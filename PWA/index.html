@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity Web Player | MagnetDash</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+    <link rel="manifest" href="manifest.webmanifest">
+
+    <meta property="og:title" content="MultiTool">
+    <meta property="og:description" content="MultiTool">
+    <meta property="og:image" content="https://igromaker.ru/Games/MultiTool/bannerMultiTool4.png">
+    <meta property="og:url" content="https://igromaker.ru/Games/MultiTool/index.html">
+    <meta property="og:type" content="website">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="MultiTool">
+    <meta name="twitter:description" content="MultiTool">
+    <meta name="twitter:image" content="https://igromaker.ru/Games/MultiTool/bannerMultiTool4.png">
+    <meta name="twitter:url" content="https://igromaker.ru/Games/MultiTool/index.html">
+
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript">
+        (function (m, e, t, r, i, k, a) {
+            m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+            m[i].l = 1 * new Date();
+            for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
+            k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+        })
+            (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+        ym(98142547, "init", {
+            clickmap: true,
+            trackLinks: true,
+            accurateTrackBounce: true,
+            webvisor: true
+        });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/98142547" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+
+</head>
+<body>
+    <div id="unity-container">
+        <canvas id="unity-canvas" width=960 height=540 tabindex="-1"></canvas>
+        <div id="unity-loading-bar">
+            <div id="unity-logo"></div>
+            <div id="unity-progress-bar-empty">
+                <div id="unity-progress-bar-full"></div>
+            </div>
+        </div>
+        <div id="unity-warning"> </div>
+    </div>
+    <script>
+      window.addEventListener("load", function () {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.register("ServiceWorker.js").then(function(registration) {
+            // Отслеживаем изменения состояния сервисного работника
+            registration.onupdatefound = function () {
+              const installingWorker = registration.installing;
+              installingWorker.onstatechange = function () {
+                if (installingWorker.state === 'installed') {
+                  if (navigator.serviceWorker.controller) {
+                    // Новая версия доступна, предлагаем обновить страницу
+                    if (confirm('Новая версия доступна. Перезагрузить страницу?')) {
+                      window.location.reload();
+                    }
+                  } else {
+                    // Контент закеширован для оффлайн использования
+                    console.log('Content is now available offline!');
+                  }
+                }
+              };
+            };
+          }).catch(function(error) {
+            console.log('Service worker registration failed:', error);
+          });
+
+          // Событие срабатывает при смене контроллера
+          let refreshing;
+          navigator.serviceWorker.addEventListener('controllerchange', function () {
+            if (refreshing) return;
+            refreshing = true;
+            window.location.reload();
+          });
+        }
+      });
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var warningBanner = document.querySelector("#unity-warning");
+
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/PWA.loader.js";
+      var config = {
+        arguments: [],
+        dataUrl: buildUrl + "/PWA.data.unityweb",
+        frameworkUrl: buildUrl + "/PWA.framework.js.unityweb",
+        codeUrl: buildUrl + "/PWA.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "AnroiDevel",
+        productName: "MagnetDash",
+        productVersion: "1.0",
+        showBanner: unityShowBanner,
+      };
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+      }
+
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+        }).then((unityInstance) => {
+            loadingBar.style.display = "none";
+
+            setTimeout(() => {
+                var isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+                unityInstance.SendMessage('PlatformDetector', 'ReceiveDeviceType', isMobile ? 'Mobile' : 'Desktop');
+            }, 1000);
+
+        }).catch((message) => {
+          alert(message);
+        });
+      };
+      document.body.appendChild(script);
+    </script>
+</body>
+</html>

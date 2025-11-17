@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b4cf89439a9f8341a5ae4377e6a75d6, type: 3}
+  m_Name: switchPolarity
+  m_EditorClassIdentifier: Assembly-CSharp::SfxEvent
+  clips:
+  - {fileID: 8300000, guid: 428978a3815a1554f97804c7ac5c9bfa, type: 3}
+  - {fileID: 8300000, guid: 2a6b534ce9f00684da4483f029fc9b83, type: 3}
+  - {fileID: 8300000, guid: e78cd1c42e08a6841b5d53800ec7c1bf, type: 3}
+  output: {fileID: 2027337713377828681, guid: 47b01b25036dfdb4389e193335484990, type: 2}
+  volume: 0.9
+  pitchBase: 1
+  pitchVar: 0.06
+  volVar: 0.05
+  cooldown: 0.08
+  maxSimultaneous: 2

@@ -1,0 +1,165 @@
+{
+  "image": "ui_levelselect_atlas.png",
+  "sprites": {
+    "ui_lvl_card_frame_neutral_9s.png": {
+      "x": 16,
+      "y": 16,
+      "w": 1024,
+      "h": 1024,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_lvl_card_frame_hover_9s.png": {
+      "x": 1056,
+      "y": 16,
+      "w": 1024,
+      "h": 1024,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_lvl_card_frame_locked_9s.png": {
+      "x": 2096,
+      "y": 16,
+      "w": 1024,
+      "h": 1024,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_lvl_card_fill.png": {
+      "x": 16,
+      "y": 1056,
+      "w": 1024,
+      "h": 1024,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_lvl_card_fill_locked.png": {
+      "x": 1056,
+      "y": 1056,
+      "w": 1024,
+      "h": 1024,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_star_empty.png": {
+      "x": 2096,
+      "y": 1056,
+      "w": 512,
+      "h": 512,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_star_filled.png": {
+      "x": 2624,
+      "y": 1056,
+      "w": 512,
+      "h": 512,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_star_highlight.png": {
+      "x": 3152,
+      "y": 1056,
+      "w": 512,
+      "h": 512,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_lock.png": {
+      "x": 16,
+      "y": 2096,
+      "w": 512,
+      "h": 512,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_crown.png": {
+      "x": 544,
+      "y": 2096,
+      "w": 512,
+      "h": 512,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_nav_arrow_left.png": {
+      "x": 1072,
+      "y": 2096,
+      "w": 256,
+      "h": 256,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_nav_arrow_right.png": {
+      "x": 1344,
+      "y": 2096,
+      "w": 256,
+      "h": 256,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_scroll_handle_9s.png": {
+      "x": 1616,
+      "y": 2096,
+      "w": 256,
+      "h": 256,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_nav_dot_on.png": {
+      "x": 1888,
+      "y": 2096,
+      "w": 128,
+      "h": 128,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_nav_dot_off.png": {
+      "x": 2032,
+      "y": 2096,
+      "w": 128,
+      "h": 128,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    },
+    "ui_scroll_track_9s.png": {
+      "x": 2176,
+      "y": 2096,
+      "w": 1024,
+      "h": 128,
+      "pivot": [
+        0.5,
+        0.5
+      ]
+    }
+  }
+}
