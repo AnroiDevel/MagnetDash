@@ -3,9 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public sealed class StarPickup : MonoBehaviour
 {
-    [SerializeField] private bool _destroyOnPick;
     private bool _taken;
-    private LevelManager _level;
 
     private void Reset()
     {
@@ -14,21 +12,23 @@ public sealed class StarPickup : MonoBehaviour
             c.isTrigger = true;
     }
 
-    private void Awake()
-    {
-        _level = FindFirstObjectByType<LevelManager>(FindObjectsInactive.Exclude);
-    }
-
     private void OnTriggerEnter2D(Collider2D other)
     {
         if(_taken || !other.CompareTag("Player"))
             return;
+
         _taken = true;
 
-        _level.CollectStar();
-        if(_destroyOnPick)
-            Destroy(gameObject);
+        if(ServiceLocator.TryGet<LevelManager>(out var levelManager))
+        {
+            levelManager.CollectStar();
+        }
         else
-            gameObject.SetActive(false);
+        {
+            Debug.LogError("[StarPickup] LevelManager service not found. " +
+                           "Ensure LevelManager is present in the Systems scene and registered.");
+        }
+
+        gameObject.SetActive(false);
     }
 }

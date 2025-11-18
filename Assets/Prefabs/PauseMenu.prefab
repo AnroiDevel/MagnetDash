@@ -496,7 +496,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 7200478586337964713}
         m_TargetAssemblyTypeName: PauseController, Assembly-CSharp
-        m_MethodName: Toggle
+        m_MethodName: OnPausePressed
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

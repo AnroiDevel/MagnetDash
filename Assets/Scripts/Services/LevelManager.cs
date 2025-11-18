@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,40 +9,42 @@ using UnityEngine.SceneManagement;
 /// Живёт в сцене Systems и не уничтожается между загрузками.
 /// </summary>
 [DisallowMultipleComponent]
-public sealed class LevelManager : MonoBehaviour
+public sealed class LevelManager : MonoBehaviour, ILevelFlow
 {
     [Header("Scenes / flow")]
     [SerializeField] private string _systemsSceneName = "Systems";
-    [SerializeField] private int _menuBuildIndex = 0;  // билд-индекс главного меню
-    [SerializeField] private int _firstLevelBuildIdx = 1;  // первая сцена уровня в Build Settings
+    [SerializeField] private int _menuSceneIndex = 1;  // билд-индекс главного меню
+    [SerializeField] private int _firstLevelSceneIndex = 2;  // первая сцена уровня в Build Settings
     [SerializeField] private float _autoNextDelay = 1.2f;
     [SerializeField, Min(1f)] private float _sceneOpTimeout = 15f;
 
     [Header("Stars")]
     [SerializeField, Min(0)] private int _starsPerLevel = 3;  // фиксированное число звёзд на уровень
-    private int _starsCollected;
+    private int _collectedStars;
+
 
     // UI результатов уровня (регистрируется самим LevelResultPanel)
     private LevelResultPanel _resultPanel;
 
     // состояние попытки
     private float _levelStartTime;
-    private bool _won;
-    private bool _isLoading;
+    private bool _isLevelCompleted;
+    private int _currentLevelIndex;
 
     // сервисы
     private IProgressService _progress;
     private IUIService _ui;
 
+    public GameState State { get; private set; } = GameState.Boot;
+
     private void Awake()
     {
         // Доступ к менеджеру для других компонентов
-        ServiceLocator.Register<LevelManager>(this);
+        ServiceLocator.Register<ILevelFlow>(this);
+        ServiceLocator.Register(this);
 
         ServiceLocator.WhenAvailable<IProgressService>(p => _progress = p);
         ServiceLocator.WhenAvailable<IUIService>(ui => _ui = ui);
-
-        DontDestroyOnLoad(gameObject);
     }
 
     private void Start()
@@ -49,7 +52,10 @@ public sealed class LevelManager : MonoBehaviour
         // На случай, если при старте активна уже сцена уровня (а не меню)
         var active = SceneManager.GetActiveScene();
         if(IsLevelScene(active))
-            InitLevelState(active);
+        {
+            InitLevelState(active.buildIndex);
+            State = GameState.Playing;
+        }
     }
 
     private void OnDestroy()
@@ -62,13 +68,13 @@ public sealed class LevelManager : MonoBehaviour
             _resultPanel.MenuRequested -= OnResultMenu;
         }
 
-        ServiceLocator.Unregister<LevelManager>(this);
+        ServiceLocator.Unregister<ILevelFlow>(this);
     }
 
     private void Update()
     {
         var active = SceneManager.GetActiveScene();
-        if(_won || !IsLevelScene(active))
+        if(_isLevelCompleted || !IsLevelScene(active))
             return;
 
         _ui?.SetTime(Time.time - _levelStartTime);
@@ -111,39 +117,47 @@ public sealed class LevelManager : MonoBehaviour
 
     public void CollectStar()
     {
-        if(_won)
+        if(_isLevelCompleted)
             return;
 
-        if(_starsCollected < _starsPerLevel)
-            _starsCollected++;
+        if(_collectedStars < _starsPerLevel)
+            _collectedStars++;
     }
 
-    public int GetStarsCollected() => _starsCollected;
+    public int GetStarsCollected() => _collectedStars;
     public int GetStarsPerLevel() => _starsPerLevel;
-
-    public void KillPlayer()
-    {
-        if(!IsLevelScene(SceneManager.GetActiveScene()))
-            return;
-
-        _ui?.ShowFailToast();
-        Reload();
-    }
 
     public void CompleteLevel()
     {
-        if(_won)
-            return;
-        _won = true;
+        if(State != GameState.Playing)
+            return; // защита от повторных триггеров портала и любых «лишних» вызовов
 
+        State = GameState.LevelCompleted;
+
+        ShowWinResult();
+    }
+
+    public void KillPlayer()
+    {
+        if(State != GameState.Playing)
+            return; // нельзя убить игрока, если уровень уже завершён/поставлен на паузу/загружается
+
+        State = GameState.LevelFailed;
+
+        ShowWinResult();
+    }
+
+
+    private void ShowWinResult()
+    {
         var scene = SceneManager.GetActiveScene();
         int build = scene.buildIndex;
-        int levelNo = build - _firstLevelBuildIdx + 1;
+        int levelNo = build - _firstLevelSceneIndex + 1;
 
         float elapsed = Time.time - _levelStartTime;
 
         bool pb = _progress?.SetBestTimeIfBetter(build, elapsed) ?? false;
-        _progress?.SetStarsMax(build, _starsCollected);
+        _progress?.SetStarsMax(build, _collectedStars);
 
         float? best = null;
         if(_progress != null && _progress.TryGetBestTime(build, out var bestTime))
@@ -158,14 +172,14 @@ public sealed class LevelManager : MonoBehaviour
                 levelNo,
                 elapsed,
                 best,
-                _starsCollected,
+                _collectedStars,
                 pb,
                 hint);
         }
         else
         {
             // fallback, если панели нет
-            _ui?.ShowWinToast(elapsed, pb, _starsCollected);
+            _ui?.ShowWinToast(elapsed, pb, _collectedStars);
             Invoke(nameof(LoadNext), _autoNextDelay);
         }
     }
@@ -174,13 +188,13 @@ public sealed class LevelManager : MonoBehaviour
 
     private void OnResultRetry() => Reload();
     private void OnResultNext() => LoadNext();
-    private void OnResultMenu() => LoadMainMenu();
+    private void OnResultMenu() => LoadMenu();
 
     // ===== Навигация по сценам (публичные методы) =====
 
     public void LoadNext()
     {
-        if(_isLoading)
+        if(State != GameState.LevelCompleted)
             return;
 
         var current = SceneManager.GetActiveScene();
@@ -189,20 +203,23 @@ public sealed class LevelManager : MonoBehaviour
 
         int nextIndex = current.buildIndex + 1;
         if(!IsValidBuildIndex(nextIndex))
-            nextIndex = _firstLevelBuildIdx;
+            nextIndex = _firstLevelSceneIndex;
 
         if(!IsValidBuildIndex(nextIndex))
         {
-            Debug.LogError($"[LevelManager] Invalid _firstLevelBuildIdx={_firstLevelBuildIdx}");
+            Debug.LogError($"[LevelManager] Invalid _firstLevelBuildIdx={_firstLevelSceneIndex}");
             return;
         }
 
-        StartCoroutine(CoSwitchToScene(nextIndex));
+        LoadSceneInternal(nextIndex);
     }
 
     public void Reload()
     {
-        if(_isLoading)
+        // Разрешаем перезапуск только из Paused / LevelFailed / LevelCompleted
+        if(State != GameState.Paused &&
+           State != GameState.LevelFailed &&
+           State != GameState.LevelCompleted)
             return;
 
         var current = SceneManager.GetActiveScene();
@@ -216,21 +233,28 @@ public sealed class LevelManager : MonoBehaviour
             return;
         }
 
-        StartCoroutine(CoSwitchToScene(idx));
+        LoadSceneInternal(_currentLevelIndex);
     }
 
-    public void LoadMainMenu()
+
+    public void LoadLevel(int buildIndex)
     {
-        if(_isLoading)
+        LoadSceneInternal(buildIndex);
+    }
+
+    public void LoadMenu()
+    {
+        // Из любых «меню» состояний это ок, из уровня — только если не инвариант нарушаем
+        if(State == GameState.LoadingLevel)
             return;
 
-        if(!IsValidBuildIndex(_menuBuildIndex))
+        if(!IsValidBuildIndex(_menuSceneIndex))
         {
-            Debug.LogError($"[LevelManager] Invalid _menuBuildIndex={_menuBuildIndex}");
+            Debug.LogError($"[LevelManager] Invalid _menuBuildIndex={_menuSceneIndex}");
             return;
         }
 
-        StartCoroutine(CoSwitchToScene(_menuBuildIndex));
+        LoadSceneInternal(_menuSceneIndex);
     }
 
     // ===== Внутренние вспомогательные методы =====
@@ -246,40 +270,58 @@ public sealed class LevelManager : MonoBehaviour
             return false;
         if(scene.name == _systemsSceneName)
             return false;
-        if(scene.buildIndex == _menuBuildIndex)
+        if(scene.buildIndex == _menuSceneIndex)
             return false;
-        return scene.buildIndex >= _firstLevelBuildIdx;
+        return scene.buildIndex >= _firstLevelSceneIndex;
     }
 
     /// <summary>Инициализация состояния при входе в сцену уровня.</summary>
-    private void InitLevelState(Scene scene)
+    //private void InitLevelState(Scene scene)
+    //{
+    //    if(!IsLevelScene(scene))
+    //        return;
+
+    //    _levelStartTime = Time.time;
+    //    _isLevelCompleted = false;
+    //    _isLoading = false;
+    //    _collectedStars = 0;
+
+    //    int levelNumber = scene.buildIndex - _firstLevelSceneIndex + 1;
+    //    _ui?.SetLevel(levelNumber);
+    //    _ui?.SetTime(0f);
+
+    //    if(_progress != null && _progress.TryGetBestTime(scene.buildIndex, out var best))
+    //        _ui?.RefreshBest(best);
+    //    else
+    //        _ui?.RefreshBest(null);
+    //}
+
+
+    private void InitLevelState(int levelBuildIndex)
     {
-        if(!IsLevelScene(scene))
-            return;
+        _currentLevelIndex = levelBuildIndex;
+        _isLevelCompleted = false;
+        _collectedStars = 0;
 
         _levelStartTime = Time.time;
-        _won = false;
-        _isLoading = false;
-        _starsCollected = 0;
 
-        int levelNumber = scene.buildIndex - _firstLevelBuildIdx + 1;
-        _ui?.SetLevel(levelNumber);
-        _ui?.SetTime(0f);
-
-        if(_progress != null && _progress.TryGetBestTime(scene.buildIndex, out var best))
-            _ui?.RefreshBest(best);
-        else
-            _ui?.RefreshBest(null);
+        _ui?.SetLevel(levelBuildIndex);
+        _ui?.RefreshBest(levelBuildIndex, _progress);
     }
+
+
+    private void LoadSceneInternal(int buildIndex)
+    {
+        StopAllCoroutines();
+        State = GameState.LoadingLevel;
+        StartCoroutine(CoSwitchToScene(buildIndex));
+    }
+
 
     // ===== Переключение сцен (Systems + одна контентная) =====
 
     private IEnumerator CoSwitchToScene(int targetBuildIndex)
     {
-        if(_isLoading)
-            yield break;
-
-        _isLoading = true;
         bool success = false;
 
         try
@@ -375,7 +417,7 @@ public sealed class LevelManager : MonoBehaviour
             // 3) Активируем новую сцену и инициализируем состояние, если это уровень
             SceneManager.SetActiveScene(newlyLoaded);
             yield return null; // дать кадр на Awake / OnEnable UI
-            InitLevelState(newlyLoaded);
+            InitLevelState(newlyLoaded.buildIndex);
 
             // 4) Собираем и выгружаем все сцены, кроме Systems и новой
             var toUnload = new List<Scene>(SceneManager.sceneCount);
@@ -417,9 +459,28 @@ public sealed class LevelManager : MonoBehaviour
         }
         finally
         {
-            _isLoading = false;
+
+            if(targetBuildIndex == _menuSceneIndex)
+            {
+                State = GameState.MainMenu;
+            }
+            else
+            {
+                State = GameState.Playing;
+            }
+
             if(!success)
                 Debug.LogWarning("[LevelManager] Scene switch finished with errors; state reset.");
         }
+    }
+
+    internal void Pause()
+    {
+        State = GameState.Paused;
+    }
+
+    internal void Resume()
+    {
+        State = GameState.Playing;
     }
 }

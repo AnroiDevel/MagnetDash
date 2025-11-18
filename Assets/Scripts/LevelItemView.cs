@@ -28,7 +28,7 @@ public sealed class LevelItemView : MonoBehaviour
         if(_button)
             _button.onClick.AddListener(HandleClick);
     }
-    private void OnDestroy() => _button?.onClick.RemoveAllListeners();
+    private void OnDestroy() => _button.onClick.RemoveAllListeners();
 
     public void Bind(int buildIndex, int number, int stars, bool unlocked, System.Action<int> onClick)
     {

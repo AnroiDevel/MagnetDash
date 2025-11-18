@@ -16,8 +16,8 @@ public sealed class Spike : MonoBehaviour
         }
         else
         {
-            var lm = FindFirstObjectByType<LevelManager>(FindObjectsInactive.Exclude);
-            lm.KillPlayer();
+            Debug.LogError("[Spike] ILevelFlow service not found. " +
+                           "Ensure LevelManager is present in the Systems scene and registered.");
         }
     }
 }

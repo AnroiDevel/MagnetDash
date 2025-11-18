@@ -209,18 +209,20 @@ public sealed class PlayerMagnet : MonoBehaviour
         if(sr)
             sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 0f);
 
-        // Сигнал о завершении уровня — без статики
+        // Сигнал о завершении уровня через сервис потока уровней
         if(ServiceLocator.TryGet<ILevelFlow>(out var flow))
         {
             flow.CompleteLevel();
         }
         else
         {
-            var lm = FindFirstObjectByType<LevelManager>(FindObjectsInactive.Exclude);
-            lm?.CompleteLevel();
+            Debug.LogError("[PlayerMagnet] ILevelFlow service not found. " +
+                           "Ensure LevelManager is present in the Systems scene and registered.");
         }
 
         _absorbRoutine = null;
         // Можно вернуть bodyType/enable по необходимости, если объект продолжит жить
+
+        gameObject.SetActive(false);
     }
 }

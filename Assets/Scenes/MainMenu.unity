@@ -2358,19 +2358,19 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1498706230960029554, guid: 8d1f5b3454740ab40bb1cc2ebcacd478, type: 3}
       propertyPath: m_NormalizedViewPortRect.x
-      value: 0.1027098
-      objectReference: {fileID: 0}
-    - target: {fileID: 1498706230960029554, guid: 8d1f5b3454740ab40bb1cc2ebcacd478, type: 3}
-      propertyPath: m_NormalizedViewPortRect.y
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1498706230960029554, guid: 8d1f5b3454740ab40bb1cc2ebcacd478, type: 3}
+      propertyPath: m_NormalizedViewPortRect.y
+      value: 0.0027502775
+      objectReference: {fileID: 0}
+    - target: {fileID: 1498706230960029554, guid: 8d1f5b3454740ab40bb1cc2ebcacd478, type: 3}
       propertyPath: m_NormalizedViewPortRect.width
-      value: 0.7945804
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1498706230960029554, guid: 8d1f5b3454740ab40bb1cc2ebcacd478, type: 3}
       propertyPath: m_NormalizedViewPortRect.height
-      value: 1
+      value: 0.99449944
       objectReference: {fileID: 0}
     - target: {fileID: 2398861774131784361, guid: 8d1f5b3454740ab40bb1cc2ebcacd478, type: 3}
       propertyPath: m_Name
@@ -2892,7 +2892,7 @@ MonoBehaviour:
   _btnSettings: {fileID: 1146026702}
   _btnExit: {fileID: 1224311608}
   _settingsPanel: {fileID: 549457301}
-  _firstLevelBuildIndex: 2
+  _firstLevelSceneIndex: 1
 --- !u!1 &2050578440
 GameObject:
   m_ObjectHideFlags: 0

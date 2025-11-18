@@ -41,14 +41,26 @@ public sealed class PauseController : MonoBehaviour
     private bool SettingsOpen => _settingsPanel && _settingsPanel.alpha > 0;
 
 
-    public void Toggle()
+    public void OnPausePressed()
     {
-        if(IsPaused)
-            Resume();
-        else
-            Pause();
-    }
+        if(!ServiceLocator.TryGet<LevelManager>(out var lm))
+            return;
 
+        switch(lm.State)
+        {
+            case GameState.Playing:
+                Pause();
+                lm.Pause();
+                break;
+            case GameState.Paused:
+                Resume();
+                lm.Resume();
+                break;
+            default:
+                // В других состояниях пауза не работает (включая LevelCompleted/LevelFailed)
+                break;
+        }
+    }
 
     public void Pause()
     {
@@ -107,7 +119,7 @@ public sealed class PauseController : MonoBehaviour
             CloseSettings();
             return;
         }
-        Resume();
+        OnPausePressed();
     }
 
     private void Show(CanvasGroup cg, bool show)

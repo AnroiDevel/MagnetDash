@@ -4,7 +4,7 @@ public interface IUIService
 {
     void SetLevel(int level);
     void SetTime(float seconds);
-    void RefreshBest(float? bestSeconds);
+    void RefreshBest(float? bestSeconds, IProgressService progress);
     void SetSpeed(float value);
     void OnPolarity(int sign); // >0 = '+', <=0 = '-'
 

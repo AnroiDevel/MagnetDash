@@ -82,10 +82,20 @@ public sealed class LevelSelectController : MonoBehaviour
         return _progress.GetStars(prev) > 0; // откроется после ≥1 звезды на предыдущем
     }
 
-    private void OnLevelClicked(int buildIndex)
+    private void OnLevelClicked(int levelBuildIndex)
     {
         // Запуск уровня: грузим аддитивно, выгружаем лишнее, Systems оставляем
-        StartCoroutine(CoLoadLevel(buildIndex));
+        //StartCoroutine(CoLoadLevel(levelBuildIndex));
+
+
+        if(ServiceLocator.TryGet<ILevelFlow>(out var flow))
+        {
+            flow.LoadLevel(levelBuildIndex);
+        }
+        else
+        {
+            Debug.LogError("[LevelSelectController] ILevelFlow service not found.");
+        }
     }
 
     private System.Collections.IEnumerator CoLoadLevel(int buildIndex)

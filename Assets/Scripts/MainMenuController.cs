@@ -17,7 +17,7 @@ public sealed class MainMenuController : MonoBehaviour
     [SerializeField] private CanvasGroup _settingsPanel;
 
     [Header("Config")]
-    [SerializeField] private int _firstLevelBuildIndex = 1;   // первая сцена-уровень в Build Settings
+    [SerializeField] private int _firstLevelSceneIndex = 1;   // первая сцена-уровень в Build Settings
 
     private bool _isLoading;
 
@@ -71,7 +71,7 @@ public sealed class MainMenuController : MonoBehaviour
     {
         if(_isLoading)
             return;
-        int target = _firstLevelBuildIndex;
+        int target = _firstLevelSceneIndex;
         StartCoroutine(CoLoadLevel(target));
     }
 
@@ -80,12 +80,29 @@ public sealed class MainMenuController : MonoBehaviour
         if(_isLoading)
             return;
 
-        int target = PlayerPrefs.GetInt(KLastLevel, _firstLevelBuildIndex);
-        // Фоллбек в допустимый диапазон
-        if(target < _firstLevelBuildIndex || target >= SceneManager.sceneCountInBuildSettings)
-            target = _firstLevelBuildIndex;
+        //int target = PlayerPrefs.GetInt(KLastLevel, _firstLevelSceneIndex);
+        //// Фоллбек в допустимый диапазон
+        //if(target < _firstLevelSceneIndex || target >= SceneManager.sceneCountInBuildSettings)
+        //    target = _firstLevelSceneIndex;
 
-        StartCoroutine(CoLoadLevel(target));
+        //StartCoroutine(CoLoadLevel(target));
+
+
+
+        if(ServiceLocator.TryGet<LevelManager>(out var lm))
+        {
+            // Здесь можно реализовать свою логику "продолжения":
+            // найти последний пройденный уровень по прогрессу и загрузить его.
+            int target = PlayerPrefs.GetInt(KLastLevel, _firstLevelSceneIndex);
+            // Фоллбек в допустимый диапазон
+            if(target < _firstLevelSceneIndex || target >= SceneManager.sceneCountInBuildSettings)
+                target = _firstLevelSceneIndex;
+            lm.LoadLevel(target);
+        }
+        else
+        {
+            Debug.LogError("[MainMenuController] LevelManager service not found.");
+        }
     }
 
     private void OnExit()

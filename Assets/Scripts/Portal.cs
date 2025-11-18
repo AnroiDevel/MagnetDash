@@ -107,6 +107,7 @@ public sealed class Portal : MonoBehaviour
         _sfx.OnAbsorb(transform.position);
         player.AbsorbIntoPortal(transform.position, 1.2f);
         StartCoroutine(WinFlash());
+        
     }
 
 

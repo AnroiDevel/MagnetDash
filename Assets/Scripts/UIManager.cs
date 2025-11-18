@@ -133,4 +133,15 @@ public sealed class UIManager : MonoBehaviour, IUIService
         else
             return $"{wholeSec}.{centisec:00}s";
     }
+
+    public void RefreshBest(float? bestSeconds, IProgressService progress)
+    {
+        if(!_bestText)
+            return;
+
+        bool has = bestSeconds.HasValue;
+        _bestText.gameObject.SetActive(has);
+        if(has)
+            _bestText.text = $"Best: {Format(bestSeconds.Value)}";
+    }
 }
