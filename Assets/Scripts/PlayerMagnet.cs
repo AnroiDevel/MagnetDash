@@ -63,7 +63,15 @@ public sealed class PlayerMagnet : MonoBehaviour
             _input.TogglePolarity -= OnToggle;
     }
 
-    private void OnToggle() => TogglePolarity();
+    private void OnToggle()
+    {
+        // Реагируем на инпут только в активном геймплее
+        if(ServiceLocator.TryGet<LevelManager>(out var lm) &&
+           lm.State != GameState.Playing)
+            return;
+
+        TogglePolarity();
+    }
 
     private void FixedUpdate()
     {
@@ -109,10 +117,12 @@ public sealed class PlayerMagnet : MonoBehaviour
         _ui?.SetSpeed(sp);
     }
 
+
     public void TogglePolarity()
     {
         Polarity *= -1;
         UpdateVisual();
+
         if(_playerSfx)
             _playerSfx.OnSwitchPolarity();
 
@@ -125,6 +135,7 @@ public sealed class PlayerMagnet : MonoBehaviour
         if(ServiceLocator.TryGet<IGameEvents>(out var ev))
             ev.FirePolaritySwitched();
     }
+
 
     private void UpdateVisual()
     {
@@ -172,6 +183,18 @@ public sealed class PlayerMagnet : MonoBehaviour
     {
         if(_absorbRoutine != null)
             return;
+
+        // Сразу фиксируем победу, чтобы запретить паузу/смерть/повторный триггер
+        if(ServiceLocator.TryGet<ILevelFlow>(out var flow))
+        {
+            flow.CompleteLevel();
+        }
+        else
+        {
+            Debug.LogError("[PlayerMagnet] ILevelFlow service not found. " +
+                           "Ensure LevelManager is present in the Systems scene and registered.");
+        }
+
         _absorbRoutine = StartCoroutine(AbsorbRoutine(portalPosition, duration));
     }
 
@@ -209,19 +232,8 @@ public sealed class PlayerMagnet : MonoBehaviour
         if(sr)
             sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 0f);
 
-        // Сигнал о завершении уровня через сервис потока уровней
-        if(ServiceLocator.TryGet<ILevelFlow>(out var flow))
-        {
-            flow.CompleteLevel();
-        }
-        else
-        {
-            Debug.LogError("[PlayerMagnet] ILevelFlow service not found. " +
-                           "Ensure LevelManager is present in the Systems scene and registered.");
-        }
 
         _absorbRoutine = null;
-        // Можно вернуть bodyType/enable по необходимости, если объект продолжит жить
 
         gameObject.SetActive(false);
     }

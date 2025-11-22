@@ -9,7 +9,7 @@ public interface IUIService
     void OnPolarity(int sign); // >0 = '+', <=0 = '-'
 
     void ShowWinToast(float elapsedSeconds, bool isPersonalBest, int stars);
-    void ShowFailToast();
+    void ShowFailToast(float elapsed);
 
     // ѕо желанию можно слушать изменени€ состо€ни€ UI
     event Action<string> ToastShown;

@@ -4,10 +4,11 @@ using UnityEngine;
 public interface IInputService
 {
     // События геймплея
-    event Action<Vector2> Move;          
+    event Action<Vector2> Move;
     event Action TogglePolarity;
 
     // Глобальные
+    event Action Pause;                  // «пауза» / «основная кнопка»
     event Action Back;                   // системная «назад» для модалок
 
     // Управление режимом

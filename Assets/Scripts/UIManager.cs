@@ -144,4 +144,9 @@ public sealed class UIManager : MonoBehaviour, IUIService
         if(has)
             _bestText.text = $"Best: {Format(bestSeconds.Value)}";
     }
+
+    public void ShowFailToast(float elapsed)
+    {
+        throw new System.NotImplementedException();
+    }
 }

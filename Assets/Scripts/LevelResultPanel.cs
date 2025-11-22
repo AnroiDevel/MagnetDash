@@ -12,6 +12,7 @@ public sealed class LevelResultPanel : MonoBehaviour
 
     [Header("Text templates")]
     [SerializeField] private string _titleWin = "УРОВЕНЬ ПРОЙДЕН";
+    [SerializeField] private string _titleFail = "ПОПРОБУЙ ЕЩЁ РАЗ";
     [SerializeField] private string _levelFmt = "Уровень {0}";
     [SerializeField] private string _timeFmt = "Время: {0}";
     [SerializeField] private string _bestFmt = "Рекорд: {0}";
@@ -137,6 +138,14 @@ public sealed class LevelResultPanel : MonoBehaviour
         if(_hintText != null)
             _hintText.text = hintText ?? string.Empty;
 
+        // Кнопки: всё доступно
+        if(_retryButton)
+            _retryButton.interactable = true;
+        if(_nextButton)
+            _nextButton.interactable = true;
+        if(_menuButton)
+            _menuButton.interactable = true;
+
         UpdateStarsInstant(0);
 
         if(_starsRoutine != null)
@@ -241,5 +250,65 @@ public sealed class LevelResultPanel : MonoBehaviour
             return $"{m}:{s:00}.{cs:00}";
 
         return $"{s:00}.{cs:00}";
+    }
+
+    internal void ShowFail(
+        int levelNumber,
+        float timeSeconds,
+        float? bestSeconds,
+        int starsCollected,
+        string hintText)
+    {
+        if(_group == null)
+            return;
+
+        if(_titleText != null)
+            _titleText.text = _titleFail;
+
+        if(_levelText != null)
+            _levelText.text = string.Format(_levelFmt, levelNumber);
+
+        if(_timeText != null)
+            _timeText.text = string.Format(_timeFmt, FormatTime(timeSeconds));
+
+        if(_bestText != null)
+        {
+            if(bestSeconds.HasValue)
+            {
+                _bestText.gameObject.SetActive(true);
+                _bestText.text = string.Format(_bestFmt, FormatTime(bestSeconds.Value));
+            }
+            else
+            {
+                _bestText.gameObject.SetActive(false);
+            }
+        }
+
+        if(_pbBadgeText != null)
+            _pbBadgeText.gameObject.SetActive(false);
+
+        if(_hintText != null)
+            _hintText.text = hintText ?? string.Empty;
+
+        // Кнопки: Next отключаем, Retry/Menu оставляем
+        if(_retryButton)
+            _retryButton.interactable = true;
+        if(_nextButton)
+            _nextButton.interactable = false;
+        if(_menuButton)
+            _menuButton.interactable = true;
+
+        // Звёзды просто выставляем статично
+        UpdateStarsInstant(starsCollected);
+
+        if(_starsRoutine != null)
+        {
+            StopCoroutine(_starsRoutine);
+            _starsRoutine = null;
+        }
+
+        _group.alpha = 1f;
+        _group.interactable = true;
+        _group.blocksRaycasts = true;
     }
 }

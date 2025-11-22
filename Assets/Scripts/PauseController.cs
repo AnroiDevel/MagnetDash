@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 [DisallowMultipleComponent]
 public sealed class PauseController : MonoBehaviour
@@ -11,9 +10,6 @@ public sealed class PauseController : MonoBehaviour
     [SerializeField] private CanvasGroup _settingsPanel;
 
     [SerializeField] private float _fade = 0.15f;
-
-    [SerializeField] private string _menuScene = "MainMenu";
-    [SerializeField] private string _systemsScene = "Systems";
 
     public bool IsPaused { get; private set; }
     public event Action<bool> PausedChanged;
@@ -25,9 +21,9 @@ public sealed class PauseController : MonoBehaviour
         ServiceLocator.WhenAvailable<IInputService>(svc =>
         {
             _input = svc;
-            _input.Back += OnBack;      // для модалок
+            _input.Back += OnBack; // для модалок
+            _input.Pause += OnPause;      // глобальная пауза/резюм
         });
-
     }
 
     private void OnDisable()
@@ -35,12 +31,21 @@ public sealed class PauseController : MonoBehaviour
         if(_input != null)
         {
             _input.Back -= OnBack;
+            _input.Pause -= OnPause;
         }
     }
 
-    private bool SettingsOpen => _settingsPanel && _settingsPanel.alpha > 0;
+    private bool SettingsOpen => _settingsPanel && _settingsPanel.alpha > 0f;
 
 
+    private void OnPause()
+    {
+        OnPausePressed(); // уже содержит логику переключения паузы через LevelManager.State
+    }
+
+    /// <summary>
+    /// Вызывается кнопкой/вводом «Пауза».
+    /// </summary>
     public void OnPausePressed()
     {
         if(!ServiceLocator.TryGet<LevelManager>(out var lm))
@@ -49,48 +54,51 @@ public sealed class PauseController : MonoBehaviour
         switch(lm.State)
         {
             case GameState.Playing:
-                Pause();
-                lm.Pause();
+                // Входим в паузу
+                lm.Pause();   // меняем состояние игры
+                Pause();      // приводим UI и ввод в соответствие
                 break;
+
             case GameState.Paused:
-                Resume();
+                // Выходим из паузы
                 lm.Resume();
+                Resume();
                 break;
+
             default:
-                // В других состояниях пауза не работает (включая LevelCompleted/LevelFailed)
+                // В других состояниях пауза не работает
                 break;
         }
     }
 
-    public void Pause()
+    private void Pause()
     {
-
         if(IsPaused)
             return;
+
         IsPaused = true;
         Time.timeScale = 0f;
-        _input?.EnableGameplay(false);    // отключаем геймплейный ввод
+        _input?.EnableGameplay(false); // отключаем геймплейный ввод
         Show(_panelPause, true);
         PausedChanged?.Invoke(true);
-
-        Debug.Log(IsPaused);
     }
 
-
-    public void Resume()
+    private void Resume()
     {
-        if(!IsPaused)
+        // Сначала закрываем настройки, если они открыты
+        if(SettingsOpen)
         {
-            Pause();
+            CloseSettings();
             return;
         }
 
-        if(SettingsOpen)
-        { CloseSettings(); return; }
+        if(!IsPaused)
+            return;
+
         IsPaused = false;
         Show(_panelPause, false);
         Time.timeScale = 1f;
-        _input?.EnableGameplay(true);     
+        _input?.EnableGameplay(true);
         PausedChanged?.Invoke(false);
     }
 
@@ -105,7 +113,7 @@ public sealed class PauseController : MonoBehaviour
 
     public void CloseSettings()
     {
-        if(_settingsPanel && _settingsPanel.alpha > 0)
+        if(_settingsPanel && _settingsPanel.alpha > 0f)
         {
             StartCoroutine(Fade(_settingsPanel, false, _fade));
             _input?.PopModal();
@@ -119,6 +127,7 @@ public sealed class PauseController : MonoBehaviour
             CloseSettings();
             return;
         }
+
         OnPausePressed();
     }
 
@@ -126,6 +135,7 @@ public sealed class PauseController : MonoBehaviour
     {
         if(!cg)
             return;
+
         StopAllCoroutines();
         StartCoroutine(Fade(cg, show, _fade));
     }
@@ -134,76 +144,56 @@ public sealed class PauseController : MonoBehaviour
     {
         cg.blocksRaycasts = true;
         cg.interactable = show;
-        float a0 = cg.alpha, a1 = show ? 1f : 0f, tt = 0f;
-        while(tt < t)
-        { tt += Time.unscaledDeltaTime; cg.alpha = Mathf.Lerp(a0, a1, tt / t); yield return null; }
-        cg.alpha = a1;
-        if(!show)
-        { cg.blocksRaycasts = false; cg.interactable = false; }
-    }
 
+        float a0 = cg.alpha;
+        float a1 = show ? 1f : 0f;
+        float tt = 0f;
+
+        while(tt < t)
+        {
+            tt += Time.unscaledDeltaTime;
+            cg.alpha = Mathf.Lerp(a0, a1, tt / t);
+            yield return null;
+        }
+
+        cg.alpha = a1;
+
+        if(!show)
+        {
+            cg.blocksRaycasts = false;
+            cg.interactable = false;
+        }
+    }
 
     public void OnRestart()
     {
+        // Сначала выходим из паузы (UI + тайм)
         Resume();
+
         if(ServiceLocator.TryGet<ILevelFlow>(out var flow))
         {
             flow.Reload();
         }
         else
         {
-            var lm = FindFirstObjectByType<LevelManager>(FindObjectsInactive.Exclude);
-            lm.Reload();
+            Debug.LogError("[PauseController] ILevelFlow service not found. " +
+                           "LevelManager / Systems scene misconfigured.");
         }
     }
 
     public void OnExitToMenu()
     {
-        StartCoroutine(CoGoToMenu());
+        // Тоже выходим из паузы (на всякий случай)
+        Resume();
 
-    }
-
-
-    private IEnumerator CoGoToMenu()
-    {
-        // 1) на всякий случай вернём время
-        Time.timeScale = 1f;
-
-        // 2) убедимся, что Systems загружена
-        var systems = SceneManager.GetSceneByName(_systemsScene);
-        if(!systems.IsValid() || !systems.isLoaded)
+        if(ServiceLocator.TryGet<ILevelFlow>(out var flow))
         {
-            yield return SceneManager.LoadSceneAsync(_systemsScene, LoadSceneMode.Additive);
-            systems = SceneManager.GetSceneByName(_systemsScene);
+            flow.LoadMenu();
         }
-
-        // 3) грузим главное меню аддитивно (если ещё не загружено)
-        var menu = SceneManager.GetSceneByName(_menuScene);
-        if(!menu.IsValid() || !menu.isLoaded)
-            yield return SceneManager.LoadSceneAsync(_menuScene, LoadSceneMode.Additive);
-
-        menu = SceneManager.GetSceneByName(_menuScene);
-        SceneManager.SetActiveScene(menu);
-        yield return null; // подождать один кадр, чтобы активная сцена применилась
-
-        // 4) выгружаем все сцены, кроме Systems и MainMenu
-        for(int i = 0; i < SceneManager.sceneCount; i++)
+        else
         {
-            var s = SceneManager.GetSceneAt(i);
-            if(!s.isLoaded)
-                continue;
-            if(s == systems || s == menu)
-                continue;
-            yield return SceneManager.UnloadSceneAsync(s);
+            Debug.LogError("[PauseController] ILevelFlow service not found. " +
+                           "LevelManager / Systems scene misconfigured.");
         }
-
-        // (опционально) если в проекте иногда дублируется EventSystem,
-        // оставим активным только тот, что в меню:
-#if UNITY_UGUI
-        var evt = UnityEngine.Object.FindObjectsByType<UnityEngine.EventSystems.EventSystem>
-                 (FindObjectsSortMode.None);
-        foreach (var es in evt)
-            es.gameObject.SetActive(es.gameObject.scene == menu);
-#endif
     }
 }

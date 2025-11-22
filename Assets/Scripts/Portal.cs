@@ -100,14 +100,21 @@ public sealed class Portal : MonoBehaviour
         if(!other.TryGetComponent<PlayerMagnet>(out var player))
             return;
 
+        // Дополнительная защита: реагируем только когда игра действительно в геймплее
+        if(ServiceLocator.TryGet<LevelManager>(out var lm) &&
+            lm.State != GameState.Playing)
+        {
+            return;
+        }
+
         _won = true;
+
         if(_nearLoop && _nearLoop.isPlaying)
             _nearLoop.Stop();
 
         _sfx.OnAbsorb(transform.position);
         player.AbsorbIntoPortal(transform.position, 1.2f);
         StartCoroutine(WinFlash());
-        
     }
 
 

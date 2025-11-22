@@ -9,6 +9,7 @@ public sealed class InputService : MonoBehaviour, IInputService
     [SerializeField] private InputActionAsset _asset;
     private string _gameplayMap = "Player";
     private string _globalMap = "UI";
+
     [Header("Action names (внутри карт)")]
     private string _actMove = "Move";
     private string _actTogglePolarity = "Attack";
@@ -22,7 +23,7 @@ public sealed class InputService : MonoBehaviour, IInputService
 
     private InputActionMap _mapGameplay;
     private InputActionMap _mapGlobal;
-    private InputAction _aMove, _aToggle, _aPause, _aBack;
+    private InputAction _aMove, _aToggle, _aPause;
 
     private int _modalDepth;
 
@@ -41,7 +42,6 @@ public sealed class InputService : MonoBehaviour, IInputService
         _aMove = _mapGameplay.FindAction(_actMove, throwIfNotFound: false);
         _aToggle = _mapGameplay.FindAction(_actTogglePolarity, throwIfNotFound: true);
         _aPause = _mapGlobal.FindAction(_actBack, throwIfNotFound: true);
-        _aBack = _mapGlobal.FindAction(_actBack, throwIfNotFound: false);
 
         // Подписки
         if(_aMove != null)
@@ -49,10 +49,11 @@ public sealed class InputService : MonoBehaviour, IInputService
             _aMove.performed += ctx => Move?.Invoke(ctx.ReadValue<Vector2>());
             _aMove.canceled += ctx => Move?.Invoke(Vector2.zero);
         }
+
         _aToggle.performed += _ => TogglePolarity?.Invoke();
+
+        // Одна кнопка Cancel, внутри решаем: Back или Pause
         _aPause.performed += _ => OnPausePressed();
-        if(_aBack != null)
-            _aBack.performed += _ => OnBackPressed();
 
         // Включаем карты
         _mapGameplay.Enable();
@@ -76,18 +77,22 @@ public sealed class InputService : MonoBehaviour, IInputService
     }
 
     public void PushModal() => _modalDepth++;
-    public void PopModal() { if(_modalDepth > 0) _modalDepth--; }
+    public void PopModal()
+    {
+        if(_modalDepth > 0)
+            _modalDepth--;
+    }
 
     private void OnPausePressed()
     {
         // Если открыт модальный — трактуем как «назад» (закрыть верхний модал)
         if(IsModalOpen)
-        { Back?.Invoke(); return; }
-        Pause?.Invoke();
-    }
-
-    private void OnBackPressed()
-    {
-        Back?.Invoke();
+        {
+            Back?.Invoke();
+        }
+        else
+        {
+            Pause?.Invoke();
+        }
     }
 }
