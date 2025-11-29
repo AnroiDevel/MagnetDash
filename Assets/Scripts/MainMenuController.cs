@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -6,103 +6,196 @@ using UnityEngine.UI;
 [DisallowMultipleComponent]
 public sealed class MainMenuController : MonoBehaviour
 {
-    private const string SystemsSceneName = "Systems";
     private const string KLastLevel = "last_level";
 
-    [Header("Bindings")]
+    [Header("Buttons")]
     [SerializeField] private Button _btnPlay;
     [SerializeField] private Button _btnContinue;
     [SerializeField] private Button _btnSettings;
     [SerializeField] private Button _btnExit;
+
+    [Header("Panels")]
     [SerializeField] private CanvasGroup _settingsPanel;
+    [SerializeField] private CanvasGroup _levelSelectPanel;
 
     [Header("Config")]
-    [SerializeField] private int _firstLevelSceneIndex = 1;   // первая сцена-уровень в Build Settings
+    [SerializeField] private int _firstLevelSceneIndex = 1;
 
     private bool _isLoading;
+    private IInputService _input;
 
     private void Awake()
     {
-        // Кнопки
-        //_btnPlay.onClick.AddListener(OnPlay);
-        _btnContinue.onClick.AddListener(OnContinue);
-        _btnSettings.onClick.AddListener(ToggleSettings);
-        if(_btnExit)
+        if(_btnPlay != null)
+            _btnPlay.onClick.AddListener(OnPlay);
+
+        if(_btnContinue != null)
+            _btnContinue.onClick.AddListener(OnContinue);
+
+        if(_btnSettings != null)
+            _btnSettings.onClick.AddListener(ToggleSettings);
+
+        if(_btnExit != null)
             _btnExit.onClick.AddListener(OnExit);
 
 #if UNITY_ANDROID || UNITY_IOS
-        if (_btnExit) _btnExit.gameObject.SetActive(false); // мобильным Exit не показываем
+        if(_btnExit != null)
+            _btnExit.gameObject.SetActive(false);
 #endif
+    }
+
+    private void OnEnable()
+    {
+        if(ServiceLocator.TryGet<IInputService>(out _input))
+        {
+            _input.Back += OnBack;
+        }
+
+        ServiceLocator.WhenAvailable<IInputService>(i =>
+        {
+            _input = i;
+            _input.Back += OnBack;
+        });
+    }
+
+    private void OnDisable()
+    {
+        if(_input != null)
+        {
+            _input.Back -= OnBack;
+            _input = null;
+        }
     }
 
     private void Start()
     {
-        // Активность Continue
         bool hasSave = PlayerPrefs.HasKey(KLastLevel);
-        _btnContinue.interactable = hasSave;
+        if(_btnContinue != null)
+            _btnContinue.gameObject.SetActive(hasSave);
+
+        InitPanel(_settingsPanel, false);
+        InitPanel(_levelSelectPanel, false);
     }
 
-    private void Update()
+    // РћР±СЂР°Р±РѕС‚РєР° Cancel/Back РёР· РЅРѕРІРѕР№ СЃРёСЃС‚РµРјС‹ РІРІРѕРґР°
+    private void OnBack()
     {
-        // Назад: закрыть настройки, иначе — ничего
-        if(Input.GetKeyDown(KeyCode.Escape))
+        // СЃРЅР°С‡Р°Р»Р° Р·Р°РєСЂС‹РІР°РµРј РЅР°СЃС‚СЂРѕР№РєРё
+        if(IsVisible(_settingsPanel))
         {
-            if(_settingsPanel && _settingsPanel.alpha > 0.5f)
-                ToggleSettings();
+            ToggleSettings();
         }
+        else if(IsVisible(_levelSelectPanel))
+        {
+            ToggleLevelSelect(false);
+        }
+    }
+
+    private  void InitPanel(CanvasGroup panel, bool visible)
+    {
+        if(panel == null)
+            return;
+
+        panel.alpha = visible ? 1f : 0f;
+        panel.interactable = visible;
+        panel.blocksRaycasts = visible;
+    }
+
+    private  void SetPanel(CanvasGroup panel, bool visible)
+    {
+        if(panel == null)
+            return;
+
+        panel.alpha = visible ? 1f : 0f;
+        panel.interactable = visible;
+        panel.blocksRaycasts = visible;
+    }
+
+    private  bool IsVisible(CanvasGroup panel)
+    {
+        return panel != null && panel.interactable; // РёР»Рё panel.alpha > 0.001f
+    }
+
+    // PLAY в†’ РѕС‚РєСЂС‹С‚СЊ РїР°РЅРµР»СЊ РІС‹Р±РѕСЂР° СѓСЂРѕРІРЅРµР№
+    private void OnPlay()
+    {
+        ToggleLevelSelect(true);
     }
 
     private void ToggleSettings()
     {
-        if(!_settingsPanel)
+        if(_settingsPanel == null)
             return;
-        bool show = _settingsPanel.alpha < 0.5f;
-        _settingsPanel.alpha = show ? 1f : 0f;
-        _settingsPanel.blocksRaycasts = show;
-        _settingsPanel.interactable = show;
 
-        if(!_settingsPanel.gameObject.activeInHierarchy)
+        bool show = !IsVisible(_settingsPanel);
+        SetPanel(_settingsPanel, show);
+
+        if(_input != null)
         {
-            _settingsPanel.gameObject.SetActive(true);
+            if(show)
+                _input.PushModal();
+            else
+                _input.PopModal();
         }
     }
 
-    private void OnPlay()
+    private void ToggleLevelSelect(bool? explicitState = null)
     {
-        if(_isLoading)
+        if(_levelSelectPanel == null)
             return;
-        int target = _firstLevelSceneIndex;
-        StartCoroutine(CoLoadLevel(target));
+
+        bool show = explicitState ?? !IsVisible(_levelSelectPanel);
+        SetPanel(_levelSelectPanel, show);
+
+        if(_input != null)
+        {
+            if(show)
+                _input.PushModal();
+            else
+                _input.PopModal();
+        }
     }
 
+    // CONTINUE в†’ Р·Р°РіСЂСѓР·РёС‚СЊ РїРѕСЃР»РµРґРЅРёР№ СѓСЂРѕРІРµРЅСЊ
     private void OnContinue()
     {
         if(_isLoading)
             return;
 
-        //int target = PlayerPrefs.GetInt(KLastLevel, _firstLevelSceneIndex);
-        //// Фоллбек в допустимый диапазон
-        //if(target < _firstLevelSceneIndex || target >= SceneManager.sceneCountInBuildSettings)
-        //    target = _firstLevelSceneIndex;
+        int target = PlayerPrefs.GetInt(KLastLevel, _firstLevelSceneIndex);
 
-        //StartCoroutine(CoLoadLevel(target));
+        if(target < _firstLevelSceneIndex || target >= SceneManager.sceneCountInBuildSettings)
+            target = _firstLevelSceneIndex;
 
+        LoadLevelThroughFlow(target);
+    }
 
+    private void LoadLevelThroughFlow(int buildIndex)
+    {
+        if(_isLoading)
+            return;
 
-        if(ServiceLocator.TryGet<LevelManager>(out var lm))
+        _isLoading = true;
+
+        // РѕСЃРЅРѕРІРЅРѕР№ РїСѓС‚СЊ вЂ” С‡РµСЂРµР· LevelManager / ServiceLocator
+        if(ServiceLocator.TryGet<LevelManager>(out var levelManager))
         {
-            // Здесь можно реализовать свою логику "продолжения":
-            // найти последний пройденный уровень по прогрессу и загрузить его.
-            int target = PlayerPrefs.GetInt(KLastLevel, _firstLevelSceneIndex);
-            // Фоллбек в допустимый диапазон
-            if(target < _firstLevelSceneIndex || target >= SceneManager.sceneCountInBuildSettings)
-                target = _firstLevelSceneIndex;
-            lm.LoadLevel(target);
+            levelManager.LoadLevel(buildIndex);
+            _isLoading = false;
+            return;
         }
-        else
-        {
-            Debug.LogError("[MainMenuController] LevelManager service not found.");
-        }
+
+        // Р·Р°РїР°СЃРЅРѕР№ РІР°СЂРёР°РЅС‚ вЂ” РїСЂСЏРјРѕР№ LoadScene
+        StartCoroutine(CoLoadSingleScene(buildIndex));
+    }
+
+    private IEnumerator CoLoadSingleScene(int buildIndex)
+    {
+        AsyncOperation op = SceneManager.LoadSceneAsync(buildIndex, LoadSceneMode.Single);
+        while(!op.isDone)
+            yield return null;
+
+        _isLoading = false;
     }
 
     private void OnExit()
@@ -112,31 +205,5 @@ public sealed class MainMenuController : MonoBehaviour
 #else
         Application.Quit();
 #endif
-    }
-
-    private IEnumerator CoLoadLevel(int buildIndex)
-    {
-        if(_isLoading)
-            yield break;
-        _isLoading = true;
-
-        // 1) Гарантируем Systems
-        var systems = SceneManager.GetSceneByName(SystemsSceneName);
-        if(!systems.IsValid() || !systems.isLoaded)
-            yield return SceneManager.LoadSceneAsync(SystemsSceneName, LoadSceneMode.Additive);
-
-        // 2) Запоминаем текущую (меню)
-        var previous = SceneManager.GetActiveScene();
-
-        // 3) Грузим уровень аддитивно и делаем активным
-        yield return SceneManager.LoadSceneAsync(buildIndex, LoadSceneMode.Additive);
-        var level = SceneManager.GetSceneByBuildIndex(buildIndex);
-        SceneManager.SetActiveScene(level);
-
-        // 4) Выгружаем меню, если это не Systems и не только что загруженная
-        if(previous.IsValid() && previous.isLoaded && previous.name != SystemsSceneName && previous != level)
-            yield return SceneManager.UnloadSceneAsync(previous);
-
-        _isLoading = false;
     }
 }

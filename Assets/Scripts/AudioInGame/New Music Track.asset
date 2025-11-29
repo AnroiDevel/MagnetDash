@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67dce45ccd884784db7a1666aeb1ce9d, type: 3}
   m_Name: New Music Track
   m_EditorClassIdentifier: Assembly-CSharp::MusicTrack
-  _intro: {fileID: 0}
+  _intro: {fileID: 8300000, guid: 0fb4cf1a54cb08f418e805d56b621c66, type: 3}
   _loop: {fileID: 8300000, guid: 82eb231cb8f5811498f084ec6e4b15e1, type: 3}
   _musicBus: {fileID: -1357345025177861028, guid: 47b01b25036dfdb4389e193335484990, type: 2}
   _volume: 0.8

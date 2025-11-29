@@ -1,26 +1,34 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Serialization; // для FormerlySerializedAs
+using UnityEngine.Serialization;
+using TMPro;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public sealed class PlayerMagnet : MonoBehaviour
 {
+    // --- Движение ---
     [Header("Movement")]
     [FormerlySerializedAs("_startVX")]
-    [SerializeField] private float _startUpSpeed = 120f;   // стартовая скорость по Y
+    [SerializeField] private float _startUpSpeed = 120f;
     [SerializeField] private float _maxSpeed = 360f;
     [SerializeField] private float _cruiseMin = 60f;
-    [SerializeField] private float _cruiseAccel = 120f;    // Ньютоновская сила (ForceMode2D.Force)
+    [SerializeField] private float _cruiseAccel = 120f;
 
+    // --- Поворот ---
+    [Header("Rotation")]
+    [SerializeField] private float _turnSpeedDeg = 360f;
+    [SerializeField] private float _minSpeedForRotate = 5f;
+
+    // --- Магнит ---
     [Header("Magnet")]
     [SerializeField] private float _k = 8000f;
     [SerializeField] private float _soft = 28f;
     [SerializeField] private float _maxForce = 800f;
 
+    // --- Визуальные эффекты ---
     [Header("FX")]
     [SerializeField] private SpriteRenderer _bodyInner;
-    [SerializeField] private TextMesh _symbol;             // можно заменить на TMP_Text для консистентности
+    [SerializeField] private TMP_Text _symbol;
     [SerializeField] private TrailRenderer _trail;
     [SerializeField] private Color _plusColor = new(0.30f, 0.64f, 1f);
     [SerializeField] private Color _minusColor = new(1f, 0.42f, 0.42f);
@@ -34,7 +42,6 @@ public sealed class PlayerMagnet : MonoBehaviour
     private IInputService _input;
     private IUIService _ui;
 
-    // локальные корутин-хэндлы, чтобы не убивать всё подряд
     private Coroutine _pulseRoutine;
     private Coroutine _absorbRoutine;
 
@@ -42,12 +49,13 @@ public sealed class PlayerMagnet : MonoBehaviour
     {
         _rb = GetComponent<Rigidbody2D>();
         _rb.gravityScale = 0f;
-        // Для Unity 6 у тебя используется linearVelocity — оставляю как есть
         _rb.linearVelocity = new Vector2(0f, _startUpSpeed);
         UpdateVisual();
+
+        InitializeServices();
     }
 
-    private void OnEnable()
+    private void InitializeServices()
     {
         ServiceLocator.WhenAvailable<IInputService>(svc =>
         {
@@ -65,7 +73,6 @@ public sealed class PlayerMagnet : MonoBehaviour
 
     private void OnToggle()
     {
-        // Реагируем на инпут только в активном геймплее
         if(ServiceLocator.TryGet<LevelManager>(out var lm) &&
            lm.State != GameState.Playing)
             return;
@@ -88,21 +95,18 @@ public sealed class PlayerMagnet : MonoBehaviour
                 continue;
 
             float falloff = 1f / (dist + _soft);
-            int sign = Polarity * n.Charge; // +1 притяжение, -1 отталкивание (или наоборот — зависит от физики)
+            int sign = -Polarity * n.Charge;
             float f = Mathf.Clamp(_k * sign * falloff, -_maxForce, _maxForce);
             Vector2 dir = d / dist;
             totalF += dir * f;
         }
 
-        // ВАЖНО: при ForceMode2D.Force НЕ умножаем на fixedDeltaTime
         _rb.AddForce(totalF, ForceMode2D.Force);
 
-        // Экспоненциальный «ручной» воздушный тормоз (DT-инвариант)
         const float dragPerSec = 0.995f;
         float drag = Mathf.Pow(dragPerSec, Time.fixedDeltaTime * 60f);
         _rb.linearVelocity *= drag;
 
-        // Крейз-контроль: подталкиваем по направлению движения (или вверх, если почти стоим)
         float sp = _rb.linearVelocity.magnitude;
         if(sp < _cruiseMin)
         {
@@ -115,8 +119,27 @@ public sealed class PlayerMagnet : MonoBehaviour
             _rb.linearVelocity = _rb.linearVelocity.normalized * _maxSpeed;
 
         _ui?.SetSpeed(sp);
+
+        RotateTowardsVelocity();
     }
 
+    private void RotateTowardsVelocity()
+    {
+        if(_rb.bodyType != RigidbodyType2D.Dynamic)
+            return;
+
+        Vector2 v = _rb.linearVelocity;
+        if(v.sqrMagnitude < _minSpeedForRotate * _minSpeedForRotate)
+            return;
+
+        float targetAngle = Mathf.Atan2(v.y, v.x) * Mathf.Rad2Deg - 90f;
+        float currentAngle = _rb.rotation;
+
+        float maxStep = _turnSpeedDeg * Time.fixedDeltaTime;
+        float newAngle = Mathf.MoveTowardsAngle(currentAngle, targetAngle, maxStep);
+
+        _rb.MoveRotation(newAngle);
+    }
 
     public void TogglePolarity()
     {
@@ -128,6 +151,7 @@ public sealed class PlayerMagnet : MonoBehaviour
 
         if(_pulseRoutine != null)
             StopCoroutine(_pulseRoutine);
+
         _pulseRoutine = StartCoroutine(PulseInner());
 
         _ui?.OnPolarity(Polarity);
@@ -135,7 +159,6 @@ public sealed class PlayerMagnet : MonoBehaviour
         if(ServiceLocator.TryGet<IGameEvents>(out var ev))
             ev.FirePolaritySwitched();
     }
-
 
     private void UpdateVisual()
     {
@@ -162,7 +185,7 @@ public sealed class PlayerMagnet : MonoBehaviour
         }
     }
 
-    private IEnumerator PulseInner()
+    private System.Collections.IEnumerator PulseInner()
     {
         float t = 0f;
         const float dur = 0.12f;
@@ -184,7 +207,6 @@ public sealed class PlayerMagnet : MonoBehaviour
         if(_absorbRoutine != null)
             return;
 
-        // Сразу фиксируем победу, чтобы запретить паузу/смерть/повторный триггер
         if(ServiceLocator.TryGet<ILevelFlow>(out var flow))
         {
             flow.CompleteLevel();
@@ -198,40 +220,34 @@ public sealed class PlayerMagnet : MonoBehaviour
         _absorbRoutine = StartCoroutine(AbsorbRoutine(portalPosition, duration));
     }
 
-    private IEnumerator AbsorbRoutine(Vector3 portalPosition, float duration)
+    private System.Collections.IEnumerator AbsorbRoutine(Vector3 portalPosition, float duration)
     {
-        // Отключаем управление и физику
         _rb.linearVelocity = Vector2.zero;
         _rb.bodyType = RigidbodyType2D.Kinematic;
 
         Vector3 startPos = transform.position;
         Vector3 startScale = transform.localScale;
-        const float spinSpeed = 360f; // град/сек, стабильное вращение
+        const float spinSpeed = 360f;
 
         float t = 0f;
         while(t < duration)
         {
             t += Time.deltaTime;
             float k = Mathf.Clamp01(t / duration);
-            float ease = 1f - Mathf.Pow(1f - k, 2f); // ease-in
+            float ease = 1f - Mathf.Pow(1f - k, 2f);
 
-            // Тянем к центру портала
             transform.position = Vector3.Lerp(startPos, portalPosition, ease);
-
-            // Ровное вращение вокруг портала
             transform.RotateAround(portalPosition, Vector3.forward, -spinSpeed * Time.deltaTime);
-
-            // Сжимаем к нулю
             transform.localScale = Vector3.Lerp(startScale, Vector3.zero, ease);
 
             yield return null;
         }
 
-        // Фейд-аут спрайта (если есть)
+        transform.localScale = Vector3.zero;
+
         var sr = GetComponentInChildren<SpriteRenderer>();
         if(sr)
             sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 0f);
-
 
         _absorbRoutine = null;
 

@@ -96,7 +96,7 @@ public sealed class SettingsMenuBinder : MonoBehaviour
     {
         ServiceLocator.Unsubscribe<AudioManager>(InitValues);
 
-        _tgHints?.onValueChanged.RemoveAllListeners();
+        _tgHints.onValueChanged.RemoveAllListeners();
 
         // Снятие подписок (чисто)
         if(_slMaster)

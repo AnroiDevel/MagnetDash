@@ -13,8 +13,8 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
 {
     [Header("Scenes / flow")]
     [SerializeField] private string _systemsSceneName = "Systems";
-    [SerializeField] private int _menuSceneIndex = 1;           // билд-индекс главного меню
-    [SerializeField] private int _firstLevelSceneIndex = 2;     // первая сцена уровня в Build Settings
+    [SerializeField] private int _menuSceneIndex = 0;           // билд-индекс главного меню
+    [SerializeField] private int _firstLevelSceneIndex = 1;     // первая сцена уровня в Build Settings
     [SerializeField] private float _autoNextDelay = 1.2f;
     [SerializeField, Min(1f)] private float _sceneOpTimeout = 15f;
 

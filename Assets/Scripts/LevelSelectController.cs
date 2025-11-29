@@ -6,28 +6,39 @@ using UnityEngine.SceneManagement;
 public sealed class LevelSelectController : MonoBehaviour
 {
     [Header("Layout")]
-    [SerializeField] private RectTransform _contentRoot;  // Grid/Vertical parent
-    [SerializeField] private LevelItemView _itemPrefab;   // префаб карточки
+    [SerializeField] private RectTransform _contentRoot;
+    [SerializeField] private LevelItemView _itemPrefab;
     [SerializeField] private bool _clearOnBuild = true;
 
     [Header("Levels")]
-    [SerializeField] private int _firstBuildIndex = 1;    // первая сцена-уровень
-    [SerializeField] private int _levelsToShow = 12;      // 0 = до конца BuildSettings
+    [SerializeField] private int _firstBuildIndex = 1;
+    [SerializeField] private int _levelsToShow = 12;
 
     private readonly List<LevelItemView> _items = new();
     private IProgressService _progress;
+    private bool _builtOnce;
 
     private void OnEnable()
     {
+        // Если прогресс уже есть — строим сразу
+        if(ServiceLocator.TryGet(out _progress))
+        {
+            BuildOrRefresh();
+            return;
+        }
+
+        // Если появится позже — перестроим один раз
         ServiceLocator.WhenAvailable<IProgressService>(p =>
         {
             _progress = p;
-            BuildOrRefresh();
+
+            // защита от двойного Build
+            if(!_builtOnce)
+                BuildOrRefresh();
         });
 
-        // Если прогресс ещё не зарегистрирован — отрисуем без него
-        if(_progress == null)
-            BuildOrRefresh();
+        // Если прогресс ещё не найден — строим "пустую" версию
+        BuildOrRefresh();
     }
 
     public void BuildOrRefresh()
@@ -35,12 +46,14 @@ public sealed class LevelSelectController : MonoBehaviour
         if(_contentRoot == null || _itemPrefab == null)
             return;
 
+        _builtOnce = true;
+
         int totalScenes = SceneManager.sceneCountInBuildSettings;
         int count = _levelsToShow > 0 ? _levelsToShow : (totalScenes - _firstBuildIndex);
         if(count < 0)
             count = 0;
 
-        // (Re)build
+        // Rebuild (если нужно)
         if(_items.Count != count)
         {
             if(_clearOnBuild)
@@ -48,6 +61,7 @@ public sealed class LevelSelectController : MonoBehaviour
                 foreach(var it in _items)
                     if(it)
                         Destroy(it.gameObject);
+
                 _items.Clear();
             }
 
@@ -64,10 +78,10 @@ public sealed class LevelSelectController : MonoBehaviour
             int buildIndex = _firstBuildIndex + i;
             int number = i + 1;
 
-            int stars = _progress != null ? _progress.GetStars(buildIndex) : 0;
+            int stars = _progress?.GetStars(buildIndex) ?? 0;
             bool unlocked = IsUnlocked(buildIndex);
 
-            _items[i].gameObject.name = $"Level_{number}";
+            _items[i].name = $"Level_{number}";
             _items[i].Bind(buildIndex, number, Mathf.Clamp(stars, 0, 3), unlocked, OnLevelClicked);
         }
     }
@@ -75,19 +89,19 @@ public sealed class LevelSelectController : MonoBehaviour
     private bool IsUnlocked(int buildIndex)
     {
         if(_progress == null)
-            return buildIndex == _firstBuildIndex; // пока грузится сервис — открыт только 1-й
+            return buildIndex == _firstBuildIndex;
+
         if(buildIndex == _firstBuildIndex)
             return true;
+
         int prev = buildIndex - 1;
-        return _progress.GetStars(prev) > 0; // откроется после ≥1 звезды на предыдущем
+
+        // лучшее условие — считаем уровень пройденным, если он игрался и набрал >= 1 звезды
+        return _progress.GetStars(prev) > 0;
     }
 
     private void OnLevelClicked(int levelBuildIndex)
     {
-        // Запуск уровня: грузим аддитивно, выгружаем лишнее, Systems оставляем
-        //StartCoroutine(CoLoadLevel(levelBuildIndex));
-
-
         if(ServiceLocator.TryGet<ILevelFlow>(out var flow))
         {
             flow.LoadLevel(levelBuildIndex);
@@ -95,36 +109,6 @@ public sealed class LevelSelectController : MonoBehaviour
         else
         {
             Debug.LogError("[LevelSelectController] ILevelFlow service not found.");
-        }
-    }
-
-    private System.Collections.IEnumerator CoLoadLevel(int buildIndex)
-    {
-        var systems = SceneManager.GetSceneByName("Systems");
-        var current = SceneManager.GetActiveScene();
-
-        yield return SceneManager.LoadSceneAsync(buildIndex, LoadSceneMode.Additive);
-
-        // найдём только что загруженную сцену
-        Scene loaded = default;
-        for(int i = 0; i < SceneManager.sceneCount; i++)
-        {
-            var s = SceneManager.GetSceneAt(i);
-            if(s.isLoaded && s.buildIndex == buildIndex)
-            { loaded = s; break; }
-        }
-        SceneManager.SetActiveScene(loaded);
-        yield return null;
-
-        // выгрузим всё, кроме Systems и загруженного уровня
-        for(int i = 0; i < SceneManager.sceneCount; i++)
-        {
-            var s = SceneManager.GetSceneAt(i);
-            if(!s.isLoaded)
-                continue;
-            if(s == systems || s == loaded)
-                continue;
-            yield return SceneManager.UnloadSceneAsync(s);
         }
     }
 }
