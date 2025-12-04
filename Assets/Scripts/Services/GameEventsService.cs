@@ -4,14 +4,26 @@ using UnityEngine;
 [DisallowMultipleComponent]
 public sealed class GameEventsService : MonoBehaviour, IGameEvents
 {
-    public event Action PolaritySwitched;
     public event Action PortalReached;
 
-    public void FirePolaritySwitched() => PolaritySwitched?.Invoke();
-    public void FirePortalReached() => PortalReached?.Invoke();
+    public event Action<int> PolarityChanged;
+    public event Action<float> SpeedChanged;
+
 
     private void Awake()
     {
         ServiceLocator.Register<IGameEvents>(this);
     }
+
+    public void FirePolarityChanged(int sign)
+    {
+        PolarityChanged?.Invoke(sign);
+    }
+
+    public void FireSpeedChanged(float speed)
+    {
+        SpeedChanged?.Invoke(speed);
+    }
+
+    public void FirePortalReached() => PortalReached?.Invoke();
 }

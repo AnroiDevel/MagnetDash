@@ -36,6 +36,31 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     }
 
     // ---------- Public API ----------
+
+
+    public bool TryGetLastCompletedLevel(out int buildIndex)
+    {
+        buildIndex = default;
+
+        if(_state == null || _state.levels == null || _state.levels.Count == 0)
+            return false;
+
+        int best = -1;
+
+        foreach(var lr in _state.levels)
+        {
+            if(lr.stars > 0 && lr.buildIndex > best)
+                best = lr.buildIndex;
+        }
+
+        if(best < 0)
+            return false;
+
+        buildIndex = best + 1;
+        return true;
+    }
+
+
     public int GetStars(int buildIndex) => _stars.TryGetValue(buildIndex, out var s) ? s : 0;
 
     public bool SetStarsMax(int buildIndex, int stars)

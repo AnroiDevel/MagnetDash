@@ -10,7 +10,7 @@ public sealed class LevelItemView : MonoBehaviour
     [SerializeField] private Image _frame;
     [SerializeField] private Image _fill;
     [SerializeField] private Image _lockIcon;
-    [SerializeField] private Image[] _stars; // 3 элемента (пустая/залитая через SpriteSwap или цвет)
+    [SerializeField] private Image[] _stars; // 3 элемента
 
     [Header("Sprites")]
     [SerializeField] private Sprite _frameNeutral;
@@ -19,51 +19,63 @@ public sealed class LevelItemView : MonoBehaviour
     [SerializeField] private Sprite _starFilled;
 
     private Button _button;
-    private int _buildIndex;
+    private int _levelId;                    // может быть buildIndex >= 0 или id < 0 (JSON)
     private System.Action<int> _onClick;
 
     private void Awake()
     {
         _button = GetComponent<Button>();
-        if(_button)
+        if(_button != null)
             _button.onClick.AddListener(HandleClick);
     }
-    private void OnDestroy() => _button.onClick.RemoveAllListeners();
 
-    public void Bind(int buildIndex, int number, int stars, bool unlocked, System.Action<int> onClick)
+    private void OnDestroy()
     {
-        _buildIndex = buildIndex;
+        if(_button != null)
+            _button.onClick.RemoveListener(HandleClick);
+    }
+
+    public void Bind(int levelId, int number, int stars, bool unlocked, System.Action<int> onClick)
+    {
+        _levelId = levelId;
         _onClick = onClick;
 
-        if(_number)
+        if(_number != null)
             _number.SetText(number.ToString());
 
         // звезды: 0..3
-        for(int i = 0; i < _stars.Length; i++)
+        if(_stars != null)
         {
-            if(!_stars[i])
-                continue;
-            _stars[i].sprite = i < stars ? _starFilled : _starEmpty;
-            _stars[i].color = Color.white;
+            for(int i = 0; i < _stars.Length; i++)
+            {
+                if(_stars[i] == null)
+                    continue;
+
+                _stars[i].sprite = i < stars ? _starFilled : _starEmpty;
+                _stars[i].color = Color.white;
+            }
         }
 
         bool locked = !unlocked;
-        if(_lockIcon)
+
+        if(_lockIcon != null)
             _lockIcon.gameObject.SetActive(locked);
-        if(_button)
+
+        if(_button != null)
             _button.interactable = !locked;
 
-        // рамка/заливка
-        if(_frame)
+        if(_frame != null)
             _frame.sprite = locked ? _frameLocked : _frameNeutral;
-        if(_fill)
-            _fill.color = locked ? new Color(1, 1, 1, 0.55f) : Color.white;
+
+        if(_fill != null)
+            _fill.color = locked ? new Color(1f, 1f, 1f, 0.55f) : Color.white;
     }
 
     private void HandleClick()
     {
-        if(_button && !_button.interactable)
+        if(_button != null && !_button.interactable)
             return;
-        _onClick?.Invoke(_buildIndex);
+
+        _onClick?.Invoke(_levelId);
     }
 }

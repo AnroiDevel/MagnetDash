@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef7478b9a0cd0b24a8eeb29da37a6b92, type: 3}
+  m_Name: New Player Magnet Config
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMagnetConfig
+  startUpSpeed: 0
+  maxSpeed: 10
+  cruiseMin: 3
+  cruiseAccel: 10
+  turnSpeedDeg: 360
+  minSpeedForRotate: 2
+  portalMagnetForce: 10
+  portalMagnetMaxDistance: 100
+  portalMagnetStopDistance: 0.5
+  orbitRadiusUnits: 1
+  orbitCaptureFactor: 0.792
+  orbitPosStiffness: 25
+  orbitVelDamping: 10
+  orbitMinSpeed: 6
+  orbitTangentialAccel: 10
+  orbitExitImpulse: 200
+  repulsionImpulse: 240
+  repulsionNearCenterFactor: 1.5
+  edgeMinFactor: 0.25
+  plusColor: {r: 0.3, g: 0.64, b: 1, a: 1}
+  minusColor: {r: 1, g: 0.42, b: 0.42, a: 1}

@@ -192,9 +192,9 @@ Camera:
   m_LensShift: {x: 0, y: 0}
   m_NormalizedViewPortRect:
     serializedVersion: 2
-    x: 0.064588904
+    x: 0
     y: 0
-    width: 0.8708222
+    width: 1
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
@@ -292,7 +292,7 @@ MonoBehaviour:
   _offset: {x: 0, y: 2}
   _smoothTime: 0.2
   _lockX: 0
-  _minY: -10
+  _minY: -100
   _maxY: 100
 --- !u!1 &3051455311073901616
 GameObject:

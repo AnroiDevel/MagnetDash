@@ -2,9 +2,13 @@ using System;
 
 public interface IGameEvents
 {
-    event Action PolaritySwitched;
     event Action PortalReached;
 
-    void FirePolaritySwitched();
+    event Action<int> PolarityChanged;
+    event Action<float> SpeedChanged;
+
     void FirePortalReached();
+
+    void FirePolarityChanged(int sign);
+    void FireSpeedChanged(float speed);
 }

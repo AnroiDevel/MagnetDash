@@ -8,6 +8,9 @@ public interface IProgressService
     bool SetBestTimeIfBetter(int buildIndex, float t);
     void ResetAll();
 
+    bool TryGetLastCompletedLevel(out int buildIndex);
+
+
     event Action<int, int> StarsChanged;              // (buildIndex, newStars)
     event Action<int, float> BestTimeChanged;         // (buildIndex, newTime)
 }

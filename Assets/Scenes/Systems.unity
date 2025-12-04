@@ -208,15 +208,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 55156096034395748, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
       propertyPath: _starsPerLevel
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 55156096034395748, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
-      propertyPath: _menuSceneIndex
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 55156096034395748, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
-      propertyPath: _firstLevelSceneIndex
-      value: 1
+      propertyPath: _runtimeLevelSceneIndex
+      value: 13
       objectReference: {fileID: 0}
     - target: {fileID: 3421145944720699378, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
       propertyPath: m_LocalPosition.x
@@ -261,30 +257,6 @@ PrefabInstance:
     - target: {fileID: 5756468907999905204, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
       propertyPath: m_Name
       value: GameController
-      objectReference: {fileID: 0}
-    - target: {fileID: 9145504215465085272, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
-      propertyPath: _asset
-      value: 
-      objectReference: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
-    - target: {fileID: 9145504215465085272, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
-      propertyPath: _actBack
-      value: Cancel
-      objectReference: {fileID: 0}
-    - target: {fileID: 9145504215465085272, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
-      propertyPath: _actPause
-      value: Cancel
-      objectReference: {fileID: 0}
-    - target: {fileID: 9145504215465085272, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
-      propertyPath: _globalMap
-      value: UI
-      objectReference: {fileID: 0}
-    - target: {fileID: 9145504215465085272, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
-      propertyPath: _gameplayMap
-      value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 9145504215465085272, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
-      propertyPath: _actTogglePolarity
-      value: Jump
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

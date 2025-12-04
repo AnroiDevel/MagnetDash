@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 55156096034395748}
   - component: {fileID: 180258786371937484}
   - component: {fileID: 9145504215465085272}
+  - component: {fileID: 8488834709203896505}
   m_Layer: 0
   m_Name: GameController
   m_TagString: Untagged
@@ -46,9 +47,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f72c229af740f634b8c2ef2d236a4748, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LevelManager
-  _meta: {fileID: 11400000, guid: 0db80679f8a7f2f448c0c6e4fd5dab50, type: 2}
-  _firstBuildIndex: 1
+  _systemsSceneName: Systems
+  _menuSceneIndex: 0
+  _firstLevelSceneIndex: 1
   _autoNextDelay: 1.2
+  _sceneOpTimeout: 15
+  _starsPerLevel: 2
 --- !u!114 &180258786371937484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61,6 +65,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4097086a50ac5c3448fb2a8ec465c58e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Services::ProgressService
+  _slotId: default
+  _filePrefix: save_
+  _saveDebounce: 0.2
 --- !u!114 &9145504215465085272
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,9 +81,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Services::InputService
   _asset: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
-  _gameplayMap: Gameplay
-  _globalMap: Global
-  _actMove: Move
-  _actTogglePolarity: TogglePolarity
-  _actPause: Pause
-  _actBack: Back
+--- !u!114 &8488834709203896505
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5756468907999905204}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 694490d4f856a61408c5fbd9b68a0178, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameFlowEventsService

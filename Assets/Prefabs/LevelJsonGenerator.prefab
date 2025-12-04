@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2809761243191271359
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6021029259612805238}
+  - component: {fileID: 3272278925557445869}
+  - component: {fileID: 6305624371468584603}
+  m_Layer: 0
+  m_Name: LevelJsonGenerator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6021029259612805238
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2809761243191271359}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.74585, y: 4.11858, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3272278925557445869
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2809761243191271359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d1c0f1b8b1bf14342b4a903e97932a41, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelJsonGenerator
+  _outputFilePath: Assets/Resources/levels.json
+  _levelsCount: 100
+  _minNodesPerLevel: 3
+  _maxNodesPerLevel: 20
+  _minRadius: 10
+  _maxRadius: 80
+  _minNodeDistance: 2
+  _minDistanceFromPlayer: 4
+  _minDistanceFromPortal: 4
+  _negativeRatioStart: 0
+  _negativeRatioEnd: 0.5
+--- !u!114 &6305624371468584603
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2809761243191271359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b4c9d147374b084780530315908c6e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LevelRuntimeLoader
+  _levelsJson: {fileID: 4900000, guid: d09fc2ae7bb8d5649adbb7bc24eb271d, type: 3}
+  _levelIndex: 0
+  _playerPrefab: {fileID: 1379861369699941191, guid: 5a5c0fe8bafd78146bf3bd3ce15002a9, type: 3}
+  _portalPrefab: {fileID: 9186506867143213281, guid: 8d0488682e6f4bc4486e8e38662acf29, type: 3}
+  _positiveNodePrefab: {fileID: 1659423987597767279, guid: 56c75bde03ef2ba40b576920e3c04c3e, type: 3}
+  _negativeNodePrefab: {fileID: 1659423987597767279, guid: fa42d3e16c0e6cf438dd050e125978bf, type: 3}
+  _levelRoot: {fileID: 6021029259612805238}
