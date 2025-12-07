@@ -1,14 +1,14 @@
-using System.Collections;
+п»їusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Управляет прогрессией уровней, временем и звёздами.
-/// Живёт в сцене Systems и не уничтожается между загрузками.
-/// Поддерживает два типа уровней:
-/// - ручные сцены (BuildSettings)
-/// - runtime JSON уровни внутри одной сцены (_runtimeLevelSceneIndex)
+/// РЈРїСЂР°РІР»СЏРµС‚ РїСЂРѕРіСЂРµСЃСЃРёРµР№ СѓСЂРѕРІРЅРµР№, РІСЂРµРјРµРЅРµРј Рё Р·РІС‘Р·РґР°РјРё.
+/// Р–РёРІС‘С‚ РІ СЃС†РµРЅРµ Systems Рё РЅРµ СѓРЅРёС‡С‚РѕР¶Р°РµС‚СЃСЏ РјРµР¶РґСѓ Р·Р°РіСЂСѓР·РєР°РјРё.
+/// РџРѕРґРґРµСЂР¶РёРІР°РµС‚ РґРІР° С‚РёРїР° СѓСЂРѕРІРЅРµР№:
+/// - СЂСѓС‡РЅС‹Рµ СЃС†РµРЅС‹ (BuildSettings)
+/// - runtime JSON СѓСЂРѕРІРЅРё РІРЅСѓС‚СЂРё РѕРґРЅРѕР№ СЃС†РµРЅС‹ (_runtimeLevelSceneIndex)
 /// </summary>
 [DisallowMultipleComponent]
 public sealed class LevelManager : MonoBehaviour, ILevelFlow
@@ -17,28 +17,26 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
 
     [Header("Scenes / flow")]
     [SerializeField] private string _systemsSceneName = "Systems";
-    [SerializeField] private int _menuSceneIndex = 0;           // билд-индекс главного меню
-    [SerializeField] private int _firstLevelSceneIndex = 1;     // первая сцена уровня в Build Settings
-    [SerializeField] private int _runtimeLevelSceneIndex = -1;  // сцена с LevelRuntimeLoader
+    [SerializeField] private int _menuSceneIndex = 0;           // Р±РёР»Рґ-РёРЅРґРµРєСЃ РіР»Р°РІРЅРѕРіРѕ РјРµРЅСЋ
+    [SerializeField] private int _firstLevelSceneIndex = 1;     // РїРµСЂРІР°СЏ СЃС†РµРЅР° СѓСЂРѕРІРЅСЏ РІ Build Settings
+    [SerializeField] private int _runtimeLevelSceneIndex = -1;  // СЃС†РµРЅР° СЃ LevelRuntimeLoader
     [SerializeField, Min(1f)] private float _sceneOpTimeout = 15f;
 
     [Header("Stars")]
-    [SerializeField, Min(0)] private int _starsPerLevel = 3;    // фиксированное число звёзд на уровень
+    [SerializeField, Min(0)] private int _starsPerLevel = 3;    // С„РёРєСЃРёСЂРѕРІР°РЅРЅРѕРµ С‡РёСЃР»Рѕ Р·РІС‘Р·Рґ РЅР° СѓСЂРѕРІРµРЅСЊ
 
     #endregion
 
     #region State
+    private LevelSession _session;
+    private Coroutine _sceneSwitchRoutine;
 
-    private int _collectedStars;
-
-    private float _levelStartTime;
-    private int _currentLevelIndex;          // билд-индекс активной сцены уровня
 
     // runtime JSON
     private bool _isRuntimeLevel;
-    private int _currentRuntimeJsonIndex = -1;   // индекс в levels.json (0..N-1)
+    private int _currentRuntimeJsonIndex = -1;   // РёРЅРґРµРєСЃ РІ levels.json (0..N-1)
 
-    // кеш количества ручных уровней (для UI)
+    // РєРµС€ РєРѕР»РёС‡РµСЃС‚РІР° СЂСѓС‡РЅС‹С… СѓСЂРѕРІРЅРµР№ (РґР»СЏ UI)
     private int _manualLevelsCountCached = -1;
 
     #endregion
@@ -48,6 +46,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
     private IProgressService _progress;
     private IUIService _ui;
     private IGameFlowEvents _flowEvents;
+    private IGameEvents _gameEvents;
 
     public GameState State { get; private set; } = GameState.Boot;
 
@@ -79,26 +78,24 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         ServiceLocator.Register<ILevelFlow>(this);
 
         ServiceLocator.WhenAvailable<IProgressService>(p => _progress = p);
-        ServiceLocator.WhenAvailable<IUIService>(ui => _ui = ui);
         ServiceLocator.WhenAvailable<IGameFlowEvents>(e => _flowEvents = e);
+        ServiceLocator.WhenAvailable<IGameEvents>(e => _gameEvents = e);
+
+        _session = new LevelSession(_starsPerLevel);
     }
 
     private void Start()
     {
         var active = SceneManager.GetActiveScene();
 
-        // Если стартуем в runtime-сцене напрямую из редактора — _isRuntimeLevel будет false,
-        // и уровень будет вести себя как ручной. Это ок для дебага, но даём явное предупреждение.
         if(active.buildIndex == _runtimeLevelSceneIndex && !_isRuntimeLevel)
         {
-            Debug.LogWarning(
-                "[LevelManager] Runtime level scene запущена напрямую. " +
-                "Для корректного режима JSON уровней загружай их через LoadRuntimeJsonLevel().");
+            Debug.LogWarning("[LevelManager] Runtime level scene Р·Р°РїСѓС‰РµРЅР° РЅР°РїСЂСЏРјСѓСЋ...");
         }
 
         if(IsLevelScene(active))
         {
-            InitLevelState(active.buildIndex);
+            InitLevelState(active.buildIndex); // РІРЅСѓС‚СЂРё РјРѕР¶РЅРѕ РІС‹Р·С‹РІР°С‚СЊ _ui?., РЅРѕ _ui РјРѕР¶РµС‚ Р±С‹С‚СЊ null
             State = GameState.Playing;
         }
         else if(active.buildIndex == _menuSceneIndex)
@@ -107,39 +104,43 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         }
     }
 
+
+    private void Update()
+    {
+        if(State != GameState.Playing || _session == null)
+            return;
+
+        _gameEvents?.FireTimeChanged(_session.Elapsed);
+    }
+
+
     private void OnDestroy()
     {
         ServiceLocator.Unregister<ILevelFlow>(this);
         ServiceLocator.Unregister<LevelManager>(this);
     }
 
-    private void Update()
-    {
-        if(State != GameState.Playing)
-            return;
-
-        var active = SceneManager.GetActiveScene();
-        if(!IsLevelScene(active))
-            return;
-
-        _ui?.SetTime(Time.time - _levelStartTime);
-    }
 
     #endregion
 
     #region Stars API
 
+
+
     public void CollectStar()
     {
-        if(State != GameState.Playing)
+        if(State != GameState.Playing || _session == null)
             return;
 
-        if(_collectedStars < _starsPerLevel)
-            _collectedStars++;
+        _session.CollectStar();
+
+        // СѓРІРµРґРѕРјР»СЏРµРј РјРёСЂ РѕР± РёР·РјРµРЅРµРЅРёРё
+        _gameEvents?.FireStarCollected(_session.CollectedStars, _session.StarsPerLevel);
     }
 
-    public int GetStarsCollected() => _collectedStars;
-    public int GetStarsPerLevel() => _starsPerLevel;
+
+    public int GetStarsCollected() => _session?.CollectedStars ?? 0;
+    public int GetStarsPerLevel() => _session?.StarsPerLevel ?? _starsPerLevel;
 
     #endregion
 
@@ -168,7 +169,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         if(State != GameState.LevelCompleted)
             return;
 
-        // --- ветка для runtime JSON уровней ---
+        // --- РІРµС‚РєР° РґР»СЏ runtime JSON СѓСЂРѕРІРЅРµР№ ---
         if(_isRuntimeLevel)
         {
             int nextJsonIndex = _currentRuntimeJsonIndex + 1;
@@ -178,7 +179,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
                 int total = cfg.LevelsCount;
                 if(nextJsonIndex >= total)
                 {
-                    // JSON-уровни закончились — идём в меню (или можно показать финал)
+                    // JSON-СѓСЂРѕРІРЅРё Р·Р°РєРѕРЅС‡РёР»РёСЃСЊ вЂ” РёРґС‘Рј РІ РјРµРЅСЋ (РёР»Рё РјРѕР¶РЅРѕ РїРѕРєР°Р·Р°С‚СЊ С„РёРЅР°Р»)
                     LoadMenu();
                     return;
                 }
@@ -188,7 +189,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
             return;
         }
 
-        // --- старая логика для ручных сцен ---
+        // --- СЃС‚Р°СЂР°СЏ Р»РѕРіРёРєР° РґР»СЏ СЂСѓС‡РЅС‹С… СЃС†РµРЅ ---
         var current = SceneManager.GetActiveScene();
         if(!IsLevelScene(current))
             return;
@@ -217,13 +218,13 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         if(!IsLevelScene(current))
             return;
 
-        if(!IsValidBuildIndex(_currentLevelIndex))
+        if(_session == null || !IsValidBuildIndex(_session.CurrentLevelBuildIndex))
         {
-            Debug.LogError($"[LevelManager] Invalid _currentLevelIndex={_currentLevelIndex}");
+            Debug.LogError("[LevelManager] Invalid current level index in session.");
             return;
         }
 
-        LoadSceneInternal(_currentLevelIndex);
+        LoadSceneInternal(_session.CurrentLevelBuildIndex);
     }
 
     public void LoadLevel(int buildIndex)
@@ -252,7 +253,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
     }
 
     /// <summary>
-    /// Загрузить runtime JSON-уровень по индексу в levels.json (0..N-1).
+    /// Р—Р°РіСЂСѓР·РёС‚СЊ runtime JSON-СѓСЂРѕРІРµРЅСЊ РїРѕ РёРЅРґРµРєСЃСѓ РІ levels.json (0..N-1).
     /// </summary>
     public void LoadRuntimeJsonLevel(int jsonIndex)
     {
@@ -271,7 +272,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         LoadSceneInternal(_runtimeLevelSceneIndex);
     }
 
-    internal void Pause()
+    public void Pause()
     {
         if(State != GameState.Playing)
             return;
@@ -279,7 +280,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         State = GameState.Paused;
     }
 
-    internal void Resume()
+    public void Resume()
     {
         if(State != GameState.Paused)
             return;
@@ -298,10 +299,14 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
 
         int progressKey = GetCurrentProgressKey(buildIndex);
         int levelNo = GetLevelNumberForUI(buildIndex);
-        float elapsed = Time.time - _levelStartTime;
+        float elapsed = _session?.Elapsed ?? 0f;
 
         bool pb = _progress?.SetBestTimeIfBetter(progressKey, elapsed) ?? false;
-        int clampedStars = Mathf.Clamp(_collectedStars, 0, _starsPerLevel);
+
+        int collected = _session?.CollectedStars ?? 0;
+        int starsPerLevel = _session?.StarsPerLevel ?? _starsPerLevel;
+        int clampedStars = Mathf.Clamp(collected, 0, starsPerLevel);
+
         if(clampedStars > 0)
             _progress?.SetStarsMax(progressKey, clampedStars);
 
@@ -318,11 +323,15 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
             collectedStars = clampedStars,
             isPersonalBest = pb,
             isWin = true,
-            hint = "Используй обе полярности!"
+            hint = "РСЃРїРѕР»СЊР·СѓР№ РѕР±Рµ РїРѕР»СЏСЂРЅРѕСЃС‚Рё!"
         };
 
         _flowEvents?.FireLevelCompleted(info);
-        _ui?.ShowWinToast(elapsed, pb, clampedStars);
+
+        // <-- РІРѕС‚ СЌС‚Рѕ РґРѕР±Р°РІР»СЏРµРј
+        int logicalIndex = GetLogicalLevelIndex(buildIndex);
+        if(logicalIndex >= 0)
+            _progress?.SetLastCompletedLevelIfHigher(logicalIndex);
     }
 
     private void ShowFailResult()
@@ -332,7 +341,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
 
         int progressKey = GetCurrentProgressKey(buildIndex);
         int levelNo = GetLevelNumberForUI(buildIndex);
-        float elapsed = Time.time - _levelStartTime;
+        float elapsed = _session?.Elapsed ?? 0f;
 
         float? best = null;
         if(_progress != null && _progress.TryGetBestTime(progressKey, out var bestTime))
@@ -344,14 +353,13 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
             levelNumber = levelNo,
             elapsedTime = elapsed,
             bestTime = best,
-            collectedStars = _collectedStars,
+            collectedStars = _session?.CollectedStars ?? 0,
             isPersonalBest = false,
             isWin = false,
-            hint = "Попробуй другую траекторию!"
+            hint = "РџРѕРїСЂРѕР±СѓР№ РґСЂСѓРіСѓСЋ С‚СЂР°РµРєС‚РѕСЂРёСЋ!"
         };
 
         _flowEvents?.FireLevelFailed(info);
-        _ui?.ShowFailToast(elapsed);
     }
 
     #endregion
@@ -375,9 +383,67 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
     }
 
     /// <summary>
-    /// Ключ для прогресса:
-    /// - ручные уровни: buildIndex
-    /// - JSON уровни: отрицательные id (0 -> -1, 1 -> -2, ...)
+    /// 0..в€ћ Р»РѕРіРёС‡РµСЃРєРёР№ РёРЅРґРµРєСЃ:
+    /// 0..manualCount-1  вЂ“ СЂСѓС‡РЅС‹Рµ СѓСЂРѕРІРЅРё
+    /// manualCount..     вЂ“ runtime JSON СѓСЂРѕРІРЅРё
+    /// </summary>
+    private int GetLogicalLevelIndex(int sceneBuildIndex)
+    {
+        if(_isRuntimeLevel && _currentRuntimeJsonIndex >= 0)
+        {
+            int manualCount = GetManualLevelsCount();
+            return manualCount + _currentRuntimeJsonIndex;
+        }
+
+        // СЂСѓС‡РЅС‹Рµ СѓСЂРѕРІРЅРё
+        return sceneBuildIndex - _firstLevelSceneIndex;
+    }
+
+
+    public void LoadByLogicalIndex(int logicalIndex)
+    {
+        if(State == GameState.LoadingLevel)
+            return;
+
+        if(logicalIndex < 0)
+        {
+            Debug.LogWarning($"[LevelManager] LoadByLogicalIndex: invalid index {logicalIndex}");
+            return;
+        }
+
+        int manualCount = GetManualLevelsCount();
+
+        // СЂСѓС‡РЅС‹Рµ СѓСЂРѕРІРЅРё
+        if(logicalIndex < manualCount)
+        {
+            int buildIndex = _firstLevelSceneIndex + logicalIndex;
+            if(!IsValidBuildIndex(buildIndex))
+            {
+                Debug.LogError($"[LevelManager] LoadByLogicalIndex: invalid manual buildIndex {buildIndex}");
+                return;
+            }
+
+            LoadLevel(buildIndex);
+            return;
+        }
+
+        // runtime СѓСЂРѕРІРЅРё
+        int jsonIndex = logicalIndex - manualCount;
+        if(jsonIndex < 0)
+        {
+            Debug.LogError($"[LevelManager] LoadByLogicalIndex: negative jsonIndex {jsonIndex}");
+            return;
+        }
+
+        LoadRuntimeJsonLevel(jsonIndex);
+    }
+
+
+
+    /// <summary>
+    /// РљР»СЋС‡ РґР»СЏ РїСЂРѕРіСЂРµСЃСЃР°:
+    /// - СЂСѓС‡РЅС‹Рµ СѓСЂРѕРІРЅРё: buildIndex
+    /// - JSON СѓСЂРѕРІРЅРё: РѕС‚СЂРёС†Р°С‚РµР»СЊРЅС‹Рµ id (0 -> -1, 1 -> -2, ...)
     /// </summary>
     private int GetCurrentProgressKey(int sceneBuildIndex)
     {
@@ -389,26 +455,37 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         return sceneBuildIndex;
     }
 
-    /// <summary>Инициализация состояния при входе в сцену уровня.</summary>
     private void InitLevelState(int levelBuildIndex)
     {
-        _currentLevelIndex = levelBuildIndex;
-        _collectedStars = 0;
-        _levelStartTime = Time.time;
+        _session.StartLevel(levelBuildIndex);
 
         int levelNo = GetLevelNumberForUI(levelBuildIndex);
-        _ui?.SetLevel(levelNo);
 
-        int progressKey = GetCurrentProgressKey(levelBuildIndex);
-        _ui?.RefreshBest(progressKey, _progress);
+        if(ServiceLocator.TryGet<IUIService>(out var ui))
+        {
+            ui.SetLevel(levelNo);
+
+            int progressKey = GetCurrentProgressKey(levelBuildIndex);
+            ui.RefreshBest(progressKey, _progress);
+
+            ui.SetStars(_session.CollectedStars, _session.StarsPerLevel); // 0 / N
+            ui.SetTime(0f);
+        }
+
+        // РјРѕР¶РЅРѕ РїСЂРѕРґСѓР±Р»РёСЂРѕРІР°С‚СЊ С‡РµСЂРµР· СЃРѕР±С‹С‚РёСЏ, РµСЃР»Рё С…РѕС‡РµС€СЊ СЃС‚СЂРѕРіРѕ С‡РµСЂРµР· binder:
+        _gameEvents?.FireStarCollected(_session.CollectedStars, _session.StarsPerLevel);
     }
+
 
     private void LoadSceneInternal(int buildIndex)
     {
-        StopAllCoroutines();
+        if(_sceneSwitchRoutine != null)
+            StopCoroutine(_sceneSwitchRoutine);
+
         State = GameState.LoadingLevel;
-        StartCoroutine(CoSwitchToScene(buildIndex));
+        _sceneSwitchRoutine = StartCoroutine(CoSwitchToScene(buildIndex));
     }
+
 
     private IEnumerator CoSwitchToScene(int targetBuildIndex)
     {
@@ -424,7 +501,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
 
             var current = SceneManager.GetActiveScene();
 
-            // 1) гарантируем, что Systems загружена
+            // 1) РіР°СЂР°РЅС‚РёСЂСѓРµРј, С‡С‚Рѕ Systems Р·Р°РіСЂСѓР¶РµРЅР°
             var systems = SceneManager.GetSceneByName(_systemsSceneName);
             if(!systems.IsValid() || !systems.isLoaded)
             {
@@ -450,7 +527,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
                 systems = SceneManager.GetSceneByName(_systemsSceneName);
             }
 
-            // 2) грузим целевую сцену
+            // 2) РіСЂСѓР·РёРј С†РµР»РµРІСѓСЋ СЃС†РµРЅСѓ
             Scene newlyLoaded = default;
 
             void OnLoaded(Scene s, LoadSceneMode mode)
@@ -504,14 +581,14 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
                 yield break;
             }
 
-            // 3) активируем новую сцену и инициализируем состояние уровня
+            // 3) Р°РєС‚РёРІРёСЂСѓРµРј РЅРѕРІСѓСЋ СЃС†РµРЅСѓ Рё РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµРј СЃРѕСЃС‚РѕСЏРЅРёРµ СѓСЂРѕРІРЅСЏ
             SceneManager.SetActiveScene(newlyLoaded);
-            yield return null; // дать кадр на Awake / OnEnable UI
+            yield return null; // РґР°С‚СЊ РєР°РґСЂ РЅР° Awake / OnEnable UI
 
             if(IsLevelScene(newlyLoaded))
                 InitLevelState(newlyLoaded.buildIndex);
 
-            // 4) выгружаем всё, кроме Systems и новой сцены
+            // 4) РІС‹РіСЂСѓР¶Р°РµРј РІСЃС‘, РєСЂРѕРјРµ Systems Рё РЅРѕРІРѕР№ СЃС†РµРЅС‹
             var toUnload = new List<Scene>(SceneManager.sceneCount);
             for(int i = 0; i < SceneManager.sceneCount; i++)
             {
@@ -568,10 +645,10 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
     #region Helpers: UI numbering
 
     /// <summary>
-    /// Количество ручных уровней по BuildSettings.
-    /// Если задана runtime-сцена, считаем, что ручные — это диапазон
+    /// РљРѕР»РёС‡РµСЃС‚РІРѕ СЂСѓС‡РЅС‹С… СѓСЂРѕРІРЅРµР№ РїРѕ BuildSettings.
+    /// Р•СЃР»Рё Р·Р°РґР°РЅР° runtime-СЃС†РµРЅР°, СЃС‡РёС‚Р°РµРј, С‡С‚Рѕ СЂСѓС‡РЅС‹Рµ вЂ” СЌС‚Рѕ РґРёР°РїР°Р·РѕРЅ
     /// [ _firstLevelSceneIndex .. _runtimeLevelSceneIndex ).
-    /// Иначе — до конца списка сцен.
+    /// РРЅР°С‡Рµ вЂ” РґРѕ РєРѕРЅС†Р° СЃРїРёСЃРєР° СЃС†РµРЅ.
     /// </summary>
     private int GetManualLevelsCount()
     {
@@ -596,9 +673,9 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
     }
 
     /// <summary>
-    /// Номер уровня для UI:
-    /// - ручные сцены: buildIndex - _firstLevelSceneIndex + 1
-    /// - runtime JSON уровни: (кол-во ручных) + jsonIndex + 1
+    /// РќРѕРјРµСЂ СѓСЂРѕРІРЅСЏ РґР»СЏ UI:
+    /// - СЂСѓС‡РЅС‹Рµ СЃС†РµРЅС‹: buildIndex - _firstLevelSceneIndex + 1
+    /// - runtime JSON СѓСЂРѕРІРЅРё: (РєРѕР»-РІРѕ СЂСѓС‡РЅС‹С…) + jsonIndex + 1
     /// </summary>
     private int GetLevelNumberForUI(int sceneBuildIndex)
     {
@@ -613,8 +690,8 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
 
 
     /// <summary>
-    /// Регистрация активного JSON-уровня при запуске runtime-сцены напрямую из редактора.
-    /// Нужна только для дебага: делает уровень "runtime" в глазах LevelManager.
+    /// Р РµРіРёСЃС‚СЂР°С†РёСЏ Р°РєС‚РёРІРЅРѕРіРѕ JSON-СѓСЂРѕРІРЅСЏ РїСЂРё Р·Р°РїСѓСЃРєРµ runtime-СЃС†РµРЅС‹ РЅР°РїСЂСЏРјСѓСЋ РёР· СЂРµРґР°РєС‚РѕСЂР°.
+    /// РќСѓР¶РЅР° С‚РѕР»СЊРєРѕ РґР»СЏ РґРµР±Р°РіР°: РґРµР»Р°РµС‚ СѓСЂРѕРІРµРЅСЊ "runtime" РІ РіР»Р°Р·Р°С… LevelManager.
     /// </summary>
     public void RegisterRuntimeJsonIndex(int jsonIndex)
     {

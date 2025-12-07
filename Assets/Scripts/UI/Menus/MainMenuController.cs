@@ -39,28 +39,26 @@ public sealed class MainMenuController : MonoBehaviour
             _btnExit.onClick.AddListener(OnExit);
 
 #if UNITY_ANDROID || UNITY_IOS
-        if(_btnExit != null)
+        if (_btnExit != null)
             _btnExit.gameObject.SetActive(false);
 #endif
     }
 
     private void OnEnable()
     {
-        //if(ServiceLocator.TryGet(out _input))
-        //{
-        //    _input.Back += OnBack;
-        //}
-
-        ServiceLocator.WhenAvailable<IInputService>(i =>
+        ServiceLocator.WhenAvailable<IInputService>(input =>
         {
-            _input = i;
+            _input = input;
             _input.Back += OnBack;
         });
 
         ServiceLocator.WhenAvailable<IProgressService>(p =>
         {
             _progress = p;
-            UpdateContinueButtonVisibility();
+            _progress.Loaded += OnProgressLoaded;
+
+            if(_progress.IsLoaded)
+                OnProgressLoaded();
         });
     }
 
@@ -72,38 +70,49 @@ public sealed class MainMenuController : MonoBehaviour
             _input = null;
         }
 
-        _progress = null;
+        if(_progress != null)
+        {
+            _progress.Loaded -= OnProgressLoaded;
+            _progress = null;
+        }
     }
 
     private void Start()
     {
         UpdateContinueButtonVisibility();
 
-        InitPanel(_settingsPanel, false);
-        InitPanel(_levelSelectPanel, false);
+        SetPanel(_settingsPanel, false);
+        SetPanel(_levelSelectPanel, false);
     }
 
+
+    private void OnProgressLoaded()
+    {
+        UpdateContinueButtonVisibility();
+    }
 
     private void UpdateContinueButtonVisibility()
     {
         if(_btnContinue == null)
             return;
 
-        bool hasSave = false;
+        bool show = false;
 
-        if(ServiceLocator.TryGet<IProgressService>(out var progress))
+        // если сервис уже есть — используем его;
+        // если нет — пытаемся получить, но не создаём жёсткую зависимость
+        if(_progress != null || ServiceLocator.TryGet<IProgressService>(out _progress))
         {
-            _progress = progress;
-            hasSave = _progress.TryGetLastCompletedLevel(out int last);
-            _btnContinue.gameObject.SetActive(last < _finalLevelSceneIndex);
+            if(_progress.TryGetLastCompletedLevel(out int lastCompleted))
+            {
+                show = lastCompleted >= 0;
+            }
         }
 
+        _btnContinue.gameObject.SetActive(show);
     }
 
-    // Обработка Cancel/Back из новой системы ввода
-    private void OnBack()
+    public void OnBack()
     {
-        // сначала закрываем настройки
         if(IsVisible(_settingsPanel))
         {
             ToggleSettings();
@@ -112,16 +121,6 @@ public sealed class MainMenuController : MonoBehaviour
         {
             ToggleLevelSelect(false);
         }
-    }
-
-    private void InitPanel(CanvasGroup panel, bool visible)
-    {
-        if(panel == null)
-            return;
-
-        panel.alpha = visible ? 1f : 0f;
-        panel.interactable = visible;
-        panel.blocksRaycasts = visible;
     }
 
     private void SetPanel(CanvasGroup panel, bool visible)
@@ -136,10 +135,9 @@ public sealed class MainMenuController : MonoBehaviour
 
     private bool IsVisible(CanvasGroup panel)
     {
-        return panel != null && panel.interactable; // или panel.alpha > 0.001f
+        return panel != null && panel.interactable;
     }
 
-    // PLAY → открыть панель выбора уровней
     private void OnPlay()
     {
         ToggleLevelSelect(true);
@@ -153,16 +151,16 @@ public sealed class MainMenuController : MonoBehaviour
         bool show = !IsVisible(_settingsPanel);
         SetPanel(_settingsPanel, show);
 
-        if(_input != null)
-        {
-            if(show)
-                _input.PushModal();
-            else
-                _input.PopModal();
-        }
+        if(_input == null)
+            return;
+
+        if(show)
+            _input.PushModal();
+        else
+            _input.PopModal();
     }
 
-    private void ToggleLevelSelect(bool? explicitState = null)
+    public void ToggleLevelSelect(bool? explicitState = null)
     {
         if(_levelSelectPanel == null)
             return;
@@ -170,50 +168,42 @@ public sealed class MainMenuController : MonoBehaviour
         bool show = explicitState ?? !IsVisible(_levelSelectPanel);
         SetPanel(_levelSelectPanel, show);
 
-        if(_input != null)
-        {
-            if(show)
-                _input.PushModal();
-            else
-                _input.PopModal();
-        }
+        if(_input == null)
+            return;
+
+        if(show)
+            _input.PushModal();
+        else
+            _input.PopModal();
     }
 
-    // CONTINUE → загрузить последний уровень
     private void OnContinue()
+    {
+        LoadLevelThroughFlow();
+    }
+
+    private void LoadLevelThroughFlow()
     {
         if(_isLoading)
             return;
 
-        int target = _firstLevelSceneIndex;
+        if(_progress == null && !ServiceLocator.TryGet<IProgressService>(out _progress))
+            return;
 
-        if(_progress != null && _progress.TryGetLastCompletedLevel(out var last))
-        {
-            if(last >= _firstLevelSceneIndex && last < _finalLevelSceneIndex)
-                target = last;
-        }
+        if(!_progress.TryGetLastCompletedLevel(out int lastCompleted))
+            return;
 
-        LoadLevelThroughFlow(target);
-    }
-
-    private void LoadLevelThroughFlow(int buildIndex)
-    {
-        if(_isLoading)
+        if(!ServiceLocator.TryGet<LevelManager>(out var levelManager))
             return;
 
         _isLoading = true;
 
-        // основной путь — через LevelManager / ServiceLocator
-        if(ServiceLocator.TryGet<LevelManager>(out var levelManager))
-        {
-            levelManager.LoadLevel(buildIndex);
-            _isLoading = false;
-            return;
-        }
+        // хотим следующий за пройденным
+        int targetIndex = lastCompleted + 1;
 
-        // запасной вариант — прямой LoadScene
-        StartCoroutine(CoLoadSingleScene(buildIndex));
+        levelManager.LoadByLogicalIndex(targetIndex);
     }
+
 
     private IEnumerator CoLoadSingleScene(int buildIndex)
     {

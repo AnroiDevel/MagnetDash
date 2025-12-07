@@ -5,13 +5,6 @@ public sealed class StarPickup : MonoBehaviour
 {
     private bool _taken;
 
-    private void Reset()
-    {
-        var c = GetComponent<Collider2D>();
-        if(c)
-            c.isTrigger = true;
-    }
-
     private void OnTriggerEnter2D(Collider2D other)
     {
         if(_taken || !other.CompareTag("Player"))
@@ -19,15 +12,8 @@ public sealed class StarPickup : MonoBehaviour
 
         _taken = true;
 
-        if(ServiceLocator.TryGet<LevelManager>(out var levelManager))
-        {
-            levelManager.CollectStar();
-        }
-        else
-        {
-            Debug.LogError("[StarPickup] LevelManager service not found. " +
-                           "Ensure LevelManager is present in the Systems scene and registered.");
-        }
+        if(other.TryGetComponent<PlayerMagnet>(out var player))
+            player.OnStarPickup(transform.position);
 
         gameObject.SetActive(false);
     }

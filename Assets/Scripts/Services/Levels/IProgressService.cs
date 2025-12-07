@@ -2,15 +2,18 @@ using System;
 
 public interface IProgressService
 {
-    int GetStars(int buildIndex);                     // 0..3
-    bool SetStarsMax(int buildIndex, int stars);     // true, если улучшили
+    bool IsLoaded { get; }                    // данные загружены и готовы
+
+    int GetStars(int buildIndex);
+    bool SetStarsMax(int buildIndex, int stars);
     bool TryGetBestTime(int buildIndex, out float t);
     bool SetBestTimeIfBetter(int buildIndex, float t);
     void ResetAll();
 
-    bool TryGetLastCompletedLevel(out int buildIndex);
+    bool TryGetLastCompletedLevel(out int logicalIndex);
+    void SetLastCompletedLevelIfHigher(int logicalIndex);
 
-
-    event Action<int, int> StarsChanged;              // (buildIndex, newStars)
-    event Action<int, float> BestTimeChanged;         // (buildIndex, newTime)
+    event Action Loaded;                      // данные загрузились (локально/облако)
+    event Action<int, int> StarsChanged;      // (buildIndex, newStars)
+    event Action<int, float> BestTimeChanged; // (buildIndex, newTime)
 }

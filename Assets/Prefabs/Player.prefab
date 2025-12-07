@@ -140,10 +140,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMagnet
   _config: {fileID: 11400000, guid: cc226e931068538428f49f8c20b8f93c, type: 2}
+  _starCollectFxPrefab: {fileID: 1758530975131985292, guid: e2d1dce839fdca74fa0bcd4cd6baf140, type: 3}
   _portalTarget: {fileID: 0}
   _bodyInner: {fileID: 3649453438094830539}
   _trail: {fileID: 7491886814137859796}
   _playerSfx: {fileID: 7033052931294111665}
+  _engineMinSpeed: 3
+  _engineMaxSpeed: 10
+  _engineResponse: 4
 --- !u!58 &4078277528101149567
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -327,10 +331,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSfx
   _switchPolarity: {fileID: 11400000, guid: 277b5a6335b7e594d92b04af030425d1, type: 2}
-  _magnetImpulse: {fileID: 0}
-  _hitLight: {fileID: 0}
+  _magnetImpulse: {fileID: 11400000, guid: 7c1b7bc28c147094795e512b33a13fe9, type: 2}
+  _hitLight: {fileID: 11400000, guid: 2a14c340b43563f4380dacaaf696a393, type: 2}
   _hitHeavy: {fileID: 11400000, guid: 2a14c340b43563f4380dacaaf696a393, type: 2}
-  _slideLoop: {fileID: 0}
+  _starCollect: {fileID: 11400000, guid: ddb7288223416614db3fe79e0ce6c3a6, type: 2}
+  _slideLoop: {fileID: 11400000, guid: 645eabca56a01f3428223d57c08363bd, type: 2}
+  _engineLowLoop: {fileID: 11400000, guid: 645eabca56a01f3428223d57c08363bd, type: 2}
+  _engineHighLoop: {fileID: 11400000, guid: 645eabca56a01f3428223d57c08363bd, type: 2}
+  _engineLowMinVolume: 0
+  _engineLowMaxVolume: 1
+  _engineHighMaxVolume: 1
+  _engineVolumeChangeSpeed: 1
 --- !u!1 &2254370190843970621
 GameObject:
   m_ObjectHideFlags: 0

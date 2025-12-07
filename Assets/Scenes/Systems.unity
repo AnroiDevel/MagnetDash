@@ -206,14 +206,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 55156096034395748, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
-      propertyPath: _starsPerLevel
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 55156096034395748, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
-      propertyPath: _runtimeLevelSceneIndex
-      value: 13
-      objectReference: {fileID: 0}
     - target: {fileID: 3421145944720699378, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0

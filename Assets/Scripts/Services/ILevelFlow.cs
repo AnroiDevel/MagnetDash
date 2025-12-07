@@ -8,4 +8,8 @@ public interface ILevelFlow
 
     void LoadLevel(int buildIndex);
     void LoadMenu();
+    void LoadByLogicalIndex(int logicalIndex);
+
+    void Pause();
+    void Resume();
 }

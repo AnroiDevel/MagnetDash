@@ -6,13 +6,28 @@ public static class ServiceLocator
     private static readonly Dictionary<Type, object> _map = new();
     private static readonly Dictionary<Type, List<Delegate>> _waiters = new();
 
+    // --- Новые события ---
+    public static event Action<Type, object> Registered;
+    public static event Action<Type> Unregistered;
+
     public static void Register<T>(T instance) where T : class
     {
         var type = typeof(T);
+
         if(instance == null)
-        { _map.Remove(type); return; }
+        {
+            // null = по сути Unregister
+            if(_map.Remove(type))
+                Unregistered?.Invoke(type);
+            return;
+        }
+
         _map[type] = instance;
 
+        // Оповещаем подписчиков
+        Registered?.Invoke(type, instance);
+
+        // Дёргаем всех "ожидающих"
         if(_waiters.TryGetValue(type, out var list))
         {
             foreach(var d in list)
@@ -24,7 +39,11 @@ public static class ServiceLocator
     public static bool TryGet<T>(out T instance) where T : class
     {
         if(_map.TryGetValue(typeof(T), out var obj) && obj is T t)
-        { instance = t; return true; }
+        {
+            instance = t;
+            return true;
+        }
+
         instance = null;
         return false;
     }
@@ -33,11 +52,17 @@ public static class ServiceLocator
     {
         if(onAvailable == null)
             return;
+
         if(TryGet(out T inst))
-        { onAvailable(inst); return; }
+        {
+            onAvailable(inst);
+            return;
+        }
+
         var type = typeof(T);
         if(!_waiters.TryGetValue(type, out var list))
             _waiters[type] = list = new List<Delegate>();
+
         list.Add(onAvailable);
     }
 
@@ -55,6 +80,9 @@ public static class ServiceLocator
     public static void Unregister<T>(T instance) where T : class
     {
         var type = typeof(T);
-        _map.Remove(type);
+        if(_map.Remove(type))
+        {
+            Unregistered?.Invoke(type);
+        }
     }
 }

@@ -140,3 +140,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a81aff47f55cc8f448ace95b7cb9bb07, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StarPickup
+  _collectFxPrefab: {fileID: 1758530975131985292, guid: e2d1dce839fdca74fa0bcd4cd6baf140, type: 3}

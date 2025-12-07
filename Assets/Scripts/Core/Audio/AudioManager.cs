@@ -141,12 +141,12 @@ public sealed class AudioManager : MonoBehaviour, IAudioService
         if(!PassCooldownAndConcurrency(sfx, key))
             return;
 
-        AudioClip clip = sfx.RandomClip();
+        AudioClip clip = sfx.GetRandomClip();
         if(clip == null)
             return;
 
         float vol = 1f, pitch = 1f;
-        sfx.Randomize(ref vol, ref pitch);
+        sfx.GetRandomized( out vol, out pitch);
 
         AudioSource src = Pop();
         SetupSource2D(src, sfx, vol, pitch);
@@ -162,12 +162,12 @@ public sealed class AudioManager : MonoBehaviour, IAudioService
         if(!PassCooldownAndConcurrency(sfx, key))
             return;
 
-        AudioClip clip = sfx.RandomClip();
+        AudioClip clip = sfx.GetRandomClip();
         if(clip == null)
             return;
 
         float vol = 1f, pitch = 1f;
-        sfx.Randomize(ref vol, ref pitch);
+        sfx.GetRandomized(out vol, out pitch);
 
         AudioSource src = Pop();
         SetupSource3D(src, sfx, vol, pitch, spatial, minDist, maxDist, worldPos);
@@ -181,12 +181,12 @@ public sealed class AudioManager : MonoBehaviour, IAudioService
         if(sfx == null)
             return null;
 
-        AudioClip clip = sfx.RandomClip();
+        AudioClip clip = sfx.GetRandomClip();
         if(clip == null)
             return null;
 
         float vol = 1f, pitch = 1f;
-        sfx.Randomize(ref vol, ref pitch);
+        sfx.GetRandomized(out vol, out pitch);
 
         GameObject go = new($"Loop_{sfx.name}");
         go.transform.SetParent(transform, false);
@@ -201,8 +201,8 @@ public sealed class AudioManager : MonoBehaviour, IAudioService
         src.spatialBlend = Mathf.Clamp01(spatial);
         src.minDistance = minDist;
         src.maxDistance = maxDist;
-        if(sfx.output != null)
-            src.outputAudioMixerGroup = sfx.output;
+        if(sfx.Output != null)
+            src.outputAudioMixerGroup = sfx.Output;
         else if(_defaultOutput != null)
             src.outputAudioMixerGroup = _defaultOutput;
 
@@ -236,8 +236,8 @@ public sealed class AudioManager : MonoBehaviour, IAudioService
     {
         src.transform.localPosition = Vector3.zero;
         src.spatialBlend = 0f;
-        if(sfx.output != null)
-            src.outputAudioMixerGroup = sfx.output;
+        if(sfx.Output != null)
+            src.outputAudioMixerGroup = sfx.Output;
         src.volume = vol;
         src.pitch = pitch;
         src.minDistance = 1f;
@@ -248,8 +248,8 @@ public sealed class AudioManager : MonoBehaviour, IAudioService
     {
         src.transform.position = pos;
         src.spatialBlend = Mathf.Clamp01(spatial);
-        if(sfx.output != null)
-            src.outputAudioMixerGroup = sfx.output;
+        if(sfx.Output != null)
+            src.outputAudioMixerGroup = sfx.Output;
         src.volume = vol;
         src.pitch = pitch;
         src.minDistance = minDist;
@@ -264,10 +264,10 @@ public sealed class AudioManager : MonoBehaviour, IAudioService
                 return false;
         }
 
-        if(sfx.maxSimultaneous > 0)
+        if(sfx.MaxSimultaneous > 0)
         {
             _concurrency.TryGetValue(sfx, out int cnt);
-            if(cnt >= sfx.maxSimultaneous)
+            if(cnt >= sfx.MaxSimultaneous)
                 return false;
         }
         return true;
@@ -275,10 +275,10 @@ public sealed class AudioManager : MonoBehaviour, IAudioService
 
     private void RegisterPlay(SfxEvent sfx, string key, float estSeconds)
     {
-        if(!string.IsNullOrEmpty(key) && sfx.cooldown > 0f)
-            _cooldowns[key] = Time.time + sfx.cooldown;
+        if(!string.IsNullOrEmpty(key) && sfx.Cooldown > 0f)
+            _cooldowns[key] = Time.time + sfx.Cooldown ;
 
-        if(sfx.maxSimultaneous > 0)
+        if(sfx.MaxSimultaneous > 0)
         {
             _concurrency.TryGetValue(sfx, out int cnt);
             _concurrency[sfx] = cnt + 1;

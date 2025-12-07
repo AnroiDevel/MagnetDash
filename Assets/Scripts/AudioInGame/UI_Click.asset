@@ -12,12 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3b4cf89439a9f8341a5ae4377e6a75d6, type: 3}
   m_Name: UI_Click
   m_EditorClassIdentifier: Assembly-CSharp::SfxEvent
-  clips:
+  _clips:
   - {fileID: 8300000, guid: c17dc08c322ea5042bd98f1e0f338ab1, type: 3}
-  output: {fileID: -8004504178884637571, guid: 47b01b25036dfdb4389e193335484990, type: 2}
-  volume: 0.9
-  pitchBase: 1
-  pitchVar: 0.06
-  volVar: 0.05
-  cooldown: 0
-  maxSimultaneous: 1
+  _output: {fileID: -8004504178884637571, guid: 47b01b25036dfdb4389e193335484990, type: 2}
+  _volume: 0.9
+  _pitchBase: 1
+  _pitchVar: 0.06
+  _volVar: 0.05
+  _cooldown: 0.08
+  _maxSimultaneous: 4

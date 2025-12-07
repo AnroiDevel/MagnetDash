@@ -25,6 +25,11 @@ public sealed class SettingsMenuBinder : MonoBehaviour
 
     private void OnEnable()
     {
+#if UNITY_EDITOR
+        _resetProgressBtn.gameObject.SetActive(true);
+#else
+        _resetProgressBtn.gameObject.SetActive(false);
+#endif
         ServiceLocator.WhenAvailable<IAudioService>(audio =>
         {
             InitValues(audio);
@@ -41,6 +46,7 @@ public sealed class SettingsMenuBinder : MonoBehaviour
         {
             _resetProgressBtn.onClick.AddListener(() => p.ResetAll());
         });
+
 
     }
 

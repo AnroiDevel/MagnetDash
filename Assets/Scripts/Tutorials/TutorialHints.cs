@@ -109,13 +109,13 @@ public sealed class TutorialHints : MonoBehaviour
     private IEnumerator CoRun()
     {
         // 1. Полярность
-        yield return Show("Нажми, чтобы сменить полярность (плюс/минус)");
+        yield return Show("Тап / клик по экрану – переключит полярность корабля");
         _waitPolarity = true;
         yield return new WaitUntil(() => !_waitPolarity);
         yield return Hide();
 
-        // 2. Подсказка про настройки
-        yield return Show("Подсказки можно отключить в «Настройках»");
+        // 3. Объяснение нод
+        yield return Show("Корабль летит сам, вы управляете только полярностью");
         yield return new WaitForSecondsRealtime(_autoHide);
         yield return Hide();
 
@@ -125,6 +125,15 @@ public sealed class TutorialHints : MonoBehaviour
         yield return Hide();
 
         yield return Show("Разные заряды притягивают");
+        yield return new WaitForSecondsRealtime(_autoHide);
+        yield return Hide();
+
+        // 2. Подсказка про настройки
+        yield return Show("Подсказки можно отключить в «Настройках»");
+        yield return new WaitForSecondsRealtime(_autoHide);
+        yield return Hide();
+
+        yield return Show("Перезапуск уровня – через меню паузы");
         yield return new WaitForSecondsRealtime(_autoHide);
         yield return Hide();
 

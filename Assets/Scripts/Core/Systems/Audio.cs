@@ -1,34 +1,60 @@
+﻿using System;
 using UnityEngine;
 
 public static class Audio
 {
-    private static IAudioService _cachedService;
-    private static bool _triedResolve;
+    private static IAudioService _service;
+    private static bool _hooked;
+
+    static Audio()
+    {
+        HookEvents();
+        TryInitialResolve();
+    }
+
+    private static void HookEvents()
+    {
+        if(_hooked)
+            return;
+
+        _hooked = true;
+
+        ServiceLocator.Registered += OnServiceRegistered;
+        ServiceLocator.Unregistered += OnServiceUnregistered;
+    }
+
+    private static void OnServiceRegistered(Type type, object instance)
+    {
+        if(type == typeof(IAudioService))
+            _service = instance as IAudioService;
+    }
+
+    private static void OnServiceUnregistered(Type type)
+    {
+        if(type == typeof(IAudioService))
+            _service = null;
+    }
+
+    private static void TryInitialResolve()
+    {
+        if(_service != null)
+            return;
+
+        if(ServiceLocator.TryGet<IAudioService>(out var s))
+            _service = s;
+    }
 
     private static IAudioService Service
     {
         get
         {
-            if(_cachedService != null)
-                return _cachedService;
-
-            if(_triedResolve)
-                return null;
-
-            _triedResolve = true;
-
-            if(ServiceLocator.TryGet<IAudioService>(out var s))
-            {
-                _cachedService = s;
-                return s;
-            }
-
-#if UNITY_EDITOR
-            Debug.LogWarning("[Audio] IAudioService not found in ServiceLocator.");
-#endif
-            return null;
+            if(_service == null)
+                TryInitialResolve();
+            return _service;
         }
     }
+
+    // ============ API ============
 
     public static void Play(SfxEvent sfx, string key = null)
     {
@@ -45,8 +71,7 @@ public static class Audio
         float spatial = 1f,
         float minDist = 2f,
         float maxDist = 20f,
-        string key = null
-    )
+        string key = null)
     {
         var s = Service;
         if(s == null || sfx == null)
@@ -60,19 +85,12 @@ public static class Audio
         Vector3 worldPos,
         float spatial = 1f,
         float minDist = 2f,
-        float maxDist = 20f
-    )
+        float maxDist = 20f)
     {
         var s = Service;
         if(s == null || sfx == null)
             return null;
 
         return s.PlayLoop(sfx, worldPos, spatial, minDist, maxDist);
-    }
-
-    public static void ResetCache()
-    {
-        _cachedService = null;
-        _triedResolve = false;
     }
 }

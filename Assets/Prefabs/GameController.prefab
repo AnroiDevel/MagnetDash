@@ -50,9 +50,9 @@ MonoBehaviour:
   _systemsSceneName: Systems
   _menuSceneIndex: 0
   _firstLevelSceneIndex: 1
-  _autoNextDelay: 1.2
+  _runtimeLevelSceneIndex: 13
   _sceneOpTimeout: 15
-  _starsPerLevel: 2
+  _starsPerLevel: 3
 --- !u!114 &180258786371937484
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -68,6 +68,7 @@ MonoBehaviour:
   _slotId: default
   _filePrefix: save_
   _saveDebounce: 0.2
+  _vkStorageKey: magnet_save_default
 --- !u!114 &9145504215465085272
 MonoBehaviour:
   m_ObjectHideFlags: 0

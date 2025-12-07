@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 public sealed class UIManager : MonoBehaviour, IUIService
@@ -12,6 +13,11 @@ public sealed class UIManager : MonoBehaviour, IUIService
     [SerializeField] private TMP_Text _speedText;
     [SerializeField] private TMP_Text _toastText;
 
+    [SerializeField] private Image[] _starIcons; // длина всегда 3
+    [SerializeField] private TMP_Text _starCountText;
+    [SerializeField] private Color _filledColor = Color.white;
+    [SerializeField] private Color _emptyColor = new Color(1, 1, 1, 0.25f);
+
     [Header("Toast")]
     [SerializeField] private float _defaultToastSeconds = 1.0f;
 
@@ -21,20 +27,37 @@ public sealed class UIManager : MonoBehaviour, IUIService
 
     private void Awake()
     {
-        // Регистрируемся как сервис UI
         ServiceLocator.Register<IUIService>(this);
-        // Спрячем тост при старте
+
         if(_toastText)
             _toastText.gameObject.SetActive(false);
     }
 
     private void OnDestroy()
     {
-        // Чистим сервис при выгрузке сцены
         ServiceLocator.Unregister<IUIService>(this);
     }
 
-    // ---------- Публичный API (IUIService) ----------
+    // ---------- IUIService ----------
+
+    public void SetStars(int collected, int total)
+    {
+        if(_starIcons != null)
+        {
+            for(int i = 0; i < _starIcons.Length; i++)
+            {
+                if(_starIcons[i] == null)
+                    continue;
+
+                bool filled = i < collected;
+                _starIcons[i].color = filled ? _filledColor : _emptyColor;
+            }
+        }
+
+        if(_starCountText != null)
+            _starCountText.text = $"{collected} / {total}";
+    }
+
 
     public void SetLevel(int level)
     {
@@ -48,15 +71,26 @@ public sealed class UIManager : MonoBehaviour, IUIService
             _timeText.text = $"Time: {Format(seconds)}";
     }
 
-    public void RefreshBest(float? bestSeconds)
+    public void RefreshBest(int progressKey, IProgressService progress)
     {
         if(!_bestText)
             return;
 
-        bool has = bestSeconds.HasValue;
+        bool has = false;
+
+        if(progress != null && progress.TryGetBestTime(progressKey, out float best))
+        {
+            has = float.IsFinite(best);
+        }
+        else
+        {
+            best = 0f; // значение не важно, мы его не используем, если has == false
+        }
+
         _bestText.gameObject.SetActive(has);
+
         if(has)
-            _bestText.text = $"Best: {Format(bestSeconds.Value)}";
+            _bestText.text = $"Best: {Format(best)}";
     }
 
     public void SetSpeed(float value)
@@ -72,8 +106,8 @@ public sealed class UIManager : MonoBehaviour, IUIService
 
     public void ShowWinToast(float elapsedSeconds, bool isPersonalBest, int stars)
     {
-        // Используем stars в сообщении (если >0)
         string starPart = stars > 0 ? $"  ★×{Mathf.Clamp(stars, 0, 3)}" : string.Empty;
+
         string msg = isPersonalBest
             ? $"PB! {Format(elapsedSeconds)}{starPart} — next…"
             : $"Level clear in {Format(elapsedSeconds)}{starPart} — next…";
@@ -81,9 +115,11 @@ public sealed class UIManager : MonoBehaviour, IUIService
         ShowToast(msg, 1.2f);
     }
 
-    public void ShowFailToast()
+    public void ShowFailToast(float elapsedSeconds)
     {
-        ShowToast("Ouch! Press R to retry.", _defaultToastSeconds);
+        // elapsedSeconds можно использовать в тексте, если нужно
+        string msg = $"Failed in {Format(elapsedSeconds)} — retry!";
+        ShowToast(msg, _defaultToastSeconds);
     }
 
     // ---------- Внутреннее ----------
@@ -96,7 +132,6 @@ public sealed class UIManager : MonoBehaviour, IUIService
         _toastText.text = message;
         _toastText.gameObject.SetActive(true);
 
-        // Отменяем предыдущую корутину, если была
         if(_toastRoutine != null)
             StopCoroutine(_toastRoutine);
 
@@ -109,11 +144,13 @@ public sealed class UIManager : MonoBehaviour, IUIService
         float t = 0f;
         while(t < seconds)
         {
-            t += Time.unscaledDeltaTime; // тост скрывается даже на паузе
+            t += Time.unscaledDeltaTime;
             yield return null;
         }
+
         if(_toastText)
             _toastText.gameObject.SetActive(false);
+
         _toastRoutine = null;
     }
 
@@ -130,23 +167,7 @@ public sealed class UIManager : MonoBehaviour, IUIService
 
         if(minutes > 0)
             return $"{minutes}:{wholeSec:00}.{centisec:00}s";
-        else
-            return $"{wholeSec}.{centisec:00}s";
-    }
 
-    public void RefreshBest(float? bestSeconds, IProgressService progress)
-    {
-        if(!_bestText)
-            return;
-
-        bool has = bestSeconds.HasValue;
-        _bestText.gameObject.SetActive(has);
-        if(has)
-            _bestText.text = $"Best: {Format(bestSeconds.Value)}";
-    }
-
-    public void ShowFailToast(float elapsed)
-    {
-        throw new System.NotImplementedException();
+        return $"{wholeSec}.{centisec:00}s";
     }
 }

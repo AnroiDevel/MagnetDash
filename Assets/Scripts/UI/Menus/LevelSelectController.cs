@@ -11,243 +11,222 @@ public sealed class LevelSelectController : MonoBehaviour
     [SerializeField] private bool _clearOnBuild = true;
 
     [Header("Manual Levels (scenes)")]
-    [SerializeField] private int _firstBuildIndex = 1;   // первая сцена-уровень
-    [SerializeField] private int _levelsToShow = 12;     // сколько ручных уровней показывать
+    [SerializeField] private int _firstBuildIndex = 1;
+    [SerializeField] private int _levelsToShow = 12;
 
     [Header("Runtime JSON Levels")]
-    [SerializeField] private TextAsset _levelsJson;      // тот же levels.json, что и у LevelRuntimeLoader
+    [SerializeField] private TextAsset _levelsJson;
     [SerializeField] private bool _showRuntimeLevels = true;
 
     private readonly List<LevelItemView> _items = new();
 
     private IProgressService _progress;
-    private LevelJsonRoot _runtimeConfig;   // разобранный JSON (только для UI)
+    private LevelJsonRoot _runtimeConfig;
     private int _manualLevelsCount;
+    private int _runtimeLevelsCount;
 
     private void OnEnable()
     {
+        BuildLayout(); // строим кнопки без прогресса
+
+        // подписываемся на прогресс
         ServiceLocator.WhenAvailable<IProgressService>(p =>
         {
             _progress = p;
-            BuildOrRefresh();
-        });
+            _progress.Loaded += OnProgressLoaded;
 
-        // На случай, если прогресс ещё не поднялся — построим "пустую" версию
-        BuildOrRefresh();
+            if(_progress.IsLoaded)
+                OnProgressLoaded();
+        });
     }
 
-    public void BuildOrRefresh()
+    private void OnDisable()
+    {
+        if(_progress != null)
+            _progress.Loaded -= OnProgressLoaded;
+    }
+
+    // ============================
+    //   СТРОИМ СЕТКУ КНОПОК
+    // ============================
+
+    private void BuildLayout()
     {
         if(_contentRoot == null || _itemPrefab == null)
             return;
 
         int totalScenes = SceneManager.sceneCountInBuildSettings;
 
-        // ----- 1. Ручные уровни -----
-        int manualCount = _levelsToShow > 0
+        // ----- Manual -----
+        int manualCount =
+            _levelsToShow > 0
             ? _levelsToShow
-            : (totalScenes - _firstBuildIndex);
+            : Mathf.Max(0, totalScenes - _firstBuildIndex);
 
-        if(manualCount < 0)
-            manualCount = 0;
-
+        manualCount = Mathf.Clamp(manualCount, 0, totalScenes - _firstBuildIndex);
         _manualLevelsCount = manualCount;
 
-        // Проверяем, чтобы не выходить за BuildSettings
-        if(_firstBuildIndex + manualCount > totalScenes)
-            manualCount = Mathf.Max(0, totalScenes - _firstBuildIndex);
+        // ----- JSON -----
+        EnsureRuntimeConfigLoaded();
+        _runtimeLevelsCount = (_showRuntimeLevels && _runtimeConfig != null)
+            ? _runtimeConfig.levels.Count
+            : 0;
 
-        _manualLevelsCount = manualCount;
+        int total = manualCount + _runtimeLevelsCount;
 
-        // ----- 2. JSON-уровни -----
-        int runtimeCount = 0;
-        if(_showRuntimeLevels && _levelsJson != null)
+        // ----- Rebuild UI -----
+        if(_clearOnBuild)
         {
-            EnsureRuntimeConfigLoaded();
-            if(_runtimeConfig != null && _runtimeConfig.levels != null)
-                runtimeCount = _runtimeConfig.levels.Count;
+            foreach(var it in _items)
+                if(it)
+                    Destroy(it.gameObject);
+            _items.Clear();
         }
 
-        int totalCount = manualCount + runtimeCount;
+        while(_items.Count < total)
+            _items.Add(Instantiate(_itemPrefab, _contentRoot));
 
-        // ----- Rebuild -----
-        if(_items.Count != totalCount)
+        while(_items.Count > total)
         {
-            if(_clearOnBuild)
-            {
-                foreach(var it in _items)
-                    if(it)
-                        Destroy(it.gameObject);
-
-                _items.Clear();
-            }
-
-            for(int i = 0; i < totalCount; i++)
-            {
-                var view = Instantiate(_itemPrefab, _contentRoot);
-                _items.Add(view);
-            }
+            Destroy(_items[^1].gameObject);
+            _items.RemoveAt(_items.Count - 1);
         }
 
-        // Если вдруг стало меньше уровней, чем в прошлый раз
-        if(totalCount == 0)
-            return;
-
-        // ----- Bind: ручные сцены -----
+        // ----- Bind первичных данных (без прогресса) -----
         int index = 0;
 
+        // Manual
         for(int i = 0; i < manualCount; i++, index++)
         {
-            int buildIndex = _firstBuildIndex + i;
-            int number = index + 1;   // общий номер в списке
+            int number = index + 1;
 
-            int stars = _progress?.GetStars(buildIndex) ?? 0;
-            bool unlocked = IsManualUnlocked(buildIndex);
-
-            _items[index].name = $"Level_{number:D3}_Scene_{buildIndex}";
             _items[index].Bind(
-                buildIndex,                                     // id = buildIndex (>=0)
-                number,
-                Mathf.Clamp(stars, 0, 3),
-                unlocked,
-                OnLevelClicked
+                id: index,
+                levelNumber: number,
+                stars: 0,
+                unlocked: false,
+                onClick: OnLevelClicked
             );
         }
 
-        // ----- Bind: runtime JSON уровни -----
-        for(int i = 0; i < runtimeCount; i++, index++)
+        // JSON
+        for(int i = 0; i < _runtimeLevelsCount; i++, index++)
         {
-            int jsonIndex = i;                 // 0..N-1 в _runtimeConfig.levels
-            int number = index + 1;            // продолжение нумерации после ручных
+            int number = index + 1;
 
-            int id = EncodeRuntimeId(jsonIndex);   // отрицательное число
-
-            int stars = _progress?.GetStars(id) ?? 0;
-            bool unlocked = IsRuntimeUnlocked(jsonIndex, id);
-
-
-            _items[index].name = $"Level_{number:D3}_Json_{jsonIndex}";
             _items[index].Bind(
-                id,          // id < 0 → runtime
-                number,
-                Mathf.Clamp(stars, 0, 3),
-                unlocked,
-                OnLevelClicked
+                id: index,
+                levelNumber: number,
+                stars: 0,
+                unlocked: false,
+                onClick: OnLevelClicked
             );
         }
     }
 
-    // ===== Раздел: разблокировка =====
+    // ============================
+    //   ПРИМЕНЯЕМ ПРОГРЕСС
+    // ============================
 
-    private bool IsRuntimeUnlocked(int jsonIndex, int id)
+    private void OnProgressLoaded()
     {
-        // Нет прогресса — разрешаем только первый JSON,
-        // и только если пройден последний ручной уровень.
-        if(_progress == null)
-            return jsonIndex == 0 && LastManualCompleted();
-
-        if(jsonIndex == 0)
-            return LastManualCompleted();
-
-        // Все последующие — если предыдущий JSON имеет >= 1 звезду
-        int prevId = EncodeRuntimeId(jsonIndex - 1);
-        return _progress.GetStars(prevId) > 0;
+        ApplyProgress();
     }
 
-    private bool LastManualCompleted()
-    {
-        if(_manualLevelsCount <= 0)
-            return true; // ручных уровней нет — считаем условие выполненным
-
-        if(_progress == null)
-            return false;
-
-        int lastBuildIndex = _firstBuildIndex + _manualLevelsCount - 1;
-        return _progress.GetStars(lastBuildIndex) > 0;
-    }
-
-    private bool IsManualUnlocked(int buildIndex)
+    private void ApplyProgress()
     {
         if(_progress == null)
-            return buildIndex == _firstBuildIndex;
-
-        if(buildIndex == _firstBuildIndex)
-            return true;
-
-        int prev = buildIndex - 1;
-
-        // считается пройденным, если набрали >= 1 звезды
-        return _progress.GetStars(prev) > 0;
-    }
-
-    // ===== Раздел: клик по уровню =====
-
-    private void OnLevelClicked(int id)
-    {
-        if(!ServiceLocator.TryGet<ILevelFlow>(out var flowRaw))
-        {
-            Debug.LogError("[LevelSelectController] ILevelFlow service not found.");
             return;
-        }
 
-        var levelManager = flowRaw as LevelManager;
+        int total = _items.Count;
 
-        // Ручной уровень (buildIndex)
-        if(id >= 0)
+        int lastCompletedLogical = -1;
+        _progress.TryGetLastCompletedLevel(out lastCompletedLogical);
+
+        for(int logicalIndex = 0; logicalIndex < total; logicalIndex++)
         {
-            if(!IsManualUnlocked(id))
+            bool isManual = logicalIndex < _manualLevelsCount;
+            int progressKey;
+            int stars;
+
+            if(isManual)
             {
-                Debug.Log("[LevelSelectController] Level is locked, cannot start.");
-                return;
+                int buildIndex = _firstBuildIndex + logicalIndex;
+                progressKey = buildIndex;
+            }
+            else
+            {
+                int jsonIndex = logicalIndex - _manualLevelsCount;
+                progressKey = -(jsonIndex + 1);
             }
 
-            flowRaw.LoadLevel(id);
-            return;
-        }
+            stars = Mathf.Clamp(_progress.GetStars(progressKey), 0, 3);
+            bool unlocked = IsLogicalUnlocked(logicalIndex, lastCompletedLogical);
 
-        // JSON-уровень
-        int jsonIndex = DecodeRuntimeId(id);
-        if(!IsRuntimeUnlocked(jsonIndex, id))
-        {
-            Debug.Log("[LevelSelectController] Runtime level is locked, cannot start.");
-            return;
-        }
+            int number = logicalIndex + 1;
 
-        if(levelManager == null)
-        {
-            Debug.LogError("[LevelSelectController] Runtime level clicked, but ILevelFlow is not LevelManager.");
-            return;
+            _items[logicalIndex].Bind(
+                id: logicalIndex,
+                levelNumber: number,
+                stars: stars,
+                unlocked: unlocked,
+                onClick: OnLevelClicked
+            );
         }
-
-        levelManager.LoadRuntimeJsonLevel(jsonIndex);
     }
 
-    // ===== Раздел: JSON config =====
+    private bool IsLogicalUnlocked(int logicalIndex, int lastCompletedLogical)
+    {
+        // первый уровень всегда доступен
+        if(logicalIndex == 0)
+            return true;
+
+        if(lastCompletedLogical < 0)
+            return false;
+
+        bool isRuntime = logicalIndex >= _manualLevelsCount;
+
+        // базовое правило: можно пройти всё, что не дальше, чем на один шаг вперёд
+        bool bySequence = logicalIndex <= lastCompletedLogical + 1;
+
+        if(!isRuntime)
+            return bySequence;
+
+        // runtime уровни: только после того, как завершены все ручные
+        bool allManualCompleted = lastCompletedLogical >= _manualLevelsCount - 1;
+        return bySequence && allManualCompleted;
+    }
+
+
+
+    // ============================
+    //   КЛИК ПО УРОВНЮ
+    // ============================
+
+    private void OnLevelClicked(int logicalIndex)
+    {
+        if(!ServiceLocator.TryGet<ILevelFlow>(out var flow))
+            return;
+
+        // проверку unlocked мы уже сделали при Bind, здесь можно
+        // либо доверять UI, либо ещё раз вызвать IsLogicalUnlocked
+
+        // интерфейс ILevelFlow лучше расширить:
+        // void LoadByLogicalIndex(int logicalIndex);
+
+        flow.LoadByLogicalIndex(logicalIndex);
+    }
+
+    // ============================
+    //   JSON
+    // ============================
 
     private void EnsureRuntimeConfigLoaded()
     {
-        if(_runtimeConfig != null)
-            return;
-
-        if(_levelsJson == null)
+        if(_runtimeConfig != null || _levelsJson == null)
             return;
 
         _runtimeConfig = JsonUtility.FromJson<LevelJsonRoot>(_levelsJson.text);
-        if(_runtimeConfig == null || _runtimeConfig.levels == null)
-            Debug.LogError("[LevelSelectController] Failed to parse levels.json for runtime levels UI.");
     }
 
-    // ===== Кодирование/декодирование id =====
-
-    private static int EncodeRuntimeId(int jsonIndex)
-    {
-        // 0 -> -1, 1 -> -2, ...
-        return -1 - jsonIndex;
-    }
-
-    private static int DecodeRuntimeId(int id)
-    {
-        // -1 -> 0, -2 -> 1, ...
-        return -id - 1;
-    }
 }

@@ -35,13 +35,13 @@ public sealed class LevelItemView : MonoBehaviour
             _button.onClick.RemoveListener(HandleClick);
     }
 
-    public void Bind(int levelId, int number, int stars, bool unlocked, System.Action<int> onClick)
+    public void Bind( int id,int levelNumber, int stars, bool unlocked, System.Action<int> onClick)
     {
-        _levelId = levelId;
+        _levelId = id;
         _onClick = onClick;
 
         if(_number != null)
-            _number.SetText(number.ToString());
+            _number.SetText(levelNumber.ToString());
 
         // звезды: 0..3
         if(_stars != null)

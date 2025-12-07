@@ -23,11 +23,6 @@ public sealed class LevelJsonGenerator : MonoBehaviour
     [SerializeField, Min(1f)] private float _minRadius = 10f;
     [SerializeField, Min(1f)] private float _maxRadius = 80f;
 
-    [Header("Global Node Distances")]
-    [SerializeField, Min(0.1f)] private float _minNodeDistance = 2f;
-    [SerializeField, Min(0.1f)] private float _minDistanceFromPlayer = 4f;
-    [SerializeField, Min(0.1f)] private float _minDistanceFromPortal = 4f;
-
     [Header("Path Steps (nodes & portal)")]
     [SerializeField, Min(0.1f)] private float _minStepDistance = 6f;   // минимальная дистанция между соседями
     [SerializeField, Min(0.1f)] private float _maxStepDistance = 14f;  // максимальная дистанция между соседями

@@ -10,11 +10,19 @@ public sealed class PlayerMagnet : MonoBehaviour
     [Header("Config")]
     [SerializeField] private PlayerMagnetConfig _config;
 
+    [Header("Stars FX")]
+    [SerializeField] private ParticleSystem _starCollectFxPrefab;
+
     [Header("Scene References")]
     [SerializeField] private Transform _portalTarget;
     [SerializeField] private SpriteRenderer _bodyInner;
     [SerializeField] private TrailRenderer _trail;
     [SerializeField] private PlayerSfx _playerSfx;
+
+    [Header("Engine SFX")]
+    [SerializeField] private float _engineMinSpeed = 40f;   // скорость, с которой двигатель начинает быть слышен
+    [SerializeField] private float _engineMaxSpeed = 260f;  // скорость, при которой громкость уже максимальная
+    [SerializeField] private float _engineResponse = 5f;    // скорость реакции громкости на изменения
 
     #endregion
 
@@ -76,6 +84,9 @@ public sealed class PlayerMagnet : MonoBehaviour
     private float _visualAngle;
     private bool _hasMagneticInfluence;
 
+    // Загрузка двигателя (0..1), сглаженная
+    private float _engineLoadSmoothed;
+
     #endregion
 
     #region Unity Lifecycle
@@ -98,28 +109,57 @@ public sealed class PlayerMagnet : MonoBehaviour
     {
         if(_input != null)
             _input.TogglePolarity -= OnToggle;
+
+        if(_playerSfx != null)
+            _playerSfx.StopEngine();
     }
 
     private void FixedUpdate()
     {
+        if(_levelManager != null && _levelManager.State != GameState.Playing)
+        {
+            // Движок должен «молчать», когда не играем
+            if(_playerSfx != null)
+                _playerSfx.UpdateEngine(0f, transform.position);
+
+            return;
+        }
+
         _hasMagneticInfluence = false;
 
         if(_isOrbiting)
         {
             UpdateOrbit();
-            _events?.FireSpeedChanged(_rb.linearVelocity.magnitude);
-            RotateTowardsVelocity();
-            return;
+        }
+        else
+        {
+            ApplyMagnetForces();
+            ApplyDragAndCruise();
+            ClampSpeed();
+            TryAutoOrbit();
+            ApplyAutoPilot();
         }
 
-        ApplyMagnetForces();
-        ApplyDragAndCruise();
-        ClampSpeed();
+        // ---- единственное место, где работаем со скоростью и звуком ----
+        float sp = _rb.linearVelocity.magnitude;
 
-        TryAutoOrbit();
-        ApplyAutoPilot();
+        _events?.FireSpeedChanged(sp);
 
-        _events?.FireSpeedChanged(_rb.linearVelocity.magnitude);
+        if(_playerSfx != null)
+        {
+            float targetLoad = CalcEngineLoad(sp);
+
+            // сглаживаем, чтобы звук не дёргался
+            _engineLoadSmoothed = Mathf.MoveTowards(
+                _engineLoadSmoothed,
+                targetLoad,
+                _engineResponse * Time.fixedDeltaTime
+            );
+
+            _playerSfx.UpdateEngine(_engineLoadSmoothed, transform.position);
+        }
+        // ----------------------------------------------------------------
+
         RotateTowardsVelocity();
     }
 
@@ -145,6 +185,18 @@ public sealed class PlayerMagnet : MonoBehaviour
 
     #region Public API (Nodes & Polarity & Portal)
 
+    public void OnStarPickup(Vector3 worldPos)
+    {
+        if(ServiceLocator.TryGet<LevelManager>(out var lm))
+            lm.CollectStar();
+
+        if(_playerSfx != null)
+            _playerSfx.OnStarCollected();
+
+        if(_starCollectFxPrefab != null)
+            Instantiate(_starCollectFxPrefab, worldPos, Quaternion.identity);
+    }
+
     public void AddNode(MagneticNode node)
     {
         if(node == null)
@@ -167,8 +219,6 @@ public sealed class PlayerMagnet : MonoBehaviour
         if(node == null)
             return;
 
-        // Если сейчас крутимся вокруг этой ноды — не удаляем её,
-        // иначе начнётся дергание логики
         if(_isOrbiting && _orbitNode == node)
             return;
 
@@ -213,7 +263,6 @@ public sealed class PlayerMagnet : MonoBehaviour
 
     public void TogglePolarity()
     {
-        // Меняем полярность и визуал
         Polarity *= -1;
         UpdateVisual();
 
@@ -227,21 +276,18 @@ public sealed class PlayerMagnet : MonoBehaviour
 
         _events?.FirePolarityChanged(Polarity);
 
-        // Если уже на орбите — решаем, слезать или остаться
         if(_isOrbiting && _orbitNode != null)
         {
             int relation = _orbitNode.Charge * Polarity;
 
             if(relation > 0)
             {
-                // стала одинаковая полярность -> слиншот
                 ExitOrbit(true);
             }
 
             return;
         }
 
-        // Не на орбите — обычная логика: либо орбита, либо отталкивание
         HandlePolarityContext();
     }
 
@@ -277,12 +323,10 @@ public sealed class PlayerMagnet : MonoBehaviour
 
         if(relation < 0)
         {
-            // противоположные заряды -> орбита
             TryEnterOrbit(node);
         }
         else
         {
-            // одинаковые заряды -> отталкивание
             ApplyRepulsionBurst(node, dist);
         }
     }
@@ -326,7 +370,7 @@ public sealed class PlayerMagnet : MonoBehaviour
             return;
 
         Vector2 center = node.Position;
-        Vector2 r = (Vector2)_rb.position - center;   // player - center
+        Vector2 r = (Vector2)_rb.position - center;
         float dist = r.magnitude;
         if(dist <= 0.001f)
             return;
@@ -340,7 +384,6 @@ public sealed class PlayerMagnet : MonoBehaviour
 
         _orbitRadius = Mathf.Min(OrbitRadiusUnits, captureRadius);
 
-        // Знак орбиты — по угловому моменту Lz = (r x v).z
         Vector2 v = _rb.linearVelocity;
         float Lz = r.x * v.y - r.y * v.x;
 
@@ -359,7 +402,7 @@ public sealed class PlayerMagnet : MonoBehaviour
         }
 
         Vector2 center = _orbitNode.Position;
-        Vector2 r = (Vector2)_rb.position - center;    // player - center
+        Vector2 r = (Vector2)_rb.position - center;
         float dist = r.magnitude;
         if(dist <= 0.001f)
         {
@@ -373,11 +416,9 @@ public sealed class PlayerMagnet : MonoBehaviour
         float radiusError = dist - _orbitRadius;
         float radialSpeed = Vector2.Dot(v, radialDir);
 
-        // Радиальная пружина + демпфер
         Vector2 radialForce =
             (-radiusError * OrbitPosStiffness - radialSpeed * OrbitVelDamping) * radialDir;
 
-        // Касательная: базис CCW, затем знак вращения
         Vector2 tangentBase = new(-radialDir.y, radialDir.x);
         Vector2 tangentDir = tangentBase * _orbitSpinSign;
 
@@ -520,7 +561,6 @@ public sealed class PlayerMagnet : MonoBehaviour
 
     private void ApplyAutoPilot()
     {
-        // пока хоть какая-то нода тянет/толкает или есть орбита, автопилот не лезет
         if(_hasMagneticInfluence || _isOrbiting)
             return;
 
@@ -620,6 +660,9 @@ public sealed class PlayerMagnet : MonoBehaviour
 
     private IEnumerator AbsorbRoutine(Vector3 portalPosition, float duration)
     {
+        if(_playerSfx != null)
+            _playerSfx.StopEngine();
+
         _rb.linearVelocity = Vector2.zero;
         _rb.bodyType = RigidbodyType2D.Kinematic;
 
@@ -649,6 +692,28 @@ public sealed class PlayerMagnet : MonoBehaviour
 
         _absorbRoutine = null;
         gameObject.SetActive(false);
+    }
+
+    #endregion
+
+    #region Engine Load Helper
+
+    /// <summary>
+    /// Переводит скорость в "нагрузку" двигателя 0..1 с порогами и квадратичной кривой.
+    /// </summary>
+    private float CalcEngineLoad(float speed)
+    {
+        if(_engineMaxSpeed <= _engineMinSpeed)
+            return 0f;
+
+        float t = Mathf.InverseLerp(_engineMinSpeed, _engineMaxSpeed, speed);
+        t = Mathf.Clamp01(t);
+
+        // квадратичная кривая: долго тихо, затем ускоренный рост
+        t = t * t;
+        // можно сделать ещё агрессивнее: t = t * t * t;
+
+        return t;
     }
 
     #endregion

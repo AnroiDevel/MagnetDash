@@ -1,67 +1,112 @@
-// ProgressService.cs
-using System;
+п»їusing System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public sealed class ProgressService : MonoBehaviour, IProgressService
 {
-    [Header("Storage")]
+    [Header("Storage (local file)")]
     [SerializeField] private string _slotId = "default";
     [SerializeField] private string _filePrefix = "save_";
     [SerializeField] private float _saveDebounce = 0.2f;
 
+    [Header("Cloud (VK)")]
+    [SerializeField] private string _vkStorageKey = "magnet_save_default";
+
+    public event Action Loaded;
     public event Action<int, int> StarsChanged;
     public event Action<int, float> BestTimeChanged;
 
-    private SaveData _state;
-    private readonly Dictionary<int, int> _stars = new();         // buildIndex -> stars
-    private readonly Dictionary<int, float> _bestTimes = new();   // buildIndex -> time
+    private SaveData _state = new() { slotId = "default" };
+    private readonly Dictionary<int, int> _stars = new();         // buildIndex/id -> stars
+    private readonly Dictionary<int, float> _bestTimes = new();   // buildIndex/id -> time
     private bool _saveScheduled;
+    private bool _loaded;     // РґР°РЅРЅС‹Рµ Р·Р°РіСЂСѓР¶РµРЅС‹ (РґР»СЏ WebGL/РѕР±Р»Р°РєР°)
 
     private string FilePath => Path.Combine(Application.persistentDataPath, $"{_filePrefix}{_slotId}.json");
     private string TempPath => FilePath + ".tmp";
 
+#if UNITY_WEBGL
+
+    [DllImport("__Internal")] private static extern void VK_SaveString(string key, string value);
+    [DllImport("__Internal")] private static extern void VK_LoadString(string key, string goName, string methodName);
+#endif
+
+    public bool IsLoaded => _loaded;
+
     private void Awake()
     {
-        LoadOrCreate();
+        _state.slotId = _slotId;
+
         ServiceLocator.Register<IProgressService>(this);
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+    if(IsVkEnvironment())
+    {
+        // РіСЂСѓР·РёРј С‚РѕР»СЊРєРѕ РёР· РѕР±Р»Р°РєР° VK
+        StartCoroutine(CoLoadFromVkCloud());
     }
+    else
+    {
+        // РѕР±С‹С‡РЅРѕРµ Р»РѕРєР°Р»СЊРЅРѕРµ СЃРѕС…СЂР°РЅРµРЅРёРµ
+        LoadOrCreateLocal();
+    }
+#else
+        // Editor / Standalone / РїСЂРѕС‡РёР№ runtime
+        LoadOrCreateLocal();
+#endif
+    }
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+    private bool IsVkEnvironment()
+    {
+        string url = Application.absoluteURL;
+        if(string.IsNullOrEmpty(url))
+            return false;
+
+        url = url.ToLowerInvariant();
+        // СЃСЋРґР° РјРѕР¶РµС€СЊ РґРѕР±Р°РІРёС‚СЊ СЃРІРѕРё РґРѕРјРµРЅС‹ VK Play, РµСЃР»Рё РЅСѓР¶РЅРѕ
+        return url.Contains("vk.com") || url.Contains("vkplay.ru");
+    }
+#endif
+
 
     private void OnDestroy()
     {
         ServiceLocator.Unregister<IProgressService>(this);
     }
 
-    // ---------- Public API ----------
+    // ================= PUBLIC API =================
 
-
-    public bool TryGetLastCompletedLevel(out int buildIndex)
+    public bool TryGetLastCompletedLevel(out int lastCLevel)
     {
-        buildIndex = default;
-
-        if(_state == null || _state.levels == null || _state.levels.Count == 0)
-            return false;
-
-        int best = -1;
-
-        foreach(var lr in _state.levels)
+        if(_state == null || _state.lastCompletedLogicalLevel < 0)
         {
-            if(lr.stars > 0 && lr.buildIndex > best)
-                best = lr.buildIndex;
+            lastCLevel = -1;
+            return false;
         }
 
-        if(best < 0)
-            return false;
-
-        buildIndex = best + 1;
+        lastCLevel = _state.lastCompletedLogicalLevel;
         return true;
     }
 
+    public void SetLastCompletedLevelIfHigher(int logicalIndex)
+    {
+        if(logicalIndex < 0)
+            return;
 
-    public int GetStars(int buildIndex) => _stars.TryGetValue(buildIndex, out var s) ? s : 0;
+        if(_state.lastCompletedLogicalLevel >= logicalIndex)
+            return;
+
+        _state.lastCompletedLogicalLevel = logicalIndex;
+        ScheduleSave();
+    }
+
+    public int GetStars(int buildIndex) =>
+        _stars.TryGetValue(buildIndex, out var s) ? s : 0;
 
     public bool SetStarsMax(int buildIndex, int stars)
     {
@@ -104,63 +149,149 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
         _state = new SaveData { slotId = _slotId };
         _stars.Clear();
         _bestTimes.Clear();
-        WriteFileImmediate();
+        ScheduleSave(forceImmediate: true);
         StarsChanged?.Invoke(-1, 0);
     }
 
-    // ---------- Internal ----------
-    private void LoadOrCreate()
+    // ================= INTERNAL: LOAD =================
+
+    /// <summary>
+    /// Р›РѕРєР°Р»СЊРЅР°СЏ Р·Р°РіСЂСѓР·РєР°/СЃРѕР·РґР°РЅРёРµ (Editor, Standalone, WebGL Р±РµР· РѕР±Р»Р°РєР°).
+    /// </summary>
+    private void LoadOrCreateLocal()
     {
         if(File.Exists(FilePath))
         {
-            TryRead(out _state);
+            TryReadLocal(out _state);
         }
         else
         {
-            // Миграция с PlayerPrefs (старые ключи "stars_{idx}", "best_{idx}")
             _state = new SaveData { slotId = _slotId };
             TryMigrateFromPlayerPrefs(_state);
-            WriteFileImmediate();
+            WriteFileImmediateLocal();
         }
 
         RebuildCaches();
+        MarkLoaded();
     }
+
+
+    private void MarkLoaded()
+    {
+        _loaded = true;
+        Loaded?.Invoke();
+    }
+
+#if UNITY_WEBGL 
+    /// <summary>
+    /// Р—Р°РіСЂСѓР·РєР° РёР· VK Storage (WebGL).
+    /// </summary>
+    private IEnumerator CoLoadFromVkCloud()
+    {
+        _loaded = false;
+
+        // РґРµСЂРіР°РµРј JS в†’ РѕРЅ РІРµСЂРЅС‘С‚ СЃС‚СЂРѕРєСѓ С‡РµСЂРµР· SendMessage
+        VK_LoadString(_vkStorageKey, gameObject.name, nameof(OnVkStorageLoaded));
+
+        // Р¶РґС‘Рј, РїРѕРєР° РєРѕР»Р»Р±РµРє РІС‹СЃС‚Р°РІРёС‚ _loaded = true
+        float timeout = 5f;
+        float t = 0f;
+        while(!_loaded && t < timeout)
+        {
+            t += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        if(!_loaded)
+        {
+            Debug.LogWarning("[ProgressService] VK cloud load timeout, fallback to empty state.");
+            _state = new SaveData { slotId = _slotId };
+            RebuildCaches();
+            MarkLoaded();
+        }
+    }
+
+    /// <summary>
+    /// РљРѕР»Р»Р±РµРє РёР· JS. РџРѕР»СѓС‡Р°РµРј JSON РёР»Рё РїСѓСЃС‚СѓСЋ СЃС‚СЂРѕРєСѓ.
+    /// </summary>
+    private void OnVkStorageLoaded(string json)
+    {
+        if(string.IsNullOrEmpty(json))
+        {
+            // РЅРµС‚ СЃРѕС…СЂР°РЅРµРЅРёСЏ вЂ” СЃС‚Р°СЂС‚СѓРµРј СЃ РЅСѓР»СЏ
+            _state = new SaveData { slotId = _slotId };
+            TryMigrateFromPlayerPrefs(_state); // РЅР° РІСЃСЏРєРёР№ СЃР»СѓС‡Р°Р№
+        }
+        else
+        {
+            try
+            {
+                var data = JsonUtility.FromJson<SaveData>(json);
+                _state = data ?? new SaveData { slotId = _slotId };
+            }
+            catch(Exception e)
+            {
+                Debug.LogError($"[ProgressService] VK load parse error: {e}");
+                _state = new SaveData { slotId = _slotId };
+            }
+        }
+
+        RebuildCaches();
+        MarkLoaded();
+    }
+#endif
 
     private void RebuildCaches()
     {
         _stars.Clear();
         _bestTimes.Clear();
+        if(_state?.levels == null)
+            return;
+
         foreach(var lr in _state.levels)
         {
-            _stars[lr.buildIndex] = Mathf.Clamp(lr.stars, 0, 3);
+            _stars[lr.levelId] = Mathf.Clamp(lr.stars, 0, 3);
             if(lr.hasBestTime && float.IsFinite(lr.bestTime))
-                _bestTimes[lr.buildIndex] = lr.bestTime;
+                _bestTimes[lr.levelId] = lr.bestTime;
         }
     }
 
-
-    private void UpsertLevel(int buildIndex, System.Func<LevelResultDto, LevelResultDto> mutate)
+    private void UpsertLevel(int buildIndex, Func<LevelResultDto, LevelResultDto> mutate)
     {
         for(int i = 0; i < _state.levels.Count; i++)
         {
-            if(_state.levels[i].buildIndex == buildIndex)
+            if(_state.levels[i].levelId == buildIndex)
             {
                 var lr = _state.levels[i];
-                lr = mutate(lr);              // <- получаем изменённую копию
-                _state.levels[i] = lr;        // <- сохраняем обратно
+                lr = mutate(lr);
+                _state.levels[i] = lr;
                 return;
             }
         }
 
-        var created = new LevelResultDto { buildIndex = buildIndex };
+        var created = new LevelResultDto { levelId = buildIndex };
         created = mutate(created);
         _state.levels.Add(created);
     }
 
-    private void ScheduleSave()
+    // ================= INTERNAL: SAVE =================
+
+    private void ScheduleSave(bool forceImmediate = false)
     {
+        if(!_loaded)
+            return; // РµС‰С‘ РЅРµ Р·Р°РіСЂСѓР·РёР»РёСЃСЊ вЂ” РЅРµ РїРёС€РµРј
+
+        if(forceImmediate)
+        {
+            StopAllCoroutines();
+            _saveScheduled = false;
+            WriteImmediate();
+            return;
+        }
+
         if(_saveScheduled)
             return;
+
         _saveScheduled = true;
         StartCoroutine(CoDebouncedSave());
     }
@@ -169,42 +300,72 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     {
         float t = 0f;
         while(t < _saveDebounce)
-        { t += Time.unscaledDeltaTime; yield return null; }
-        WriteFileImmediate();
+        {
+            t += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        WriteImmediate();
         _saveScheduled = false;
     }
 
-    private void WriteFileImmediate()
+    private void WriteImmediate()
+    {
+        var json = JsonUtility.ToJson(_state, prettyPrint: false);
+
+#if UNITY_WEBGL&& !UNITY_EDITOR
+        if(IsVkEnvironment())
+        {
+            VK_SaveString(_vkStorageKey, json);
+        }
+        else
+        {
+            WriteFileImmediateLocal(json);
+        }
+#else
+        WriteFileImmediateLocal(json);
+#endif
+    }
+
+    private void WriteFileImmediateLocal()
+    {
+        var json = JsonUtility.ToJson(_state, prettyPrint: false);
+        WriteFileImmediateLocal(json);
+    }
+
+    private void WriteFileImmediateLocal(string json)
     {
         try
         {
-            var json = JsonUtility.ToJson(_state, prettyPrint: false);
             File.WriteAllText(TempPath, json);
             if(File.Exists(FilePath))
                 File.Delete(FilePath);
-            File.Move(TempPath, FilePath); // атомарнее, чем перезапись
+            File.Move(TempPath, FilePath);
         }
         catch(Exception e)
         {
-            Debug.LogError($"Progress save error: {e}");
+            Debug.LogError($"[ProgressService] local save error: {e}");
         }
     }
 
-    private bool TryRead(out SaveData data)
+    private bool TryReadLocal(out SaveData data)
     {
         try
         {
             string json = File.ReadAllText(FilePath);
             data = JsonUtility.FromJson<SaveData>(json);
             if(data == null)
-            { data = new SaveData { slotId = _slotId }; return false; }
+            {
+                data = new SaveData { slotId = _slotId };
+                return false;
+            }
             if(string.IsNullOrEmpty(data.slotId))
                 data.slotId = _slotId;
             return true;
         }
         catch(Exception e)
         {
-            Debug.LogError($"Progress read error: {e}");
+            Debug.LogError($"[ProgressService] local read error: {e}");
             data = new SaveData { slotId = _slotId };
             return false;
         }
@@ -212,15 +373,13 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
 
     private void TryMigrateFromPlayerPrefs(SaveData target)
     {
-        // перебором по BuildSettings обычно нельзя узнать количество сцен — это делай лениво
-        // мигрируем встречающиеся ключи 0..300 на всякий случай
         for(int idx = 0; idx <= 300; idx++)
         {
             string sk = $"stars_{idx}";
             string bk = $"best_{idx}";
             bool touched = false;
 
-            var lr = new LevelResultDto { buildIndex = idx };
+            var lr = new LevelResultDto { levelId = idx };
 
             if(PlayerPrefs.HasKey(sk))
             {
