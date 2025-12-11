@@ -59,6 +59,7 @@ Material:
     - _TwinkleSpeed: 2
     - _ZWrite: 0
     m_Colors:
+    - White: {r: 1, g: 1, b: 1, a: 1}
     - _BackgroundColor: {r: 0.048178457, g: 0.0028034835, b: 0.1981132, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}

@@ -15,26 +15,34 @@ public sealed class PlayerMagnet : MonoBehaviour
 
     [Header("Scene References")]
     [SerializeField] private Transform _portalTarget;
-    [SerializeField] private SpriteRenderer _bodyInner;
-    [SerializeField] private TrailRenderer _trail;
-    [SerializeField] private PlayerSfx _playerSfx;
 
-    [Header("Engine SFX")]
-    [SerializeField] private float _engineMinSpeed = 40f;   // скорость, с которой двигатель начинает быть слышен
-    [SerializeField] private float _engineMaxSpeed = 260f;  // скорость, при которой громкость уже максимальная
-    [SerializeField] private float _engineResponse = 5f;    // скорость реакции громкости на изменения
+    [Header("Engine Wear")]
+    [SerializeField] private int _engineWearPerOrbitExit = 1;
+
+    [Header("Skin")]
+    [SerializeField] private PlayerSkinView _skinView;
 
     #endregion
 
-    #region Config Accessors (safe defaults)
+    #region Config Accessors
 
-    private float StartUpSpeed => _config != null ? _config.startUpSpeed : 120f;
-    private float MaxSpeed => _config != null ? _config.maxSpeed : 360f;
-    private float CruiseMin => _config != null ? _config.cruiseMin : 60f;
-    private float CruiseAccel => _config != null ? _config.cruiseAccel : 120f;
+    private float StartUpSpeed => _config != null ? _config.startUpSpeed : 2f;
+    private float BaseMaxSpeed => _config != null ? _config.maxSpeed : 10f;
+
+    private float MaxSpeed
+    {
+        get
+        {
+            float power = _progress?.EnginePower ?? 1f;
+            return BaseMaxSpeed * power;
+        }
+    }
+
+    private float CruiseMin => _config != null ? _config.cruiseMin : 5f;
+    private float CruiseAccel => _config != null ? _config.cruiseAccel : 10f;
 
     private float TurnSpeedDeg => _config != null ? _config.turnSpeedDeg : 360f;
-    private float MinSpeedForRotate => _config != null ? _config.minSpeedForRotate : 5f;
+    private float MinSpeedForRotate => _config != null ? _config.minSpeedForRotate : 1f;
 
     private float PortalMagnetForce => _config != null ? _config.portalMagnetForce : 5f;
     private float PortalMagnetMaxDistance => _config != null ? _config.portalMagnetMaxDistance : 100f;
@@ -53,9 +61,6 @@ public sealed class PlayerMagnet : MonoBehaviour
 
     private float EdgeMinFactor => _config != null ? _config.edgeMinFactor : 0.25f;
 
-    private Color PlusColor => _config != null ? _config.plusColor : new Color(0.30f, 0.64f, 1f);
-    private Color MinusColor => _config != null ? _config.minusColor : new Color(1f, 0.42f, 0.42f);
-
     #endregion
 
     #region State & Services
@@ -65,27 +70,23 @@ public sealed class PlayerMagnet : MonoBehaviour
     private Rigidbody2D _rb;
     private IInputService _input;
     private IGameEvents _events;
+    private IProgressService _progress;
     private LevelManager _levelManager;
 
     private readonly List<MagneticNode> _activeNodes = new();
 
-    private Coroutine _pulseRoutine;
-    private Coroutine _absorbRoutine;
-
     private MagneticNode _spawnNode;
     private MagneticNode _lastVisitedNode;
 
-    // Орбита
     private MagneticNode _orbitNode;
     private bool _isOrbiting;
     private float _orbitRadius;
-    private float _orbitSpinSign = 1f; // знак вращения: +1 / -1
+    private float _orbitSpinSign = 1f;
 
     private float _visualAngle;
     private bool _hasMagneticInfluence;
 
-    // Загрузка двигателя (0..1), сглаженная
-    private float _engineLoadSmoothed;
+    private Coroutine _absorbRoutine;
 
     #endregion
 
@@ -99,31 +100,25 @@ public sealed class PlayerMagnet : MonoBehaviour
 
         _visualAngle = _rb.rotation;
 
-        UpdateVisual();
-        InitializeServices();
+        // 1) если в инспекторе назначен конкретный скин – используем его
+        if(_skinView == null)
+            _skinView = GetComponentInChildren<PlayerSkinView>(true);
 
-        ServiceLocator.WhenAvailable<LevelManager>(lm => _levelManager = lm);
+        InitializeServices();
     }
 
-    private void OnDisable()
+    private void OnDestroy()
     {
         if(_input != null)
             _input.TogglePolarity -= OnToggle;
 
-        if(_playerSfx != null)
-            _playerSfx.StopEngine();
+        ServiceLocator.Unsubscribe<IProgressService>(OnProgressAvailable);
     }
 
     private void FixedUpdate()
     {
         if(_levelManager != null && _levelManager.State != GameState.Playing)
-        {
-            // Движок должен «молчать», когда не играем
-            if(_playerSfx != null)
-                _playerSfx.UpdateEngine(0f, transform.position);
-
             return;
-        }
 
         _hasMagneticInfluence = false;
 
@@ -140,25 +135,9 @@ public sealed class PlayerMagnet : MonoBehaviour
             ApplyAutoPilot();
         }
 
-        // ---- единственное место, где работаем со скоростью и звуком ----
         float sp = _rb.linearVelocity.magnitude;
 
         _events?.FireSpeedChanged(sp);
-
-        if(_playerSfx != null)
-        {
-            float targetLoad = CalcEngineLoad(sp);
-
-            // сглаживаем, чтобы звук не дёргался
-            _engineLoadSmoothed = Mathf.MoveTowards(
-                _engineLoadSmoothed,
-                targetLoad,
-                _engineResponse * Time.fixedDeltaTime
-            );
-
-            _playerSfx.UpdateEngine(_engineLoadSmoothed, transform.position);
-        }
-        // ----------------------------------------------------------------
 
         RotateTowardsVelocity();
     }
@@ -169,49 +148,48 @@ public sealed class PlayerMagnet : MonoBehaviour
 
     private void InitializeServices()
     {
+        ServiceLocator.WhenAvailable<LevelManager>(lm => _levelManager = lm);
+
         ServiceLocator.WhenAvailable<IInputService>(svc =>
         {
             _input = svc;
             _input.TogglePolarity += OnToggle;
         });
 
-        ServiceLocator.WhenAvailable<IGameEvents>(ev =>
-        {
-            _events = ev;
-        });
+        ServiceLocator.WhenAvailable<IGameEvents>(ev => _events = ev);
+
+        ServiceLocator.WhenAvailable<IProgressService>(OnProgressAvailable);
+    }
+
+    private void OnProgressAvailable(IProgressService progress)
+    {
+        _progress = progress;
     }
 
     #endregion
 
-    #region Public API (Nodes & Polarity & Portal)
+    #region Public API
 
     public void OnStarPickup(Vector3 worldPos)
     {
-        if(ServiceLocator.TryGet<LevelManager>(out var lm))
-            lm.CollectStar();
-
-        if(_playerSfx != null)
-            _playerSfx.OnStarCollected();
+        if(_levelManager != null)
+            _levelManager.CollectStar(worldPos);
 
         if(_starCollectFxPrefab != null)
             Instantiate(_starCollectFxPrefab, worldPos, Quaternion.identity);
     }
 
+
     public void AddNode(MagneticNode node)
     {
-        if(node == null)
-            return;
-
-        if(!_activeNodes.Contains(node))
+        if(node != null && !_activeNodes.Contains(node))
             _activeNodes.Add(node);
     }
 
     public void RemoveNode(MagneticNode node)
     {
-        if(node == null)
-            return;
-
-        _activeNodes.Remove(node);
+        if(node != null)
+            _activeNodes.Remove(node);
     }
 
     public void OnNodeTriggerExit(MagneticNode node)
@@ -237,10 +215,8 @@ public sealed class PlayerMagnet : MonoBehaviour
 
     public void RegisterVisitedNode(MagneticNode node)
     {
-        if(node == null)
-            return;
-
-        _lastVisitedNode = node;
+        if(node != null)
+            _lastVisitedNode = node;
     }
 
     public void AbsorbIntoPortal(Vector3 portalPosition, float duration = 1.2f)
@@ -249,14 +225,9 @@ public sealed class PlayerMagnet : MonoBehaviour
             return;
 
         if(ServiceLocator.TryGet<ILevelFlow>(out var flow))
-        {
             flow.CompleteLevel();
-        }
         else
-        {
-            Debug.LogError("[PlayerMagnet] ILevelFlow service not found. " +
-                           "Ensure LevelManager is present in the Systems scene and registered.");
-        }
+            Debug.LogError("[PlayerMagnet] ILevelFlow not found.");
 
         _absorbRoutine = StartCoroutine(AbsorbRoutine(portalPosition, duration));
     }
@@ -264,15 +235,6 @@ public sealed class PlayerMagnet : MonoBehaviour
     public void TogglePolarity()
     {
         Polarity *= -1;
-        UpdateVisual();
-
-        if(_playerSfx)
-            _playerSfx.OnSwitchPolarity();
-
-        if(_pulseRoutine != null)
-            StopCoroutine(_pulseRoutine);
-
-        _pulseRoutine = StartCoroutine(PulseInner());
 
         _events?.FirePolarityChanged(Polarity);
 
@@ -281,9 +243,7 @@ public sealed class PlayerMagnet : MonoBehaviour
             int relation = _orbitNode.Charge * Polarity;
 
             if(relation > 0)
-            {
                 ExitOrbit(true);
-            }
 
             return;
         }
@@ -316,19 +276,16 @@ public sealed class PlayerMagnet : MonoBehaviour
         Vector2 p = _rb.position;
         Vector2 toNode = node.Position - p;
         float dist = toNode.magnitude;
+
         if(dist <= 0.001f || dist > node.Radius)
             return;
 
         int relation = node.Charge * Polarity;
 
         if(relation < 0)
-        {
             TryEnterOrbit(node);
-        }
         else
-        {
             ApplyRepulsionBurst(node, dist);
-        }
     }
 
     private MagneticNode FindNearestActiveNodeInRange()
@@ -340,14 +297,14 @@ public sealed class PlayerMagnet : MonoBehaviour
         MagneticNode best = null;
         float bestSqr = float.MaxValue;
 
-        for(int i = 0; i < _activeNodes.Count; i++)
+        foreach(var n in _activeNodes)
         {
-            MagneticNode n = _activeNodes[i];
             if(n == null)
                 continue;
 
             Vector2 d = n.Position - p;
             float sqr = d.sqrMagnitude;
+
             if(sqr > n.Radius * n.Radius)
                 continue;
 
@@ -372,6 +329,7 @@ public sealed class PlayerMagnet : MonoBehaviour
         Vector2 center = node.Position;
         Vector2 r = (Vector2)_rb.position - center;
         float dist = r.magnitude;
+
         if(dist <= 0.001f)
             return;
 
@@ -387,10 +345,7 @@ public sealed class PlayerMagnet : MonoBehaviour
         Vector2 v = _rb.linearVelocity;
         float Lz = r.x * v.y - r.y * v.x;
 
-        if(Mathf.Abs(Lz) > 0.01f)
-            _orbitSpinSign = Mathf.Sign(Lz);
-        else
-            _orbitSpinSign = 1f;
+        _orbitSpinSign = (Mathf.Abs(Lz) > 0.01f) ? Mathf.Sign(Lz) : 1f;
     }
 
     private void UpdateOrbit()
@@ -404,6 +359,7 @@ public sealed class PlayerMagnet : MonoBehaviour
         Vector2 center = _orbitNode.Position;
         Vector2 r = (Vector2)_rb.position - center;
         float dist = r.magnitude;
+
         if(dist <= 0.001f)
         {
             ExitOrbit(false);
@@ -423,13 +379,12 @@ public sealed class PlayerMagnet : MonoBehaviour
         Vector2 tangentDir = tangentBase * _orbitSpinSign;
 
         float tangentialSpeed = Vector2.Dot(v, tangentDir);
-        float absTangential = Mathf.Abs(tangentialSpeed);
 
         Vector2 tangentialForce = Vector2.zero;
 
-        if(absTangential < OrbitMinSpeed)
+        if(Mathf.Abs(tangentialSpeed) < OrbitMinSpeed)
         {
-            float delta = OrbitMinSpeed - absTangential;
+            float delta = OrbitMinSpeed - Mathf.Abs(tangentialSpeed);
             tangentialForce = tangentDir * (delta * OrbitTangentialAccel);
         }
 
@@ -450,10 +405,10 @@ public sealed class PlayerMagnet : MonoBehaviour
             if(dist > 0.001f)
             {
                 Vector2 radialDir = r / dist;
-                Vector2 tangentBase = new(-radialDir.y, radialDir.x);
-                Vector2 tangentDir = tangentBase * _orbitSpinSign;
-
+                Vector2 tangentDir = new Vector2(-radialDir.y, radialDir.x) * _orbitSpinSign;
                 _rb.AddForce(tangentDir.normalized * OrbitExitImpulse, ForceMode2D.Impulse);
+
+                _progress?.DamageEngine(_engineWearPerOrbitExit);
             }
         }
 
@@ -464,10 +419,7 @@ public sealed class PlayerMagnet : MonoBehaviour
     private void ApplyRepulsionBurst(MagneticNode node, float dist)
     {
         Vector2 fromNode = _rb.position - node.Position;
-        if(fromNode.sqrMagnitude < 1e-4f)
-            fromNode = Random.insideUnitCircle.normalized;
-        else
-            fromNode /= dist;
+        fromNode = (fromNode.sqrMagnitude < 1e-4f) ? Random.insideUnitCircle.normalized : fromNode / dist;
 
         float t = 1f - Mathf.Clamp01(dist / node.Radius);
         float factor = Mathf.Lerp(1f, RepulsionNearCenterFactor, t);
@@ -487,9 +439,8 @@ public sealed class PlayerMagnet : MonoBehaviour
         Vector2 totalF = Vector2.zero;
         Vector2 p = _rb.position;
 
-        for(int i = 0; i < _activeNodes.Count; i++)
+        foreach(var n in _activeNodes)
         {
-            MagneticNode n = _activeNodes[i];
             if(n == null)
                 continue;
 
@@ -512,8 +463,7 @@ public sealed class PlayerMagnet : MonoBehaviour
             int sign = -Polarity * n.Charge;
             float fMag = n.Strength * t * sign;
 
-            Vector2 dir = d / dist;
-            totalF += dir * fMag;
+            totalF += (d / dist) * fMag;
         }
 
         if(totalF.sqrMagnitude > 0f)
@@ -580,15 +530,14 @@ public sealed class PlayerMagnet : MonoBehaviour
             return;
 
         Vector2 p = _rb.position;
-        Vector2 t = target.position;
-        Vector2 toTarget = t - p;
+        Vector2 tp = target.position;
+        Vector2 toTarget = tp - p;
         float dist = toTarget.magnitude;
 
         if(dist < PortalMagnetStopDistance || dist > PortalMagnetMaxDistance)
             return;
 
-        Vector2 dir = toTarget / Mathf.Max(dist, 0.001f);
-        _rb.AddForce(dir * PortalMagnetForce, ForceMode2D.Force);
+        _rb.AddForce(toTarget.normalized * PortalMagnetForce, ForceMode2D.Force);
     }
 
     private void RotateTowardsVelocity()
@@ -613,56 +562,10 @@ public sealed class PlayerMagnet : MonoBehaviour
 
     #endregion
 
-    #region Visual FX
-
-    private void UpdateVisual()
-    {
-        Color c = (Polarity > 0) ? PlusColor : MinusColor;
-
-        if(_bodyInner)
-            _bodyInner.color = c;
-
-        if(_trail)
-        {
-            var g = new Gradient();
-            g.SetKeys(
-                new[] { new GradientColorKey(c, 0f), new GradientColorKey(c, 1f) },
-                new[] { new GradientAlphaKey(c.a, 0f), new GradientAlphaKey(0f, 1f) }
-            );
-            _trail.colorGradient = g;
-        }
-    }
-
-    private IEnumerator PulseInner()
-    {
-        float t = 0f;
-        const float dur = 0.12f;
-        const float min = 0.90f, max = 1.00f;
-
-        while(t < dur)
-        {
-            t += Time.deltaTime;
-            float k = t / dur;
-            float s = Mathf.Lerp(min, max, k);
-
-            if(_bodyInner)
-                _bodyInner.transform.localScale = new Vector3(0.82f * s, 0.82f * s, 1f);
-
-            yield return null;
-        }
-
-        _pulseRoutine = null;
-    }
-
-    #endregion
-
     #region Portal Absorption
 
     private IEnumerator AbsorbRoutine(Vector3 portalPosition, float duration)
     {
-        if(_playerSfx != null)
-            _playerSfx.StopEngine();
-
         _rb.linearVelocity = Vector2.zero;
         _rb.bodyType = RigidbodyType2D.Kinematic;
 
@@ -685,35 +588,9 @@ public sealed class PlayerMagnet : MonoBehaviour
         }
 
         transform.localScale = Vector3.zero;
-
-        var sr = GetComponentInChildren<SpriteRenderer>();
-        if(sr)
-            sr.color = new Color(sr.color.r, sr.color.g, sr.color.b, 0f);
+        gameObject.SetActive(false);
 
         _absorbRoutine = null;
-        gameObject.SetActive(false);
-    }
-
-    #endregion
-
-    #region Engine Load Helper
-
-    /// <summary>
-    /// Переводит скорость в "нагрузку" двигателя 0..1 с порогами и квадратичной кривой.
-    /// </summary>
-    private float CalcEngineLoad(float speed)
-    {
-        if(_engineMaxSpeed <= _engineMinSpeed)
-            return 0f;
-
-        float t = Mathf.InverseLerp(_engineMinSpeed, _engineMaxSpeed, speed);
-        t = Mathf.Clamp01(t);
-
-        // квадратичная кривая: долго тихо, затем ускоренный рост
-        t = t * t;
-        // можно сделать ещё агрессивнее: t = t * t * t;
-
-        return t;
     }
 
     #endregion

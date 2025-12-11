@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class ProgressService : MonoBehaviour, IProgressService
+public sealed class ProgressService : MonoBehaviour, IProgressService, ICurrencyService
 {
     [Header("Storage (local file)")]
     [SerializeField] private string _slotId = "default";
@@ -19,6 +19,8 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     public event Action Loaded;
     public event Action<int, int> StarsChanged;
     public event Action<int, float> BestTimeChanged;
+
+    public event Action<int> AmountChanged;
 
     private SaveData _state = new() { slotId = "default" };
     private readonly Dictionary<int, int> _stars = new();         // buildIndex/id -> stars
@@ -42,6 +44,7 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
         _state.slotId = _slotId;
 
         ServiceLocator.Register<IProgressService>(this);
+        ServiceLocator.Register<ICurrencyService>(this);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     if(IsVkEnvironment())
@@ -77,9 +80,79 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     private void OnDestroy()
     {
         ServiceLocator.Unregister<IProgressService>(this);
+        ServiceLocator.Unregister<ICurrencyService>(this);
     }
 
     // ================= PUBLIC API =================
+
+    public int EngineDurability => Mathf.Clamp(_state.engineDurability, 0, 100);
+
+    public float EnginePower
+    {
+        get
+        {
+            // 100 → 1.0; 0 → 0.5
+            float dur = EngineDurability;
+            return 0.5f + (dur / 100f) * 0.5f;
+        }
+    }
+
+
+    public void DamageEngine(int amount)
+    {
+        if(amount <= 0 || !_loaded)
+            return;
+
+        _state.engineDurability = Mathf.Clamp(_state.engineDurability - amount, 0, 100);
+        ScheduleSave();
+
+        // сразу обновляем индикатор в UI
+        if(ServiceLocator.TryGet<IUIService>(out var ui))
+            ui.UpdateEngineDangerIndicator(_state.engineDurability);
+    }
+
+    public void RepairEngineFull()
+    {
+        _state.engineDurability = 100;
+        ScheduleSave(forceImmediate: true);
+    }
+
+    // ===== CURRENCY =====
+
+    public int Amount => _state.currency;
+
+    public bool CanSpend(int amount)
+    {
+        if(amount <= 0)
+            return true;
+        return _state.currency >= amount;
+    }
+
+    public bool TrySpend(int amount)
+    {
+        if(amount <= 0)
+            return false;
+
+        if(_state.currency < amount)
+            return false;
+
+        _state.currency -= amount;
+        ScheduleSave();
+        AmountChanged?.Invoke(_state.currency);
+        return true;
+    }
+
+    public void Add(int amount)
+    {
+        if(amount <= 0)
+            return;
+
+        _state.currency += amount;
+        ScheduleSave();
+        AmountChanged?.Invoke(_state.currency);
+    }
+
+
 
     public bool TryGetLastCompletedLevel(out int lastCLevel)
     {
@@ -147,10 +220,15 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     public void ResetAll()
     {
         _state = new SaveData { slotId = _slotId };
+        EnsureEngineInitialized();
+
         _stars.Clear();
         _bestTimes.Clear();
+
         ScheduleSave(forceImmediate: true);
+
         StarsChanged?.Invoke(-1, 0);
+        AmountChanged?.Invoke(_state.currency);
     }
 
     // ================= INTERNAL: LOAD =================
@@ -171,8 +249,16 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
             WriteFileImmediateLocal();
         }
 
+        EnsureEngineInitialized();
         RebuildCaches();
         MarkLoaded();
+    }
+
+
+    private void EnsureEngineInitialized()
+    {
+        if(_state.engineDurability <= 0 || _state.engineDurability > 100)
+            _state.engineDurability = 100;
     }
 
 
@@ -180,7 +266,13 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     {
         _loaded = true;
         Loaded?.Invoke();
+
+        AmountChanged?.Invoke(_state.currency);
+
+        if(ServiceLocator.TryGet<IUIService>(out var ui))
+            ui.UpdateEngineDangerIndicator(EngineDurability);
     }
+
 
 #if UNITY_WEBGL 
     /// <summary>
@@ -218,9 +310,8 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     {
         if(string.IsNullOrEmpty(json))
         {
-            // нет сохранения — стартуем с нуля
             _state = new SaveData { slotId = _slotId };
-            TryMigrateFromPlayerPrefs(_state); // на всякий случай
+            TryMigrateFromPlayerPrefs(_state);
         }
         else
         {
@@ -236,6 +327,7 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
             }
         }
 
+        EnsureEngineInitialized();
         RebuildCaches();
         MarkLoaded();
     }
@@ -313,15 +405,15 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     {
         var json = JsonUtility.ToJson(_state, prettyPrint: false);
 
-#if UNITY_WEBGL&& !UNITY_EDITOR
-        if(IsVkEnvironment())
-        {
-            VK_SaveString(_vkStorageKey, json);
-        }
-        else
-        {
-            WriteFileImmediateLocal(json);
-        }
+#if UNITY_WEBGL && !UNITY_EDITOR       // <-- пробелы вокруг &&
+    if (IsVkEnvironment())
+    {
+        VK_SaveString(_vkStorageKey, json);
+    }
+    else
+    {
+        WriteFileImmediateLocal(json);
+    }
 #else
         WriteFileImmediateLocal(json);
 #endif

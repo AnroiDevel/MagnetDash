@@ -69,10 +69,10 @@ public sealed class GameplayHudBinder : MonoBehaviour
             _ui.SetSpeed(speed);
     }
 
-    private void OnStarCollected(int collected, int perLevel)
+    private void OnStarCollected(int collected, Vector3 perLevel)
     {
         if(_ui != null)
-            _ui.SetStars(collected, perLevel);
+            _ui.SetStars(collected);
     }
 
     private void OnTimeChanged(float t)

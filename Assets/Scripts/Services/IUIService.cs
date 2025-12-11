@@ -14,8 +14,11 @@ public interface IUIService
     void ShowWinToast(float elapsedSeconds, bool isPersonalBest, int stars);
     void ShowFailToast(float elapsedSeconds);
 
-    void SetStars(int collected, int total);
+    void SetStars(int collected);
 
+    void ShowEngineRepairOffer(int power);
+
+    void UpdateEngineDangerIndicator(int durability);
 
     event Action<string> ToastShown;
 }

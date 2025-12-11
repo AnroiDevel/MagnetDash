@@ -6,36 +6,42 @@ public static class ServiceLocator
     private static readonly Dictionary<Type, object> _map = new();
     private static readonly Dictionary<Type, List<Delegate>> _waiters = new();
 
-    // --- Новые события ---
+    /// <summary>
+    /// Вызывается при успешной регистрации сервиса указанного типа.
+    /// </summary>
     public static event Action<Type, object> Registered;
+
+    /// <summary>
+    /// Вызывается при удалении сервиса указанного типа.
+    /// </summary>
     public static event Action<Type> Unregistered;
 
+    /// <summary>
+    /// Регистрирует экземпляр сервиса типа T.
+    /// </summary>
     public static void Register<T>(T instance) where T : class
     {
-        var type = typeof(T);
-
         if(instance == null)
-        {
-            // null = по сути Unregister
-            if(_map.Remove(type))
-                Unregistered?.Invoke(type);
-            return;
-        }
+            throw new ArgumentNullException(nameof(instance), $"ServiceLocator.Register<{typeof(T).Name}>: instance is null. Use Unregister(instance) для удаления.");
+
+        var type = typeof(T);
 
         _map[type] = instance;
 
-        // Оповещаем подписчиков
         Registered?.Invoke(type, instance);
 
-        // Дёргаем всех "ожидающих"
         if(_waiters.TryGetValue(type, out var list))
         {
             foreach(var d in list)
                 ((Action<T>)d)?.Invoke(instance);
+
             _waiters.Remove(type);
         }
     }
 
+    /// <summary>
+    /// Пытается получить зарегистрированный сервис типа T.
+    /// </summary>
     public static bool TryGet<T>(out T instance) where T : class
     {
         if(_map.TryGetValue(typeof(T), out var obj) && obj is T t)
@@ -48,6 +54,10 @@ public static class ServiceLocator
         return false;
     }
 
+    /// <summary>
+    /// Если сервис уже есть — сразу вызывает onAvailable.
+    /// Если нет — сохранит колбэк и вызовет его при первой регистрации сервиса.
+    /// </summary>
     public static void WhenAvailable<T>(Action<T> onAvailable) where T : class
     {
         if(onAvailable == null)
@@ -66,8 +76,14 @@ public static class ServiceLocator
         list.Add(onAvailable);
     }
 
+    /// <summary>
+    /// Убирает колбэк из очереди ожидания сервиса типа T.
+    /// </summary>
     public static void Unsubscribe<T>(Action<T> onAvailable) where T : class
     {
+        if(onAvailable == null)
+            return;
+
         var type = typeof(T);
         if(_waiters.TryGetValue(type, out var list))
         {
@@ -77,11 +93,19 @@ public static class ServiceLocator
         }
     }
 
+    /// <summary>
+    /// Удаляет сервис типа T, только если в локаторе хранится именно этот экземпляр.
+    /// </summary>
     public static void Unregister<T>(T instance) where T : class
     {
+        if(instance == null)
+            return;
+
         var type = typeof(T);
-        if(_map.Remove(type))
+
+        if(_map.TryGetValue(type, out var current) && ReferenceEquals(current, instance))
         {
+            _map.Remove(type);
             Unregistered?.Invoke(type);
         }
     }

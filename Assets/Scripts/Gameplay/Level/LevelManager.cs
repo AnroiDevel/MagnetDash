@@ -25,6 +25,9 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
     [Header("Stars")]
     [SerializeField, Min(0)] private int _starsPerLevel = 3;    // фиксированное число звёзд на уровень
 
+    [Header("Engine wear")]
+    [SerializeField, Range(0, 100)] private int _engineRepairThreshold = 70;
+
     #endregion
 
     #region State
@@ -125,19 +128,21 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
 
     #region Stars API
 
-
-
     public void CollectStar()
+    {
+        CollectStar(Vector3.zero);
+    }
+
+    public void CollectStar(Vector3 worldPos)
     {
         if(State != GameState.Playing || _session == null)
             return;
 
         _session.CollectStar();
 
-        // уведомляем мир об изменении
-        _gameEvents?.FireStarCollected(_session.CollectedStars, _session.StarsPerLevel);
+        // единый источник истины: считаем здесь и только отсюда шлём событие
+        _gameEvents?.FireStarCollected(_session.CollectedStars, worldPos);
     }
-
 
     public int GetStarsCollected() => _session?.CollectedStars ?? 0;
     public int GetStarsPerLevel() => _session?.StarsPerLevel ?? _starsPerLevel;
@@ -278,6 +283,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
             return;
 
         State = GameState.Paused;
+        Time.timeScale = 0f;
     }
 
     public void Resume()
@@ -286,11 +292,26 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
             return;
 
         State = GameState.Playing;
+        Time.timeScale = 1f;
     }
 
     #endregion
 
     #region Results
+
+    private void TryShowEngineRepairUI()
+    {
+        if(_progress == null || !_progress.IsLoaded)
+            return;
+
+        int durability = _progress.EngineDurability;
+        if(durability > _engineRepairThreshold)
+            return;
+
+        if(ServiceLocator.TryGet<IUIService>(out var ui))
+            ui.ShowEngineRepairOffer((int)(_progress.EnginePower*100));
+    }
+
 
     private void ShowWinResult()
     {
@@ -332,6 +353,8 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         int logicalIndex = GetLogicalLevelIndex(buildIndex);
         if(logicalIndex >= 0)
             _progress?.SetLastCompletedLevelIfHigher(logicalIndex);
+
+        TryShowEngineRepairUI();
     }
 
     private void ShowFailResult()
@@ -468,12 +491,17 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
             int progressKey = GetCurrentProgressKey(levelBuildIndex);
             ui.RefreshBest(progressKey, _progress);
 
-            ui.SetStars(_session.CollectedStars, _session.StarsPerLevel); // 0 / N
+            ui.SetStars(_session.CollectedStars); // 0 / N
             ui.SetTime(0f);
         }
 
         // можно продублировать через события, если хочешь строго через binder:
-        _gameEvents?.FireStarCollected(_session.CollectedStars, _session.StarsPerLevel);
+        _gameEvents?.FireStarCollected(_session.CollectedStars, Vector3.zero);
+
+        TryShowEngineRepairUI();
+
+        if(_progress != null && ServiceLocator.TryGet<IUIService>(out var ui2))
+            ui2.UpdateEngineDangerIndicator(_progress.EngineDurability);
     }
 
 

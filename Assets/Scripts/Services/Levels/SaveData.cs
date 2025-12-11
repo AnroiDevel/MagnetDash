@@ -4,8 +4,10 @@ using System.Collections.Generic;
 [Serializable]
 public sealed class SaveData
 {
-    public int version = 1;
-    public string slotId = "default";
+    public string slotId;
+    public int lastCompletedLogicalLevel;
     public List<LevelResultDto> levels = new();
-    public int lastCompletedLogicalLevel = -1; // -1 = нет прогресса
+
+    public int engineDurability = 100;
+    public int currency = 1000;
 }
