@@ -21,4 +21,6 @@ public interface IProgressService
     event Action Loaded;                      // данные загрузились (локально/облако)
     event Action<int, int> StarsChanged;      // (buildIndex, newStars)
     event Action<int, float> BestTimeChanged; // (buildIndex, newTime)
+    event Action<int> EngineDurabilityChanged; // 0..100
+
 }

@@ -182,12 +182,12 @@ public sealed class UIManager : MonoBehaviour, IUIService
         ShowToast(msg, _defaultToastSeconds);
     }
 
-    public void ShowEngineRepairOffer(int durability)
+    public void ShowEngineRepairOffer(int powerPercent)
     {
         if(_engineRepairPanel == null)
             return;
 
-        _engineRepairPanel.Show(durability);
+        _engineRepairPanel.Show(powerPercent);
     }
 
     public void UpdateEngineDangerIndicator(int durability)
@@ -225,12 +225,11 @@ public sealed class UIManager : MonoBehaviour, IUIService
     {
         _levelFlow?.Pause();
 
-        int power = 100;
+        int powerPercent = 100;
         if(ServiceLocator.TryGet<IProgressService>(out var progress))
-            power = (int)(progress.EnginePower * 100);
+            powerPercent = Mathf.RoundToInt(progress.EnginePower * 100f);
 
-        ShowEngineRepairOffer(power);
-        _dangerBtn.gameObject.SetActive(false);
+        ShowEngineRepairOffer(powerPercent);
     }
 
     private void ShowToast(string message, float seconds)

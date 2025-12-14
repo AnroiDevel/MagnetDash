@@ -16,7 +16,7 @@ public interface IUIService
 
     void SetStars(int collected);
 
-    void ShowEngineRepairOffer(int power);
+    void ShowEngineRepairOffer(int powerPercent);
 
     void UpdateEngineDangerIndicator(int durability);
 

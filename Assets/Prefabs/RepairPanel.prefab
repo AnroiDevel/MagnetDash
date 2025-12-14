@@ -173,7 +173,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 35d3c063471680d4e9679c2e8a93551a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EngineRepairPanel
-  _durabilityText: {fileID: 8726191681645690723}
+  _power: {fileID: 8726191681645690723}
   _repairButton: {fileID: 6978416191834668744}
   _continueButton: {fileID: 606103035530204804}
   _powerSlider: {fileID: 3870646614828183202}
@@ -1111,7 +1111,7 @@ GameObject:
   - component: {fileID: 2298570850562927353}
   - component: {fileID: 8726191681645690723}
   m_Layer: 5
-  m_Name: durabilityText
+  m_Name: powerText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

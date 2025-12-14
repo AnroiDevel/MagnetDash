@@ -4190,7 +4190,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1498706230960029554, guid: 8d1f5b3454740ab40bb1cc2ebcacd478, type: 3}
       propertyPath: m_NormalizedViewPortRect.y
-      value: 0
+      value: 0.017915308
       objectReference: {fileID: 0}
     - target: {fileID: 1498706230960029554, guid: 8d1f5b3454740ab40bb1cc2ebcacd478, type: 3}
       propertyPath: m_NormalizedViewPortRect.width
@@ -4198,7 +4198,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1498706230960029554, guid: 8d1f5b3454740ab40bb1cc2ebcacd478, type: 3}
       propertyPath: m_NormalizedViewPortRect.height
-      value: 1
+      value: 0.9641694
       objectReference: {fileID: 0}
     - target: {fileID: 2398861774131784361, guid: 8d1f5b3454740ab40bb1cc2ebcacd478, type: 3}
       propertyPath: m_Name
@@ -4459,6 +4459,7 @@ GameObject:
   - component: {fileID: 1686286162}
   - component: {fileID: 1686286161}
   - component: {fileID: 1686286160}
+  - component: {fileID: 1686286163}
   m_Layer: 5
   m_Name: ButtonShare
   m_TagString: Untagged
@@ -4567,6 +4568,20 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1686286158}
   m_CullTransparentMesh: 1
+--- !u!114 &1686286163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1686286158}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c01e9cfdf8ba664eb43f97f8f5fd332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp-firstpass::VKSocial
+  _shareRoot: {fileID: 1686286158}
+  _button: {fileID: 1686286160}
 --- !u!1 &1744000395
 GameObject:
   m_ObjectHideFlags: 0
@@ -4862,78 +4877,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1847923451}
   m_CullTransparentMesh: 1
---- !u!1 &1898231990
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1898231994}
-  - component: {fileID: 1898231993}
-  - component: {fileID: 1898231992}
-  - component: {fileID: 1898231991}
-  m_Layer: 0
-  m_Name: VKBridgeHandler
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1898231991
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1898231990}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 50647c4bf71673d4cbf68d806207dbed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::VKBridgeHandler
---- !u!114 &1898231992
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1898231990}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ae0aa7f25b157804eb1af8dff6a8c55a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::VkAdService
---- !u!114 &1898231993
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1898231990}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3c01e9cfdf8ba664eb43f97f8f5fd332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp-firstpass::VKSocial
-  _shareRoot: {fileID: 1686286158}
-  _button: {fileID: 1686286160}
---- !u!4 &1898231994
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1898231990}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 4.48464, y: -0.31632, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1936784187
 GameObject:
   m_ObjectHideFlags: 0
@@ -6060,4 +6003,3 @@ SceneRoots:
   - {fileID: 1540308951}
   - {fileID: 931486874}
   - {fileID: 2048495464}
-  - {fileID: 1898231994}

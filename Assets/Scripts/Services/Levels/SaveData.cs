@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public sealed class SaveData
 {
     public string slotId;
-    public int lastCompletedLogicalLevel;
+    public int lastCompletedLogicalLevel = -1;   // ВАЖНО: дефолт "ничего не пройдено"
     public List<LevelResultDto> levels = new();
 
     public int engineDurability = 100;

@@ -301,6 +301,9 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
 
     private void TryShowEngineRepairUI()
     {
+        Debug.Log($"[LevelManager] Using progress instance={_progress?.GetHashCode()} dur={_progress?.EngineDurability}");
+
+
         if(_progress == null || !_progress.IsLoaded)
             return;
 
@@ -308,8 +311,10 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         if(durability > _engineRepairThreshold)
             return;
 
+        int powerPercent = Mathf.RoundToInt(_progress.EnginePower * 100f);
+
         if(ServiceLocator.TryGet<IUIService>(out var ui))
-            ui.ShowEngineRepairOffer((int)(_progress.EnginePower*100));
+            ui.ShowEngineRepairOffer(powerPercent);
     }
 
 

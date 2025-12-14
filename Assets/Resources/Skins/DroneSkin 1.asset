@@ -15,5 +15,5 @@ MonoBehaviour:
   id: 1
   displayName: "\u0443\u0443\u0443"
   price: 10
-  icon: {fileID: 21300000, guid: 439c8e525ac36454abe67477b1897dbf, type: 3}
+  icon: {fileID: 21300000, guid: 3a3595c2d346e5542ba395b80997f249, type: 3}
   prefab: {fileID: 5424064437642409790, guid: cc943380b74ac8f4085f9b7fa162c9fd, type: 3}
