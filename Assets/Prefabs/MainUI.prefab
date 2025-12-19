@@ -1463,9 +1463,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 0}
+  m_Sprite: {fileID: 3873280621675791077, guid: 1bb594b7e8494694b8ac5c097ce545f9, type: 3}
   m_Type: 0
-  m_PreserveAspect: 0
+  m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
@@ -1500,6 +1500,7 @@ GameObject:
   - component: {fileID: 6699075480575096471}
   - component: {fileID: 8782020007715981877}
   - component: {fileID: 6918719922744510763}
+  - component: {fileID: 5972275414569317861}
   m_Layer: 5
   m_Name: PauseButton
   m_TagString: Untagged
@@ -1608,9 +1609,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: PauseController, Assembly-CSharp
-        m_MethodName: OnPausePressed
+      - m_Target: {fileID: 5972275414569317861}
+        m_TargetAssemblyTypeName: PauseButtonProxy, Assembly-CSharp
+        m_MethodName: Click
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1635,6 +1636,18 @@ MonoBehaviour:
   _clickSfx: {fileID: 11400000, guid: ace9e96f67c889245b2d717e28cac9d9, type: 2}
   _hoverSfx: {fileID: 11400000, guid: 277b5a6335b7e594d92b04af030425d1, type: 2}
   _downSfx: {fileID: 11400000, guid: 277b5a6335b7e594d92b04af030425d1, type: 2}
+--- !u!114 &5972275414569317861
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073226285639881010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c31a987c9e1b4ce4187e110786bfc3ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PauseButtonProxy
 --- !u!1 &8752511074600870343
 GameObject:
   m_ObjectHideFlags: 0

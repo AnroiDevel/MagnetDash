@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(RectTransform))]
+[RequireComponent(typeof(Graphic))]
 public sealed class PortalArrow : MonoBehaviour
 {
     #region Serialized Fields
@@ -39,21 +40,12 @@ public sealed class PortalArrow : MonoBehaviour
         {
             _canvasRect = _rootCanvas.GetComponent<RectTransform>();
 
-            switch(_rootCanvas.renderMode)
+            _uiCamera = _rootCanvas.renderMode switch
             {
-                case RenderMode.ScreenSpaceOverlay:
-                    _uiCamera = null; // по правилам Unity
-                    break;
-
-                case RenderMode.ScreenSpaceCamera:
-                case RenderMode.WorldSpace:
-                    _uiCamera = _rootCanvas.worldCamera;
-                    break;
-
-                default:
-                    _uiCamera = null;
-                    break;
-            }
+                RenderMode.ScreenSpaceOverlay => null,// по правилам Unity
+                RenderMode.ScreenSpaceCamera or RenderMode.WorldSpace => _rootCanvas.worldCamera,
+                _ => null,
+            };
         }
 
 

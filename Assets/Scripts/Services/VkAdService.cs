@@ -7,14 +7,14 @@ public sealed class VkAdService : MonoBehaviour, IAdService
 {
 #if UNITY_WEBGL && !UNITY_EDITOR
     [DllImport("__Internal")] private static extern void VK_ShowRewardedAd(string goName, string onSuccess, string onFail);
-    [DllImport("__Internal")] private static extern int VK_HasBridge();                 // 1/0
-    [DllImport("__Internal")] private static extern void VK_Log(string msg);            // console.log
-    [DllImport("__Internal")] private static extern string VK_GetUrl();                 // absoluteURL as seen by JS
+    [DllImport("__Internal")] private static extern int VK_HasBridge();
+    [DllImport("__Internal")] private static extern void VK_Log(string msg);
+    [DllImport("__Internal")] private static extern string VK_GetUrl();
     [DllImport("__Internal")] private static extern void VK_PreloadRewardedAd(string goName, string onDone); // "1"/"0"
 #endif
 
     [Header("Debug")]
-    [SerializeField] private bool _forceAvailableInWebGL = true;   // для дебага: не зависеть от URL
+    [SerializeField] private bool _ignoreUrlCheck = true; // раньше _forceAvailableInWebGL, фактически это "не проверять URL"
     [SerializeField] private bool _verbose = true;
     [SerializeField] private float _callTimeoutSeconds = 10f;
 
@@ -29,17 +29,13 @@ public sealed class VkAdService : MonoBehaviour, IAdService
 
     private bool _rewardedReady;
     public bool IsRewardedReady => _rewardedReady;
-
     public bool IsAvailable => _available;
 
     private void Awake()
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
-        // 1) Проверяем наличие vkBridge (через JS)
         bool hasBridge = SafeHasBridge();
-
-        // 2) Дебажный availability
-        _available = _forceAvailableInWebGL ? hasBridge : (hasBridge && IsVkEnvironmentByUrl());
+        _available = hasBridge && (_ignoreUrlCheck || IsVkEnvironmentByUrl());
 
         if(_verbose)
         {
@@ -59,6 +55,7 @@ public sealed class VkAdService : MonoBehaviour, IAdService
         }
 #else
         _available = false;
+        _rewardedReady = false; // важно: недоступно => не "готово"
         if(_verbose)
             Debug.Log("[VkAdService] Not WebGL build -> unavailable");
 #endif
@@ -77,21 +74,15 @@ public sealed class VkAdService : MonoBehaviour, IAdService
 
     private void Update()
     {
-#if UNITY_WEBGL && !UNITY_EDITOR
         if(!_waiting)
             return;
 
         float elapsed = Time.unscaledTime - _startedAt;
-        if(elapsed >= _callTimeoutSeconds)
-        {
-            _waiting = false;
-            if(_verbose) Debug.LogWarning($"[VkAdService] Rewarded timeout after {elapsed:0.0}s");
-            SafeJsLog($"[VkAdService] Rewarded timeout after {elapsed:0.0}s");
-            FailInternal("timeout");
-        }
-#endif
-    }
+        if(elapsed < _callTimeoutSeconds)
+            return;
 
+        Complete(success: false, reason: $"timeout:{elapsed:0.0}s");
+    }
 
     public void PreloadRewarded()
     {
@@ -108,7 +99,8 @@ public sealed class VkAdService : MonoBehaviour, IAdService
             _rewardedReady = false;
         }
 #else
-        _rewardedReady = true;
+        // В не-WebGL среде ничего не прелоадим.
+        _rewardedReady = false;
 #endif
     }
 
@@ -119,7 +111,6 @@ public sealed class VkAdService : MonoBehaviour, IAdService
         if(_verbose)
             Debug.Log($"[VkAdService] PreloadRewarded result={_rewardedReady}");
     }
-
 
     public void ShowRewarded(Action onSuccess, Action onFail = null)
     {
@@ -149,6 +140,9 @@ public sealed class VkAdService : MonoBehaviour, IAdService
         _success = onSuccess;
         _fail = onFail;
 
+        // Показываем — считаем, что "готовность" потрачена
+        _rewardedReady = false;
+
 #if UNITY_WEBGL && !UNITY_EDITOR
         _waiting = true;
         _startedAt = Time.unscaledTime;
@@ -162,13 +156,12 @@ public sealed class VkAdService : MonoBehaviour, IAdService
         }
         catch(Exception e)
         {
-            _waiting = false;
-            Debug.LogError($"[VkAdService] Exception calling JS: {e}");
-            FailInternal("js_call_exception");
+            if(_verbose) Debug.LogError($"[VkAdService] Exception calling JS: {e}");
+            Complete(success: false, reason: "js_call_exception");
         }
 #else
         if(_verbose)
-            Debug.Log("[VkAdService] Editor/Non-WebGL stub -> simulate success");
+            Debug.Log("[VkAdService] Non-WebGL -> simulate success");
         onSuccess?.Invoke();
 #endif
     }
@@ -178,31 +171,35 @@ public sealed class VkAdService : MonoBehaviour, IAdService
     {
         if(_verbose)
             Debug.Log($"[VkAdService] OnJsSuccess payload='{payload}'");
-#if UNITY_WEBGL && !UNITY_EDITOR
-        SafeJsLog($"[VkAdService] OnJsSuccess payload='{payload}'");
-        _waiting = false;
-#endif
-        _success?.Invoke();
-        _success = null;
-        _fail = null;
+        Complete(success: true, reason: payload);
     }
 
     public void OnJsFail(string reason)
     {
         if(_verbose)
             Debug.LogWarning($"[VkAdService] OnJsFail reason='{reason}'");
-#if UNITY_WEBGL && !UNITY_EDITOR
-        SafeJsLog($"[VkAdService] OnJsFail reason='{reason}'");
-        _waiting = false;
-#endif
-        FailInternal(reason);
+        Complete(success: false, reason: reason);
     }
 
-    private void FailInternal(string reason)
+    private void Complete(bool success, string reason)
     {
-        _fail?.Invoke();
+        if(_waiting)
+            _waiting = false;
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        SafeJsLog($"[VkAdService] Complete success={success} reason='{reason}'");
+#endif
+
+        var onSuccess = _success;
+        var onFail = _fail;
+
         _success = null;
         _fail = null;
+
+        if(success)
+            onSuccess?.Invoke();
+        else
+            onFail?.Invoke();
     }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -224,11 +221,10 @@ public sealed class VkAdService : MonoBehaviour, IAdService
 
     private void SafeJsLog(string msg)
     {
-        try
-        {
-            if(_verbose)
-                VK_Log(msg);
-        }
+        if(!_verbose)
+            return;
+
+        try { VK_Log(msg); }
         catch { }
     }
 

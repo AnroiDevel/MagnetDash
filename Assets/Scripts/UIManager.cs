@@ -33,7 +33,6 @@ public sealed class UIManager : MonoBehaviour, IUIService
     [SerializeField, Range(0, 100)] private int _dangerHighThreshold = 40;
 
     private Coroutine _toastRoutine;
-    private ILevelFlow _levelFlow;
     private IGameEvents _gameEvents;
 
     public event System.Action<string> ToastShown;
@@ -41,7 +40,6 @@ public sealed class UIManager : MonoBehaviour, IUIService
     private void Awake()
     {
         ServiceLocator.Register<IUIService>(this);
-        ServiceLocator.WhenAvailable<ILevelFlow>(OnLevelFlowAvailable);
         ServiceLocator.WhenAvailable<IGameEvents>(OnGameEventsAvailable);
 
         if(_toastText)
@@ -67,15 +65,10 @@ public sealed class UIManager : MonoBehaviour, IUIService
             _gameEvents.TimeChanged -= HandleTimeChanged;
         }
 
-        ServiceLocator.Unsubscribe<ILevelFlow>(OnLevelFlowAvailable);
         ServiceLocator.Unsubscribe<IGameEvents>(OnGameEventsAvailable);
         ServiceLocator.Unregister<IUIService>(this);
     }
 
-    private void OnLevelFlowAvailable(ILevelFlow flow)
-    {
-        _levelFlow = flow;
-    }
 
     private void OnGameEventsAvailable(IGameEvents events)
     {
@@ -223,13 +216,24 @@ public sealed class UIManager : MonoBehaviour, IUIService
 
     private void OnDangerClicked()
     {
-        _levelFlow?.Pause();
-
         int powerPercent = 100;
         if(ServiceLocator.TryGet<IProgressService>(out var progress))
             powerPercent = Mathf.RoundToInt(progress.EnginePower * 100f);
 
-        ShowEngineRepairOffer(powerPercent);
+        if(_engineRepairPanel == null)
+            return;
+
+        if(ServiceLocator.TryGet<IModalService>(out var modal))
+        {
+            modal.Show(
+                onShow: () => _engineRepairPanel.Show(powerPercent),
+                onHide: null // панель сама прячет себя
+            );
+            return;
+        }
+
+        // fallback: если модал-сервиса нет
+        _engineRepairPanel.Show(powerPercent);
     }
 
     private void ShowToast(string message, float seconds)

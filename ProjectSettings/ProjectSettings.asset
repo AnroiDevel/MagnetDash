@@ -702,13 +702,13 @@ PlayerSettings:
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
   captureStartupLogs: {}
-  activeInputHandler: 2
+  activeInputHandler: 1
   windowsGamepadBackendHint: 0
   cloudProjectId: 0a489e81-41d7-42cf-a12d-443876810b5f
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
   projectName: MagnetDash
-  organizationId: 
+  organizationId: anroidevel
   cloudEnabled: 0
   legacyClampBlendShapeWeights: 0
   hmiLoadingImage: {fileID: 0}

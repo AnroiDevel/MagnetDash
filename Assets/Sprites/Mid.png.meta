@@ -1,0 +1,1274 @@
+fileFormatVersion: 2
+guid: 13c68e27813a78743b7e6042db475e76
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -8538736069523498542
+    second: Mid_0
+  - first:
+      213: -3175209656034921757
+    second: Mid_1
+  - first:
+      213: -8800748922116780876
+    second: Mid_2
+  - first:
+      213: 3192519182688639456
+    second: Mid_3
+  - first:
+      213: 1549493850510464207
+    second: Mid_4
+  - first:
+      213: 2344304727416285596
+    second: Mid_5
+  - first:
+      213: 6988165519469658179
+    second: Mid_6
+  - first:
+      213: 7761083690120030110
+    second: Mid_7
+  - first:
+      213: 1014600086331433163
+    second: Mid_8
+  - first:
+      213: 4501746885002647940
+    second: Mid_9
+  - first:
+      213: 2996316788683066629
+    second: Mid_10
+  - first:
+      213: -3456030574821737695
+    second: Mid_11
+  - first:
+      213: 2246552230072183887
+    second: Mid_12
+  - first:
+      213: -7158224488785036697
+    second: Mid_13
+  - first:
+      213: -8182805795859642693
+    second: Mid_14
+  - first:
+      213: 5050608512616038785
+    second: Mid_15
+  - first:
+      213: 7208398970943817555
+    second: Mid_16
+  - first:
+      213: -3946617137212133108
+    second: Mid_17
+  - first:
+      213: -3892405939293269764
+    second: Mid_18
+  - first:
+      213: 3714614411198157980
+    second: Mid_19
+  - first:
+      213: -7172241809551092172
+    second: Mid_20
+  - first:
+      213: 783203670681420190
+    second: Mid_21
+  - first:
+      213: -4357280295197034552
+    second: Mid_22
+  - first:
+      213: -2188750923066302933
+    second: Mid_23
+  - first:
+      213: -4779967642183279764
+    second: Mid_24
+  - first:
+      213: 2052114210838487686
+    second: Mid_25
+  - first:
+      213: -3441504287000771230
+    second: Mid_26
+  - first:
+      213: -4233654657644764816
+    second: Mid_27
+  - first:
+      213: -5554078212596352071
+    second: Mid_28
+  - first:
+      213: 4014978301263820674
+    second: Mid_29
+  - first:
+      213: 5473179848086989779
+    second: Mid_30
+  - first:
+      213: 2308426237217851414
+    second: Mid_31
+  - first:
+      213: 1631001391564862958
+    second: Mid_32
+  - first:
+      213: -7545310856306186186
+    second: Mid_33
+  - first:
+      213: 341869178013757293
+    second: Mid_34
+  - first:
+      213: -102241356694672072
+    second: Mid_35
+  - first:
+      213: 7140142203891429098
+    second: Mid_36
+  - first:
+      213: -6248014494915112712
+    second: Mid_37
+  - first:
+      213: 2756140557345169324
+    second: Mid_38
+  - first:
+      213: -8659147794232746292
+    second: Mid_39
+  - first:
+      213: 1969865894230259168
+    second: Mid_40
+  - first:
+      213: -5016880585591755855
+    second: Mid_41
+  - first:
+      213: -2245620174348240069
+    second: Mid_42
+  - first:
+      213: 9099846135917289012
+    second: Mid_43
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 0
+    wrapV: 0
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Mid_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 336
+        height: 608
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d99c31f8c0508980800000000000000
+      internalID: -8538736069523498542
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_1
+      rect:
+        serializedVersion: 2
+        x: 23
+        y: 570
+        width: 29
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e2f5ac04a36fe3d0800000000000000
+      internalID: -3175209656034921757
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_2
+      rect:
+        serializedVersion: 2
+        x: 104
+        y: 544
+        width: 32
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4bcc3d3db757dd580800000000000000
+      internalID: -8800748922116780876
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_3
+      rect:
+        serializedVersion: 2
+        x: 61
+        y: 544
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e9d6ce284b1e4c20800000000000000
+      internalID: 3192519182688639456
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_4
+      rect:
+        serializedVersion: 2
+        x: 183
+        y: 533
+        width: 31
+        height: 30
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fc4145d8278e08510800000000000000
+      internalID: 1549493850510464207
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_5
+      rect:
+        serializedVersion: 2
+        x: 313
+        y: 536
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c99aaea9ab4a88020800000000000000
+      internalID: 2344304727416285596
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_6
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 528
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3404f9bd383faf060800000000000000
+      internalID: 6988165519469658179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_7
+      rect:
+        serializedVersion: 2
+        x: 152
+        y: 527
+        width: 15
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e97aea50f78e4bb60800000000000000
+      internalID: 7761083690120030110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_8
+      rect:
+        serializedVersion: 2
+        x: 252
+        y: 522
+        width: 17
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc0add62765941e00800000000000000
+      internalID: 1014600086331433163
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_9
+      rect:
+        serializedVersion: 2
+        x: 110
+        y: 494
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 489dd4dc0fa697e30800000000000000
+      internalID: 4501746885002647940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_10
+      rect:
+        serializedVersion: 2
+        x: 284
+        y: 478
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 50d4eff7e3e059920800000000000000
+      internalID: 2996316788683066629
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_11
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 439
+        width: 47
+        height: 47
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 12b7cd6c086b900d0800000000000000
+      internalID: -3456030574821737695
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_12
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 474
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f4c60dab95b5d2f10800000000000000
+      internalID: 2246552230072183887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_13
+      rect:
+        serializedVersion: 2
+        x: 147
+        y: 466
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76a377bd0c0e8ac90800000000000000
+      internalID: -7158224488785036697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_14
+      rect:
+        serializedVersion: 2
+        x: 138
+        y: 453
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb647c7ab75d07e80800000000000000
+      internalID: -8182805795859642693
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_15
+      rect:
+        serializedVersion: 2
+        x: 238
+        y: 433
+        width: 27
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1810b06dead571640800000000000000
+      internalID: 5050608512616038785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_16
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 444
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 357c56e1ca0690460800000000000000
+      internalID: 7208398970943817555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_17
+      rect:
+        serializedVersion: 2
+        x: 8
+        y: 399
+        width: 15
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c017000bf9cca39c0800000000000000
+      internalID: -3946617137212133108
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_18
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 396
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf0ddcacb656bf9c0800000000000000
+      internalID: -3892405939293269764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_19
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 330
+        width: 36
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c9453094026fc8330800000000000000
+      internalID: 3714614411198157980
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_20
+      rect:
+        serializedVersion: 2
+        x: 146
+        y: 308
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 436908a0314177c90800000000000000
+      internalID: -7172241809551092172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_21
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 328
+        width: 58
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e918fb1c69f7eda00800000000000000
+      internalID: 783203670681420190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_22
+      rect:
+        serializedVersion: 2
+        x: 21
+        y: 270
+        width: 10
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c7b8f948a4d783c0800000000000000
+      internalID: -4357280295197034552
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_23
+      rect:
+        serializedVersion: 2
+        x: 58
+        y: 225
+        width: 87
+        height: 76
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b2e13d8c1aeff91e0800000000000000
+      internalID: -2188750923066302933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_24
+      rect:
+        serializedVersion: 2
+        x: 276
+        y: 260
+        width: 37
+        height: 42
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c6bddc931c42aadb0800000000000000
+      internalID: -4779967642183279764
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_25
+      rect:
+        serializedVersion: 2
+        x: 186
+        y: 235
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6822f8f80039a7c10800000000000000
+      internalID: 2052114210838487686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_26
+      rect:
+        serializedVersion: 2
+        x: 276
+        y: 224
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 265c558b5125d30d0800000000000000
+      internalID: -3441504287000771230
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_27
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 229
+        width: 6
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 071e76d05890f35c0800000000000000
+      internalID: -4233654657644764816
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_28
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 214
+        width: 6
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9bb357bda43fbe2b0800000000000000
+      internalID: -5554078212596352071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_29
+      rect:
+        serializedVersion: 2
+        x: 138
+        y: 175
+        width: 38
+        height: 38
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2873bb32e7118b730800000000000000
+      internalID: 4014978301263820674
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_30
+      rect:
+        serializedVersion: 2
+        x: 202
+        y: 120
+        width: 75
+        height: 70
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3db2d0dd214a4fb40800000000000000
+      internalID: 5473179848086989779
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_31
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 130
+        width: 42
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 618cf83ae6d290020800000000000000
+      internalID: 2308426237217851414
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_32
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 90
+        width: 40
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee5346ccf1b72a610800000000000000
+      internalID: 1631001391564862958
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_33
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 81
+        width: 47
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 638a8f1c0cba94790800000000000000
+      internalID: -7545310856306186186
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_34
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 74
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d6f2a23c4309eb400800000000000000
+      internalID: 341869178013757293
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_35
+      rect:
+        serializedVersion: 2
+        x: 290
+        y: 73
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 83d2cdc1704c49ef0800000000000000
+      internalID: -102241356694672072
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_36
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 80
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aee29bc1181e61360800000000000000
+      internalID: 7140142203891429098
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_37
+      rect:
+        serializedVersion: 2
+        x: 35
+        y: 25
+        width: 29
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8f0d7179be79a49a0800000000000000
+      internalID: -6248014494915112712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_38
+      rect:
+        serializedVersion: 2
+        x: 97
+        y: 30
+        width: 39
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: caf1b97fb37cf3620800000000000000
+      internalID: 2756140557345169324
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_39
+      rect:
+        serializedVersion: 2
+        x: 141
+        y: 30
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cce562395f684d780800000000000000
+      internalID: -8659147794232746292
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_40
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 35
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0e570c0189e565b10800000000000000
+      internalID: 1969865894230259168
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_41
+      rect:
+        serializedVersion: 2
+        x: 234
+        y: 6
+        width: 47
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1bbef3f10b5706ab0800000000000000
+      internalID: -5016880585591755855
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_42
+      rect:
+        serializedVersion: 2
+        x: 132
+        y: 24
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3bb5876954f5d0e0800000000000000
+      internalID: -2245620174348240069
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Mid_43
+      rect:
+        serializedVersion: 2
+        x: 91
+        y: 8
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43e9f0af8d5294e70800000000000000
+      internalID: 9099846135917289012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Mid_0: -8538736069523498542
+      Mid_1: -3175209656034921757
+      Mid_10: 2996316788683066629
+      Mid_11: -3456030574821737695
+      Mid_12: 2246552230072183887
+      Mid_13: -7158224488785036697
+      Mid_14: -8182805795859642693
+      Mid_15: 5050608512616038785
+      Mid_16: 7208398970943817555
+      Mid_17: -3946617137212133108
+      Mid_18: -3892405939293269764
+      Mid_19: 3714614411198157980
+      Mid_2: -8800748922116780876
+      Mid_20: -7172241809551092172
+      Mid_21: 783203670681420190
+      Mid_22: -4357280295197034552
+      Mid_23: -2188750923066302933
+      Mid_24: -4779967642183279764
+      Mid_25: 2052114210838487686
+      Mid_26: -3441504287000771230
+      Mid_27: -4233654657644764816
+      Mid_28: -5554078212596352071
+      Mid_29: 4014978301263820674
+      Mid_3: 3192519182688639456
+      Mid_30: 5473179848086989779
+      Mid_31: 2308426237217851414
+      Mid_32: 1631001391564862958
+      Mid_33: -7545310856306186186
+      Mid_34: 341869178013757293
+      Mid_35: -102241356694672072
+      Mid_36: 7140142203891429098
+      Mid_37: -6248014494915112712
+      Mid_38: 2756140557345169324
+      Mid_39: -8659147794232746292
+      Mid_4: 1549493850510464207
+      Mid_40: 1969865894230259168
+      Mid_41: -5016880585591755855
+      Mid_42: -2245620174348240069
+      Mid_43: 9099846135917289012
+      Mid_5: 2344304727416285596
+      Mid_6: 6988165519469658179
+      Mid_7: 7761083690120030110
+      Mid_8: 1014600086331433163
+      Mid_9: 4501746885002647940
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

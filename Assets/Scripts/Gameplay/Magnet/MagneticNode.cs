@@ -66,12 +66,11 @@ public sealed class MagneticNode : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if(!other.TryGetComponent<PlayerMagnet>(out var player))
+        if(!other.TryGetComponent<IMagneticNodeListener>(out var listener))
             return;
 
-        player.AddNode(this);
-        player.RegisterVisitedNode(this);
-        player.TryEnterOrbit(this); // орбита только если пол€рность противоположна€
+        listener.AddNode(this);
+        listener.RegisterVisitedNode(this);
     }
 
     private void OnTriggerExit2D(Collider2D other)

@@ -13,6 +13,26 @@ public sealed class CameraFollow2D : MonoBehaviour
     [SerializeField] private float _maxY = 100f;
 
     private Vector3 _velocity;
+    private IPlayerRegistry _registry;
+
+
+    private void OnEnable()
+    {
+        ServiceLocator.WhenAvailable<IPlayerRegistry>(r =>
+        {
+            _registry = r;
+            _registry.PlayerSpawned += SetTarget;
+
+            if(_registry.Current != null)
+                SetTarget(_registry.Current);
+        });
+    }
+
+    private void OnDisable()
+    {
+        if(_registry != null)
+            _registry.PlayerSpawned -= SetTarget;
+    }
 
     private void LateUpdate()
     {

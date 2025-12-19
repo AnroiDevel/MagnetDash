@@ -105,7 +105,7 @@ private bool IsVkEnvironment()
         {
             // 100 → 1.0; 0 → 0.5
             float dur = EngineDurability;
-            return 0.5f + (dur / 100f) * 0.5f;
+            return (0.5f + (dur / 100f) * 0.5f);
         }
     }
 

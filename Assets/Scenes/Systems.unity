@@ -208,7 +208,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 55156096034395748, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
       propertyPath: _engineRepairThreshold
-      value: 99
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 3421145944720699378, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
       propertyPath: m_LocalPosition.x
@@ -330,6 +330,63 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 391e57f161ab4bc4590656837da57ee8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Services::SettingsService
+--- !u!1 &1362433099
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1362433101}
+  - component: {fileID: 1362433100}
+  - component: {fileID: 1362433102}
+  m_Layer: 0
+  m_Name: ModalService
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1362433100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1362433099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9a33aa3a8da3aae4db0ad684841d3215, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ModalService
+--- !u!4 &1362433101
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1362433099}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.66499, y: -0.5636, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1362433102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1362433099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e0c4be1f9494c0c42a95870ce53004e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PauseController
 --- !u!1 &1493479788
 GameObject:
   m_ObjectHideFlags: 0
@@ -360,7 +417,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShopBootstrap
   _skinDatabase: {fileID: 11400000, guid: e534478ae58271448906b3952ae5e2ec, type: 2}
-  _defaultSkinId: default
+  _defaultSkinId: 0
 --- !u!4 &1493479790
 Transform:
   m_ObjectHideFlags: 0
@@ -511,3 +568,4 @@ SceneRoots:
   - {fileID: 341961246}
   - {fileID: 1493479790}
   - {fileID: 1841037870}
+  - {fileID: 1362433101}

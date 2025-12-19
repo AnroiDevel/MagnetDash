@@ -24,7 +24,7 @@ public sealed class LevelResultPanel : MonoBehaviour
     [SerializeField] private Button _btnMenu;
 
     [Header("FX")]
-    [SerializeField] private float _fadeDuration = 0.25f;
+     private float _fadeDuration = 2.25f;
 
     [Header("Final panel")]
     [SerializeField] private GameObject _finalPanel; 
