@@ -1,51 +1,54 @@
 ﻿using System;
-using System.Collections;
 using UnityEngine;
 
 [DisallowMultipleComponent]
 public sealed class PauseController : MonoBehaviour
 {
-    [Header("Bindings")]
-    [SerializeField] private CanvasGroup _panelPause;
-    [SerializeField] private CanvasGroup _settingsPanel;
-
-    [SerializeField] private float _fade = 0.15f;
-
     public bool IsPaused { get; private set; }
     public event Action<bool> PausedChanged;
 
+    /// <summary>
+    /// UI может подписаться и вернуть true, если обработал Back (например, закрыл настройки).
+    /// </summary>
+    public event Func<bool> TryConsumeBack;
+
     private IInputService _input;
+
+    // модальная “заморозка” (ремонт/магазин/прочее) — без GameState и без UI
+    private int _modalFreezeCount;
 
     private void OnEnable()
     {
+        ServiceLocator.Register(this);
         ServiceLocator.WhenAvailable<IInputService>(svc =>
         {
             _input = svc;
-            _input.Back += OnBack; // для модалок
-            _input.Pause += OnPause;      // глобальная пауза/резюм
+            _input.Back += OnBack;
+            _input.Pause += OnPause;
         });
     }
 
     private void OnDisable()
     {
-        if(_input != null)
-        {
-            _input.Back -= OnBack;
-            _input.Pause -= OnPause;
-        }
+        if(_input == null)
+            return;
+
+        _input.Back -= OnBack;
+        _input.Pause -= OnPause;
     }
 
-    private bool SettingsOpen => _settingsPanel && _settingsPanel.alpha > 0f;
+    private void OnDestroy()
+    {
+        ServiceLocator.Unregister(this);
+    }
+
 
 
     private void OnPause()
     {
-        OnPausePressed(); // уже содержит логику переключения паузы через LevelManager.State
+        OnPausePressed();
     }
 
-    /// <summary>
-    /// Вызывается кнопкой/вводом «Пауза».
-    /// </summary>
     public void OnPausePressed()
     {
         if(!ServiceLocator.TryGet<LevelManager>(out var lm))
@@ -54,146 +57,98 @@ public sealed class PauseController : MonoBehaviour
         switch(lm.State)
         {
             case GameState.Playing:
-                // Входим в паузу
-                lm.Pause();   // меняем состояние игры
-                Pause();      // приводим UI и ввод в соответствие
+                lm.Pause();
+                PauseCore();
                 break;
 
             case GameState.Paused:
-                // Выходим из паузы
                 lm.Resume();
-                Resume();
+                ResumeCore();
                 break;
-
-            default:
-                // В других состояниях пауза не работает
-                break;
-        }
-    }
-
-    private void Pause()
-    {
-        if(IsPaused)
-            return;
-
-        IsPaused = true;
-        Time.timeScale = 0f;
-        _input?.EnableGameplay(false); // отключаем геймплейный ввод
-        Show(_panelPause, true);
-        PausedChanged?.Invoke(true);
-    }
-
-    private void Resume()
-    {
-        // Сначала закрываем настройки, если они открыты
-        if(SettingsOpen)
-        {
-            CloseSettings();
-            return;
-        }
-
-        if(!IsPaused)
-            return;
-
-        IsPaused = false;
-        Show(_panelPause, false);
-        Time.timeScale = 1f;
-        _input?.EnableGameplay(true);
-        PausedChanged?.Invoke(false);
-    }
-
-    public void OpenSettings()
-    {
-        if(_settingsPanel)
-        {
-            StartCoroutine(Fade(_settingsPanel, true, _fade));
-            _input?.PushModal();
-        }
-    }
-
-    public void CloseSettings()
-    {
-        if(_settingsPanel && _settingsPanel.alpha > 0f)
-        {
-            StartCoroutine(Fade(_settingsPanel, false, _fade));
-            _input?.PopModal();
         }
     }
 
     private void OnBack()
     {
-        if(SettingsOpen)
+        // 1) Всегда даём шанс модалкам/настройкам закрыться
+        var handler = TryConsumeBack;
+        if(handler != null)
         {
-            CloseSettings();
-            return;
+            foreach(Func<bool> h in handler.GetInvocationList())
+            {
+                if(h.Invoke())
+                    return;
+            }
         }
 
+        // 2) Если никто не обработал Back — это "пауза/резюм"
         OnPausePressed();
     }
 
-    private void Show(CanvasGroup cg, bool show)
+    private void PauseCore()
     {
-        if(!cg)
+        if(IsPaused)
             return;
 
-        StopAllCoroutines();
-        StartCoroutine(Fade(cg, show, _fade));
+        IsPaused = true;
+
+        // не трогаем modalFreezeCount — это отдельный слой
+        Time.timeScale = 0f;
+        _input?.EnableGameplay(false);
+
+        PausedChanged?.Invoke(true);
+    }
+    public void ForceResume()
+    {
+        if(!IsPaused)
+            return;
+
+        IsPaused = false;
+
+        Time.timeScale = _modalFreezeCount > 0 ? 0f : 1f;
+        _input?.EnableGameplay(_modalFreezeCount == 0);
+
+        PausedChanged?.Invoke(false);
     }
 
-    private IEnumerator Fade(CanvasGroup cg, bool show, float t)
+    private void ResumeCore()
     {
-        cg.blocksRaycasts = true;
-        cg.interactable = show;
+        if(!IsPaused)
+            return;
 
-        float a0 = cg.alpha;
-        float a1 = show ? 1f : 0f;
-        float tt = 0f;
+        IsPaused = false;
 
-        while(tt < t)
-        {
-            tt += Time.unscaledDeltaTime;
-            cg.alpha = Mathf.Lerp(a0, a1, tt / t);
-            yield return null;
-        }
+        Time.timeScale = _modalFreezeCount > 0 ? 0f : 1f;
+        _input?.EnableGameplay(_modalFreezeCount == 0);
 
-        cg.alpha = a1;
-
-        if(!show)
-        {
-            cg.blocksRaycasts = false;
-            cg.interactable = false;
-        }
+        PausedChanged?.Invoke(false);
     }
 
-    public void OnRestart()
-    {
-        // Сначала выходим из паузы (UI + тайм)
-        Resume();
+    // --------- Modal freeze API (для ModalService) ---------
 
-        if(ServiceLocator.TryGet<ILevelFlow>(out var flow))
-        {
-            flow.Reload();
-        }
-        else
-        {
-            Debug.LogError("[PauseController] ILevelFlow service not found. " +
-                           "LevelManager / Systems scene misconfigured.");
-        }
+    public void BeginModalFreeze()
+    {
+        _modalFreezeCount++;
+        if(_modalFreezeCount > 1)
+            return;
+
+        Time.timeScale = 0f;
+        _input?.EnableGameplay(false);
+        _input?.PushModal();
     }
 
-    public void OnExitToMenu()
+    public void EndModalFreeze()
     {
-        // Тоже выходим из паузы (на всякий случай)
-        Resume();
+        if(_modalFreezeCount <= 0)
+            return;
 
-        if(ServiceLocator.TryGet<ILevelFlow>(out var flow))
-        {
-            flow.LoadMenu();
-        }
-        else
-        {
-            Debug.LogError("[PauseController] ILevelFlow service not found. " +
-                           "LevelManager / Systems scene misconfigured.");
-        }
+        _modalFreezeCount--;
+        if(_modalFreezeCount > 0)
+            return;
+
+        _input?.PopModal();
+
+        Time.timeScale = IsPaused ? 0f : 1f;
+        _input?.EnableGameplay(!IsPaused);
     }
 }

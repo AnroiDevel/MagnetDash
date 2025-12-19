@@ -1,0 +1,1066 @@
+fileFormatVersion: 2
+guid: 0eebc2b830c530c4fafb309ccacc5c2a
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -6072647820194990280
+    second: Near_0
+  - first:
+      213: -4819395461928140284
+    second: Near_1
+  - first:
+      213: 6165022005790021735
+    second: Near_2
+  - first:
+      213: -7328659883339305333
+    second: Near_3
+  - first:
+      213: -9168738707479071863
+    second: Near_4
+  - first:
+      213: -2845868412611897687
+    second: Near_5
+  - first:
+      213: 6187511958621344611
+    second: Near_6
+  - first:
+      213: -2357162959655421620
+    second: Near_7
+  - first:
+      213: -3335435067181872252
+    second: Near_8
+  - first:
+      213: 4401598490454497806
+    second: Near_9
+  - first:
+      213: 2709508073696581261
+    second: Near_10
+  - first:
+      213: -3180820540222691079
+    second: Near_11
+  - first:
+      213: 8721202068389082096
+    second: Near_12
+  - first:
+      213: -468558065119593038
+    second: Near_13
+  - first:
+      213: -1155665824225952166
+    second: Near_14
+  - first:
+      213: 7311722625277606681
+    second: Near_15
+  - first:
+      213: 4341494128232767737
+    second: Near_16
+  - first:
+      213: -8521985325972858563
+    second: Near_17
+  - first:
+      213: 2192406612730024949
+    second: Near_18
+  - first:
+      213: 7885913795033156832
+    second: Near_19
+  - first:
+      213: 8849871506759650040
+    second: Near_20
+  - first:
+      213: -421502038417947369
+    second: Near_21
+  - first:
+      213: -1601241123874397311
+    second: Near_22
+  - first:
+      213: 3254412485902730043
+    second: Near_23
+  - first:
+      213: 927125202110847867
+    second: Near_24
+  - first:
+      213: -3129779797597032253
+    second: Near_25
+  - first:
+      213: -7882261936284299124
+    second: Near_26
+  - first:
+      213: 621623921765202754
+    second: Near_27
+  - first:
+      213: -1291608789841615875
+    second: Near_28
+  - first:
+      213: 6524613774531887975
+    second: Near_29
+  - first:
+      213: -5828439643758719016
+    second: Near_30
+  - first:
+      213: -5626378040683317211
+    second: Near_31
+  - first:
+      213: -4632680038781560716
+    second: Near_32
+  - first:
+      213: -5770889784877264890
+    second: Near_33
+  - first:
+      213: -2106415651822782235
+    second: Near_34
+  - first:
+      213: -3987176300758851246
+    second: Near_35
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 0
+    wrapV: 0
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Near_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 119
+        width: 336
+        height: 489
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8373a375bfe99bba0800000000000000
+      internalID: -6072647820194990280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_1
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 543
+        width: 49
+        height: 46
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 402c4a39c511e1db0800000000000000
+      internalID: -4819395461928140284
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_2
+      rect:
+        serializedVersion: 2
+        x: 152
+        y: 582
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 768949fb9de8e8550800000000000000
+      internalID: 6165022005790021735
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_3
+      rect:
+        serializedVersion: 2
+        x: 196
+        y: 566
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b8ea7ed3aae5b4a90800000000000000
+      internalID: -7328659883339305333
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_4
+      rect:
+        serializedVersion: 2
+        x: 111
+        y: 499
+        width: 26
+        height: 26
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 983f55e39b812c080800000000000000
+      internalID: -9168738707479071863
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_5
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 494
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a653ccb1c17188d0800000000000000
+      internalID: -2845868412611897687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_6
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 446
+        width: 42
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3635b11f7557ed550800000000000000
+      internalID: 6187511958621344611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_7
+      rect:
+        serializedVersion: 2
+        x: 140
+        y: 439
+        width: 30
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c49b708e6cca94fd0800000000000000
+      internalID: -2357162959655421620
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_8
+      rect:
+        serializedVersion: 2
+        x: 151
+        y: 339
+        width: 111
+        height: 145
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 48b4e317a7726b1d0800000000000000
+      internalID: -3335435067181872252
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_9
+      rect:
+        serializedVersion: 2
+        x: 293
+        y: 422
+        width: 37
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0a9f63a18e951d30800000000000000
+      internalID: 4401598490454497806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_10
+      rect:
+        serializedVersion: 2
+        x: 108
+        y: 400
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d86dcb8cc3b1a9520800000000000000
+      internalID: 2709508073696581261
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_11
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 373
+        width: 14
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f8a2c542947bd3d0800000000000000
+      internalID: -3180820540222691079
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_12
+      rect:
+        serializedVersion: 2
+        x: 46
+        y: 276
+        width: 78
+        height: 78
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0f3bbb4031fe70970800000000000000
+      internalID: 8721202068389082096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_13
+      rect:
+        serializedVersion: 2
+        x: 298
+        y: 342
+        width: 11
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2bdf6eb1ce85f79f0800000000000000
+      internalID: -468558065119593038
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_14
+      rect:
+        serializedVersion: 2
+        x: 233
+        y: 287
+        width: 45
+        height: 37
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a5ef3fb4e0046ffe0800000000000000
+      internalID: -1155665824225952166
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_15
+      rect:
+        serializedVersion: 2
+        x: 323
+        y: 313
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 91bbbdf0df4787560800000000000000
+      internalID: 7311722625277606681
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_16
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 295
+        width: 11
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f022cb48e5104c30800000000000000
+      internalID: 4341494128232767737
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_17
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 267
+        width: 46
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d39db485f73dbb980800000000000000
+      internalID: -8521985325972858563
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_18
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 175
+        width: 50
+        height: 58
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5f39dfac23efc6e10800000000000000
+      internalID: 2192406612730024949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_19
+      rect:
+        serializedVersion: 2
+        x: 285
+        y: 231
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0eccd42b0d4607d60800000000000000
+      internalID: 7885913795033156832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_20
+      rect:
+        serializedVersion: 2
+        x: 27
+        y: 153
+        width: 44
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8fa824c2f3f01da70800000000000000
+      internalID: 8849871506759650040
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_21
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 74
+        width: 101
+        height: 124
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 715cef71126862af0800000000000000
+      internalID: -421502038417947369
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_22
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 0
+        width: 32
+        height: 148
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 18328bb7eaf37c9e0800000000000000
+      internalID: -1601241123874397311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_23
+      rect:
+        serializedVersion: 2
+        x: 117
+        y: 118
+        width: 22
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3304dec9eef92d20800000000000000
+      internalID: 3254412485902730043
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_24
+      rect:
+        serializedVersion: 2
+        x: 289
+        y: 136
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7b112e857fcddc00800000000000000
+      internalID: 927125202110847867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_25
+      rect:
+        serializedVersion: 2
+        x: 47
+        y: 0
+        width: 91
+        height: 125
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c0f80b3bd9c094d0800000000000000
+      internalID: -3129779797597032253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_26
+      rect:
+        serializedVersion: 2
+        x: 271
+        y: 97
+        width: 19
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c80113de7849c9290800000000000000
+      internalID: -7882261936284299124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_27
+      rect:
+        serializedVersion: 2
+        x: 142
+        y: 11
+        width: 43
+        height: 51
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24b33b0d9a370a800800000000000000
+      internalID: 621623921765202754
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_28
+      rect:
+        serializedVersion: 2
+        x: 244
+        y: 42
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: df3e7bc16a8431ee0800000000000000
+      internalID: -1291608789841615875
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_29
+      rect:
+        serializedVersion: 2
+        x: 264
+        y: 36
+        width: 20
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7630897b8a51c8a50800000000000000
+      internalID: 6524613774531887975
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_30
+      rect:
+        serializedVersion: 2
+        x: 290
+        y: 24
+        width: 46
+        height: 64
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8df05fe36093d1fa0800000000000000
+      internalID: -5828439643758719016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_31
+      rect:
+        serializedVersion: 2
+        x: 30
+        y: 28
+        width: 8
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 52833095bf61be1b0800000000000000
+      internalID: -5626378040683317211
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_32
+      rect:
+        serializedVersion: 2
+        x: 208
+        y: 19
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 478d16abc0a65bfb0800000000000000
+      internalID: -4632680038781560716
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_33
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 10
+        width: 15
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 600d57ee05ea9efa0800000000000000
+      internalID: -5770889784877264890
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_34
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 11
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e8b7cbff1284c2e0800000000000000
+      internalID: -2106415651822782235
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Near_35
+      rect:
+        serializedVersion: 2
+        x: 263
+        y: 0
+        width: 24
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 251a9688744baa8c0800000000000000
+      internalID: -3987176300758851246
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Near_0: -6072647820194990280
+      Near_1: -4819395461928140284
+      Near_10: 2709508073696581261
+      Near_11: -3180820540222691079
+      Near_12: 8721202068389082096
+      Near_13: -468558065119593038
+      Near_14: -1155665824225952166
+      Near_15: 7311722625277606681
+      Near_16: 4341494128232767737
+      Near_17: -8521985325972858563
+      Near_18: 2192406612730024949
+      Near_19: 7885913795033156832
+      Near_2: 6165022005790021735
+      Near_20: 8849871506759650040
+      Near_21: -421502038417947369
+      Near_22: -1601241123874397311
+      Near_23: 3254412485902730043
+      Near_24: 927125202110847867
+      Near_25: -3129779797597032253
+      Near_26: -7882261936284299124
+      Near_27: 621623921765202754
+      Near_28: -1291608789841615875
+      Near_29: 6524613774531887975
+      Near_3: -7328659883339305333
+      Near_30: -5828439643758719016
+      Near_31: -5626378040683317211
+      Near_32: -4632680038781560716
+      Near_33: -5770889784877264890
+      Near_34: -2106415651822782235
+      Near_35: -3987176300758851246
+      Near_4: -9168738707479071863
+      Near_5: -2845868412611897687
+      Near_6: 6187511958621344611
+      Near_7: -2357162959655421620
+      Near_8: -3335435067181872252
+      Near_9: 4401598490454497806
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,1976 @@
+fileFormatVersion: 2
+guid: 3babd2b93f477b744a979e647eb762db
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -9149148599079927820
+    second: Far_0
+  - first:
+      213: -7566145275461013157
+    second: Far_1
+  - first:
+      213: 960511527782744651
+    second: Far_2
+  - first:
+      213: -3027006753996748047
+    second: Far_3
+  - first:
+      213: 4812754653581628264
+    second: Far_4
+  - first:
+      213: 3492016225570835997
+    second: Far_5
+  - first:
+      213: -6738728891058114905
+    second: Far_6
+  - first:
+      213: 8786737922543391008
+    second: Far_7
+  - first:
+      213: -5518686256690719155
+    second: Far_8
+  - first:
+      213: -4270507921326035602
+    second: Far_9
+  - first:
+      213: 6581464331968072118
+    second: Far_10
+  - first:
+      213: 3034575700772362144
+    second: Far_11
+  - first:
+      213: 3270824884900462263
+    second: Far_12
+  - first:
+      213: 5570633519802652422
+    second: Far_13
+  - first:
+      213: 4848216034537411321
+    second: Far_14
+  - first:
+      213: 6624839310342438896
+    second: Far_15
+  - first:
+      213: 8143192790389779200
+    second: Far_16
+  - first:
+      213: -6743200410640695280
+    second: Far_17
+  - first:
+      213: 7096397932259659672
+    second: Far_18
+  - first:
+      213: 5304639003115116511
+    second: Far_19
+  - first:
+      213: -6894123266169321993
+    second: Far_20
+  - first:
+      213: -398391742548941805
+    second: Far_21
+  - first:
+      213: -554761502292261711
+    second: Far_22
+  - first:
+      213: 2667144985305756766
+    second: Far_23
+  - first:
+      213: 8847754018077239923
+    second: Far_24
+  - first:
+      213: -857852990928054071
+    second: Far_25
+  - first:
+      213: -8537688289220841631
+    second: Far_26
+  - first:
+      213: -90994356074344755
+    second: Far_27
+  - first:
+      213: 2118064331156624293
+    second: Far_28
+  - first:
+      213: 3531558676421360605
+    second: Far_29
+  - first:
+      213: -8780534648333463125
+    second: Far_30
+  - first:
+      213: -8605229477850049493
+    second: Far_31
+  - first:
+      213: -9092892386550943617
+    second: Far_32
+  - first:
+      213: 6414936920751817006
+    second: Far_33
+  - first:
+      213: -4681920769850119203
+    second: Far_34
+  - first:
+      213: -9143157654077273926
+    second: Far_35
+  - first:
+      213: -5642832353961381406
+    second: Far_36
+  - first:
+      213: -4183897412437811818
+    second: Far_37
+  - first:
+      213: -5713282776743914003
+    second: Far_38
+  - first:
+      213: 776872826821333057
+    second: Far_39
+  - first:
+      213: 2215191329449247395
+    second: Far_40
+  - first:
+      213: -297671254665657694
+    second: Far_41
+  - first:
+      213: -2080275744875300065
+    second: Far_42
+  - first:
+      213: 460643890090601925
+    second: Far_43
+  - first:
+      213: -4309079466693417700
+    second: Far_44
+  - first:
+      213: -7524938305191209910
+    second: Far_45
+  - first:
+      213: -7452915462621112651
+    second: Far_46
+  - first:
+      213: -2198560448900222180
+    second: Far_47
+  - first:
+      213: -4647639536436331159
+    second: Far_48
+  - first:
+      213: -3119697242956030646
+    second: Far_49
+  - first:
+      213: -442911127091987837
+    second: Far_50
+  - first:
+      213: -1662067911434533673
+    second: Far_51
+  - first:
+      213: -4843776491704931156
+    second: Far_52
+  - first:
+      213: 5481427320787734684
+    second: Far_53
+  - first:
+      213: 662960149283676331
+    second: Far_54
+  - first:
+      213: -3220137943639959768
+    second: Far_55
+  - first:
+      213: 1336406048070500213
+    second: Far_56
+  - first:
+      213: 6222570681664142576
+    second: Far_57
+  - first:
+      213: -4720763738204369400
+    second: Far_58
+  - first:
+      213: 4672986801001446768
+    second: Far_59
+  - first:
+      213: 8498742959487974452
+    second: Far_60
+  - first:
+      213: -6488592120450570327
+    second: Far_61
+  - first:
+      213: -5637691076881730945
+    second: Far_62
+  - first:
+      213: 8969487860957542175
+    second: Far_63
+  - first:
+      213: -5298885352485634241
+    second: Far_64
+  - first:
+      213: -5319525719942969987
+    second: Far_65
+  - first:
+      213: 6752598566239964504
+    second: Far_66
+  - first:
+      213: 3604499156066468227
+    second: Far_67
+  - first:
+      213: 6348874684302420344
+    second: Far_68
+  - first:
+      213: -9192876752780231179
+    second: Far_69
+  - first:
+      213: -5539125725684757658
+    second: Far_70
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 0
+    wrapV: 0
+    wrapW: 0
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Far_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 334
+        height: 608
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4fff39ac2d1b70180800000000000000
+      internalID: -9149148599079927820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_1
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 452
+        width: 20
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b51752985f6aff690800000000000000
+      internalID: -7566145275461013157
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_2
+      rect:
+        serializedVersion: 2
+        x: 4
+        y: 224
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b428820452c645d00800000000000000
+      internalID: 960511527782744651
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_3
+      rect:
+        serializedVersion: 2
+        x: 5
+        y: 511
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1fac05f1569edf5d0800000000000000
+      internalID: -3027006753996748047
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_4
+      rect:
+        serializedVersion: 2
+        x: 12
+        y: 64
+        width: 26
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86357ddbbd65ac240800000000000000
+      internalID: 4812754653581628264
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_5
+      rect:
+        serializedVersion: 2
+        x: 15
+        y: 190
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d1ecc037142267030800000000000000
+      internalID: 3492016225570835997
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_6
+      rect:
+        serializedVersion: 2
+        x: 22
+        y: 394
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7aea1d2e6c93b72a0800000000000000
+      internalID: -6738728891058114905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_7
+      rect:
+        serializedVersion: 2
+        x: 36
+        y: 459
+        width: 28
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02117af1693c0f970800000000000000
+      internalID: 8786737922543391008
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_8
+      rect:
+        serializedVersion: 2
+        x: 37
+        y: 135
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d469e1bb610b963b0800000000000000
+      internalID: -5518686256690719155
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_9
+      rect:
+        serializedVersion: 2
+        x: 37
+        y: 116
+        width: 12
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e6daed2fbab1cb4c0800000000000000
+      internalID: -4270507921326035602
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_10
+      rect:
+        serializedVersion: 2
+        x: 38
+        y: 72
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b94cd890fe065b50800000000000000
+      internalID: 6581464331968072118
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_11
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 594
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a79190a58afc1a20800000000000000
+      internalID: 3034575700772362144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_12
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 456
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7befffa37ed446d20800000000000000
+      internalID: 3270824884900462263
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_13
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 235
+        width: 13
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 60798b9fbadde4d40800000000000000
+      internalID: 5570633519802652422
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_14
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 144
+        width: 7
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9f294f4ebc2584340800000000000000
+      internalID: 4848216034537411321
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_15
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 11
+        width: 6
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ff310bb04820fb50800000000000000
+      internalID: 6624839310342438896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_16
+      rect:
+        serializedVersion: 2
+        x: 40
+        y: 124
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 00b64b8c2be620170800000000000000
+      internalID: 8143192790389779200
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_17
+      rect:
+        serializedVersion: 2
+        x: 45
+        y: 565
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0104e7a14f65b62a0800000000000000
+      internalID: -6743200410640695280
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_18
+      rect:
+        serializedVersion: 2
+        x: 45
+        y: 148
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 89f472132587b7260800000000000000
+      internalID: 7096397932259659672
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_19
+      rect:
+        serializedVersion: 2
+        x: 53
+        y: 191
+        width: 37
+        height: 33
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd7db52711ddd9940800000000000000
+      internalID: 5304639003115116511
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_20
+      rect:
+        serializedVersion: 2
+        x: 54
+        y: 528
+        width: 11
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7f5c8328a672350a0800000000000000
+      internalID: -6894123266169321993
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_21
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 59
+        width: 24
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 314ebe722d0a87af0800000000000000
+      internalID: -398391742548941805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_22
+      rect:
+        serializedVersion: 2
+        x: 68
+        y: 394
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1b4cec85a571d48f0800000000000000
+      internalID: -554761502292261711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_23
+      rect:
+        serializedVersion: 2
+        x: 76
+        y: 129
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e543d95ab3a930520800000000000000
+      internalID: 2667144985305756766
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_24
+      rect:
+        serializedVersion: 2
+        x: 83
+        y: 35
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 37a678be66989ca70800000000000000
+      internalID: 8847754018077239923
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_25
+      rect:
+        serializedVersion: 2
+        x: 87
+        y: 57
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9c81a36ff3b4814f0800000000000000
+      internalID: -857852990928054071
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_26
+      rect:
+        serializedVersion: 2
+        x: 98
+        y: 314
+        width: 9
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16faafd4cb9048980800000000000000
+      internalID: -8537688289220841631
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_27
+      rect:
+        serializedVersion: 2
+        x: 99
+        y: 466
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dce8f918d19bcbef0800000000000000
+      internalID: -90994356074344755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_28
+      rect:
+        serializedVersion: 2
+        x: 109
+        y: 46
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a314068940e46d10800000000000000
+      internalID: 2118064331156624293
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_29
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 450
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddb3b8bb7ed920130800000000000000
+      internalID: 3531558676421360605
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_30
+      rect:
+        serializedVersion: 2
+        x: 121
+        y: 46
+        width: 8
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba113143246452680800000000000000
+      internalID: -8780534648333463125
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_31
+      rect:
+        serializedVersion: 2
+        x: 134
+        y: 565
+        width: 10
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b241702e165149880800000000000000
+      internalID: -8605229477850049493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_32
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 156
+        width: 33
+        height: 34
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f70f6c6fc8e8fc180800000000000000
+      internalID: -9092892386550943617
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_33
+      rect:
+        serializedVersion: 2
+        x: 167
+        y: 339
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e2143f1442f660950800000000000000
+      internalID: 6414936920751817006
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_34
+      rect:
+        serializedVersion: 2
+        x: 170
+        y: 282
+        width: 9
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddb6f8e9dd9760fb0800000000000000
+      internalID: -4681920769850119203
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_35
+      rect:
+        serializedVersion: 2
+        x: 174
+        y: 474
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ab8845f5e8afc1180800000000000000
+      internalID: -9143157654077273926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_36
+      rect:
+        serializedVersion: 2
+        x: 175
+        y: 85
+        width: 37
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2e1fc0ffed1a0b1b0800000000000000
+      internalID: -5642832353961381406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_37
+      rect:
+        serializedVersion: 2
+        x: 175
+        y: 23
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 69dd7fa787fcfe5c0800000000000000
+      internalID: -4183897412437811818
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_38
+      rect:
+        serializedVersion: 2
+        x: 178
+        y: 394
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: de552d6b59756b0b0800000000000000
+      internalID: -5713282776743914003
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_39
+      rect:
+        serializedVersion: 2
+        x: 182
+        y: 295
+        width: 22
+        height: 23
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 140d65e48b108ca00800000000000000
+      internalID: 776872826821333057
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_40
+      rect:
+        serializedVersion: 2
+        x: 186
+        y: 35
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3a2095d07c0fdbe10800000000000000
+      internalID: 2215191329449247395
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_41
+      rect:
+        serializedVersion: 2
+        x: 197
+        y: 67
+        width: 14
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2a20fcd22957edbf0800000000000000
+      internalID: -297671254665657694
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_42
+      rect:
+        serializedVersion: 2
+        x: 199
+        y: 191
+        width: 32
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f1bb8d75b306123e0800000000000000
+      internalID: -2080275744875300065
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_43
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 424
+        width: 12
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5cdedcc6d29846600800000000000000
+      internalID: 460643890090601925
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_44
+      rect:
+        serializedVersion: 2
+        x: 209
+        y: 60
+        width: 6
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c152fc63e031334c0800000000000000
+      internalID: -4309079466693417700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_45
+      rect:
+        serializedVersion: 2
+        x: 214
+        y: 387
+        width: 36
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a441952fa7c029790800000000000000
+      internalID: -7524938305191209910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_46
+      rect:
+        serializedVersion: 2
+        x: 215
+        y: 351
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5b6d37dbfdce19890800000000000000
+      internalID: -7452915462621112651
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_47
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 164
+        width: 20
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1334129be42d71e0800000000000000
+      internalID: -2198560448900222180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_48
+      rect:
+        serializedVersion: 2
+        x: 221
+        y: 448
+        width: 9
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 96db6a24774408fb0800000000000000
+      internalID: -4647639536436331159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_49
+      rect:
+        serializedVersion: 2
+        x: 231
+        y: 451
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a4d17dae2eb94b4d0800000000000000
+      internalID: -3119697242956030646
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_50
+      rect:
+        serializedVersion: 2
+        x: 231
+        y: 9
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38a3d923da67ad9f0800000000000000
+      internalID: -442911127091987837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_51
+      rect:
+        serializedVersion: 2
+        x: 238
+        y: 67
+        width: 26
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d48e526a062fe8e0800000000000000
+      internalID: -1662067911434533673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_52
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 593
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cac2a88b1f277ccb0800000000000000
+      internalID: -4843776491704931156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_53
+      rect:
+        serializedVersion: 2
+        x: 243
+        y: 267
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c909cad3b11f11c40800000000000000
+      internalID: 5481427320787734684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_54
+      rect:
+        serializedVersion: 2
+        x: 244
+        y: 22
+        width: 7
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba02b464ebe433900800000000000000
+      internalID: 662960149283676331
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_55
+      rect:
+        serializedVersion: 2
+        x: 249
+        y: 273
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 827559de995cf43d0800000000000000
+      internalID: -3220137943639959768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_56
+      rect:
+        serializedVersion: 2
+        x: 254
+        y: 461
+        width: 7
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 57ffcea583edb8210800000000000000
+      internalID: 1336406048070500213
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_57
+      rect:
+        serializedVersion: 2
+        x: 269
+        y: 318
+        width: 18
+        height: 27
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0fcf95ef0130b5650800000000000000
+      internalID: 6222570681664142576
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_58
+      rect:
+        serializedVersion: 2
+        x: 270
+        y: 439
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80e88cb446a7c7eb0800000000000000
+      internalID: -4720763738204369400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_59
+      rect:
+        serializedVersion: 2
+        x: 270
+        y: 223
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 07db7c9acb8c9d040800000000000000
+      internalID: 4672986801001446768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_60
+      rect:
+        serializedVersion: 2
+        x: 291
+        y: 2
+        width: 9
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43cf1a181b991f570800000000000000
+      internalID: 8498742959487974452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_61
+      rect:
+        serializedVersion: 2
+        x: 297
+        y: 378
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a7252038d3e3f5a0800000000000000
+      internalID: -6488592120450570327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_62
+      rect:
+        serializedVersion: 2
+        x: 300
+        y: 259
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f723319d5d5e2c1b0800000000000000
+      internalID: -5637691076881730945
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_63
+      rect:
+        serializedVersion: 2
+        x: 303
+        y: 428
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f177d89efa50a7c70800000000000000
+      internalID: 8969487860957542175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_64
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 511
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3fb29bb8d39676b0800000000000000
+      internalID: -5298885352485634241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_65
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 367
+        width: 6
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d75ce31ba8f3d26b0800000000000000
+      internalID: -5319525719942969987
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_66
+      rect:
+        serializedVersion: 2
+        x: 305
+        y: 68
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 85d8b838e9c06bd50800000000000000
+      internalID: 6752598566239964504
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_67
+      rect:
+        serializedVersion: 2
+        x: 308
+        y: 451
+        width: 9
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 381898e82e0c50230800000000000000
+      internalID: 3604499156066468227
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_68
+      rect:
+        serializedVersion: 2
+        x: 308
+        y: 141
+        width: 8
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 879e05933ebbb1850800000000000000
+      internalID: 6348874684302420344
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_69
+      rect:
+        serializedVersion: 2
+        x: 309
+        y: 472
+        width: 10
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fd769e9c475c6080800000000000000
+      internalID: -9192876752780231179
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Far_70
+      rect:
+        serializedVersion: 2
+        x: 311
+        y: 92
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 66b055200821123b0800000000000000
+      internalID: -5539125725684757658
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Far_0: -9149148599079927820
+      Far_1: -7566145275461013157
+      Far_10: 6581464331968072118
+      Far_11: 3034575700772362144
+      Far_12: 3270824884900462263
+      Far_13: 5570633519802652422
+      Far_14: 4848216034537411321
+      Far_15: 6624839310342438896
+      Far_16: 8143192790389779200
+      Far_17: -6743200410640695280
+      Far_18: 7096397932259659672
+      Far_19: 5304639003115116511
+      Far_2: 960511527782744651
+      Far_20: -6894123266169321993
+      Far_21: -398391742548941805
+      Far_22: -554761502292261711
+      Far_23: 2667144985305756766
+      Far_24: 8847754018077239923
+      Far_25: -857852990928054071
+      Far_26: -8537688289220841631
+      Far_27: -90994356074344755
+      Far_28: 2118064331156624293
+      Far_29: 3531558676421360605
+      Far_3: -3027006753996748047
+      Far_30: -8780534648333463125
+      Far_31: -8605229477850049493
+      Far_32: -9092892386550943617
+      Far_33: 6414936920751817006
+      Far_34: -4681920769850119203
+      Far_35: -9143157654077273926
+      Far_36: -5642832353961381406
+      Far_37: -4183897412437811818
+      Far_38: -5713282776743914003
+      Far_39: 776872826821333057
+      Far_4: 4812754653581628264
+      Far_40: 2215191329449247395
+      Far_41: -297671254665657694
+      Far_42: -2080275744875300065
+      Far_43: 460643890090601925
+      Far_44: -4309079466693417700
+      Far_45: -7524938305191209910
+      Far_46: -7452915462621112651
+      Far_47: -2198560448900222180
+      Far_48: -4647639536436331159
+      Far_49: -3119697242956030646
+      Far_5: 3492016225570835997
+      Far_50: -442911127091987837
+      Far_51: -1662067911434533673
+      Far_52: -4843776491704931156
+      Far_53: 5481427320787734684
+      Far_54: 662960149283676331
+      Far_55: -3220137943639959768
+      Far_56: 1336406048070500213
+      Far_57: 6222570681664142576
+      Far_58: -4720763738204369400
+      Far_59: 4672986801001446768
+      Far_6: -6738728891058114905
+      Far_60: 8498742959487974452
+      Far_61: -6488592120450570327
+      Far_62: -5637691076881730945
+      Far_63: 8969487860957542175
+      Far_64: -5298885352485634241
+      Far_65: -5319525719942969987
+      Far_66: 6752598566239964504
+      Far_67: 3604499156066468227
+      Far_68: 6348874684302420344
+      Far_69: -9192876752780231179
+      Far_7: 8786737922543391008
+      Far_70: -5539125725684757658
+      Far_8: -5518686256690719155
+      Far_9: -4270507921326035602
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

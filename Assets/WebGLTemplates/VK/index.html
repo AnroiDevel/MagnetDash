@@ -17,16 +17,22 @@
         vkBridge.send("VKWebAppInit", {});
 
         vkBridge.subscribe((e) => {
+            if (!e || !e.detail) return;
+            const type = e.detail.type;
 
-            console.log(e);
+            if (type === 'VKWebAppViewHide') {
+                if (myGameInstance) {
+                    myGameInstance.SendMessage('VKBridgeHandler', 'OnAppHide');
+                }
+            }
+
+            if (type === 'VKWebAppViewRestore') {
+                if (myGameInstance) {
+                    myGameInstance.SendMessage('VKBridgeHandler', 'OnAppRestore');
+                }
+            }
         });
 
-
-        function test() {
-            console.log('тест');
-
-            myGameInstance.SendMessage("VK", "ClearAllSaves");
-        }
 
     </script>
 

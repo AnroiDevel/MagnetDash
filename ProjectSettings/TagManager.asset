@@ -45,5 +45,20 @@ TagManager:
   - name: Background
     uniqueID: 2419734741
     locked: 0
+  - name: Background_Far
+    uniqueID: 2422382909
+    locked: 0
+  - name: Background_Mid
+    uniqueID: 3720834099
+    locked: 0
+  - name: Background_Near
+    uniqueID: 3118139705
+    locked: 0
+  - name: Gameplay
+    uniqueID: 3129309673
+    locked: 0
+  - name: UI
+    uniqueID: 2985091193
+    locked: 0
   m_RenderingLayers:
   - Default

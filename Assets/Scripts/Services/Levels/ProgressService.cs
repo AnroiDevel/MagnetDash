@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class ProgressService : MonoBehaviour, IProgressService
+public sealed class ProgressService : MonoBehaviour, IProgressService, ICurrencyService
 {
     [Header("Storage (local file)")]
     [SerializeField] private string _slotId = "default";
@@ -19,6 +19,9 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     public event Action Loaded;
     public event Action<int, int> StarsChanged;
     public event Action<int, float> BestTimeChanged;
+    public event Action<int> EngineDurabilityChanged;
+
+    public event Action<int> AmountChanged;
 
     private SaveData _state = new() { slotId = "default" };
     private readonly Dictionary<int, int> _stars = new();         // buildIndex/id -> stars
@@ -37,11 +40,21 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
 
     public bool IsLoaded => _loaded;
 
+    private Coroutine _saveRoutine;
+
     private void Awake()
     {
+        if(ServiceLocator.TryGet<IProgressService>(out var existing) && !ReferenceEquals(existing, this))
+        {
+            Debug.LogWarning("[ProgressService] Duplicate instance detected. Destroying new one.");
+            Destroy(gameObject);
+            return;
+        }
+
         _state.slotId = _slotId;
 
         ServiceLocator.Register<IProgressService>(this);
+        ServiceLocator.Register<ICurrencyService>(this);
 
 #if UNITY_WEBGL && !UNITY_EDITOR
     if(IsVkEnvironment())
@@ -61,25 +74,116 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     }
 
 #if UNITY_WEBGL && !UNITY_EDITOR
-    private bool IsVkEnvironment()
-    {
-        string url = Application.absoluteURL;
-        if(string.IsNullOrEmpty(url))
-            return false;
+private bool IsVkEnvironment()
+{
+    string url = Application.absoluteURL;
+    if(string.IsNullOrEmpty(url))
+        return false;
 
-        url = url.ToLowerInvariant();
-        // сюда можешь добавить свои домены VK Play, если нужно
-        return url.Contains("vk.com") || url.Contains("vkplay.ru");
-    }
+    url = url.ToLowerInvariant();
+    return url.Contains("vk.com")
+        || url.Contains("m.vk.com")
+        || url.Contains("vk.ru")
+        || url.Contains("vkplay.ru");
+}
 #endif
 
 
     private void OnDestroy()
     {
         ServiceLocator.Unregister<IProgressService>(this);
+        ServiceLocator.Unregister<ICurrencyService>(this);
     }
 
     // ================= PUBLIC API =================
+
+    public int EngineDurability => Mathf.Clamp(_state.engineDurability, 0, 100);
+
+    public float EnginePower
+    {
+        get
+        {
+            // 100 → 1.0; 0 → 0.5
+            float dur = EngineDurability;
+            return (0.5f + (dur / 100f) * 0.5f);
+        }
+    }
+
+
+    public void DamageEngine(int amount)
+    {
+        if(amount <= 0 || !_loaded)
+            return;
+
+        Debug.Log($"[ProgressService] DamageEngine amount={amount} before={_state.engineDurability}\n{Environment.StackTrace}");
+
+        int prev = _state.engineDurability;
+        _state.engineDurability = Mathf.Clamp(_state.engineDurability - amount, 0, 100);
+
+        if(_state.engineDurability == prev)
+            return;
+
+        ScheduleSave();
+        EngineDurabilityChanged?.Invoke(_state.engineDurability);
+
+        if(ServiceLocator.TryGet<IUIService>(out var ui))
+            ui.UpdateEngineDangerIndicator(_state.engineDurability);
+    }
+
+    public void RepairEngineFull()
+    {
+        Debug.Log($"[ProgressService] RepairEngineFull instance={GetHashCode()}");
+
+
+        int prev = _state.engineDurability;
+        _state.engineDurability = 100;
+
+        if(prev == 100)
+            return;
+
+        ScheduleSave(forceImmediate: true);
+        EngineDurabilityChanged?.Invoke(_state.engineDurability);
+
+        if(ServiceLocator.TryGet<IUIService>(out var ui))
+            ui.UpdateEngineDangerIndicator(_state.engineDurability);
+    }
+
+    // ===== CURRENCY =====
+
+    public int Amount => _state.currency;
+
+    public bool CanSpend(int amount)
+    {
+        if(amount <= 0)
+            return true;
+        return _state.currency >= amount;
+    }
+
+    public bool TrySpend(int amount)
+    {
+        if(amount < 0)
+            return false;
+
+        if(_state.currency < amount)
+            return false;
+
+        _state.currency -= amount;
+        ScheduleSave();
+        AmountChanged?.Invoke(_state.currency);
+        return true;
+    }
+
+    public void Add(int amount)
+    {
+        if(amount <= 0)
+            return;
+
+        _state.currency += amount;
+        ScheduleSave();
+        AmountChanged?.Invoke(_state.currency);
+    }
+
+
 
     public bool TryGetLastCompletedLevel(out int lastCLevel)
     {
@@ -146,11 +250,16 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
 
     public void ResetAll()
     {
-        _state = new SaveData { slotId = _slotId };
+        _state = new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
+        EnsureProgressInitialized();
+
         _stars.Clear();
         _bestTimes.Clear();
+
         ScheduleSave(forceImmediate: true);
+
         StarsChanged?.Invoke(-1, 0);
+        AmountChanged?.Invoke(_state.currency);
     }
 
     // ================= INTERNAL: LOAD =================
@@ -166,21 +275,48 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
         }
         else
         {
-            _state = new SaveData { slotId = _slotId };
+            _state = new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
             TryMigrateFromPlayerPrefs(_state);
             WriteFileImmediateLocal();
         }
 
+        EnsureProgressInitialized();   // <-- вместо EnsureEngineInitialized
         RebuildCaches();
         MarkLoaded();
     }
 
 
+    private void EnsureEngineInitialized()
+    {
+        if(_state.engineDurability <= 0 || _state.engineDurability > 100)
+            _state.engineDurability = 100;
+    }
+
+
+    private void EnsureProgressInitialized()
+    {
+        // 1) двигатель
+        if(_state.engineDurability <= 0 || _state.engineDurability > 100)
+            _state.engineDurability = 100;
+
+        // 2) прогресс уровней
+        // Если сейв реально пустой (нет записей уровней), но lastCompleted == 0,
+        // это почти наверняка "дефолт int", а не реальный прогресс.
+        if((_state.levels == null || _state.levels.Count == 0) && _state.lastCompletedLogicalLevel == 0)
+            _state.lastCompletedLogicalLevel = -1;
+    }
+
     private void MarkLoaded()
     {
         _loaded = true;
         Loaded?.Invoke();
+
+        AmountChanged?.Invoke(_state.currency);
+
+        if(ServiceLocator.TryGet<IUIService>(out var ui))
+            ui.UpdateEngineDangerIndicator(EngineDurability);
     }
+
 
 #if UNITY_WEBGL 
     /// <summary>
@@ -205,7 +341,8 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
         if(!_loaded)
         {
             Debug.LogWarning("[ProgressService] VK cloud load timeout, fallback to empty state.");
-            _state = new SaveData { slotId = _slotId };
+            _state = new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
+            EnsureProgressInitialized();
             RebuildCaches();
             MarkLoaded();
         }
@@ -218,24 +355,24 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     {
         if(string.IsNullOrEmpty(json))
         {
-            // нет сохранения — стартуем с нуля
-            _state = new SaveData { slotId = _slotId };
-            TryMigrateFromPlayerPrefs(_state); // на всякий случай
+            _state = new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
+            TryMigrateFromPlayerPrefs(_state);
         }
         else
         {
             try
             {
                 var data = JsonUtility.FromJson<SaveData>(json);
-                _state = data ?? new SaveData { slotId = _slotId };
+                _state = data ?? new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
             }
             catch(Exception e)
             {
                 Debug.LogError($"[ProgressService] VK load parse error: {e}");
-                _state = new SaveData { slotId = _slotId };
+                _state = new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
             }
         }
 
+        EnsureProgressInitialized();   // <-- вместо EnsureEngineInitialized
         RebuildCaches();
         MarkLoaded();
     }
@@ -279,11 +416,16 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
     private void ScheduleSave(bool forceImmediate = false)
     {
         if(!_loaded)
-            return; // ещё не загрузились — не пишем
+            return;
 
         if(forceImmediate)
         {
-            StopAllCoroutines();
+            if(_saveRoutine != null)
+            {
+                StopCoroutine(_saveRoutine);
+                _saveRoutine = null;
+            }
+
             _saveScheduled = false;
             WriteImmediate();
             return;
@@ -293,7 +435,7 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
             return;
 
         _saveScheduled = true;
-        StartCoroutine(CoDebouncedSave());
+        _saveRoutine = StartCoroutine(CoDebouncedSave());
     }
 
     private IEnumerator CoDebouncedSave()
@@ -307,21 +449,22 @@ public sealed class ProgressService : MonoBehaviour, IProgressService
 
         WriteImmediate();
         _saveScheduled = false;
+        _saveRoutine = null;
     }
 
     private void WriteImmediate()
     {
         var json = JsonUtility.ToJson(_state, prettyPrint: false);
 
-#if UNITY_WEBGL&& !UNITY_EDITOR
-        if(IsVkEnvironment())
-        {
-            VK_SaveString(_vkStorageKey, json);
-        }
-        else
-        {
-            WriteFileImmediateLocal(json);
-        }
+#if UNITY_WEBGL && !UNITY_EDITOR       
+    if (IsVkEnvironment())
+    {
+        VK_SaveString(_vkStorageKey, json);
+    }
+    else
+    {
+        WriteFileImmediateLocal(json);
+    }
 #else
         WriteFileImmediateLocal(json);
 #endif

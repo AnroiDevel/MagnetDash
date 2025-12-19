@@ -16,31 +16,85 @@ public sealed class UIManager : MonoBehaviour, IUIService
     [SerializeField] private Image[] _starIcons; // длина всегда 3
     [SerializeField] private TMP_Text _starCountText;
     [SerializeField] private Color _filledColor = Color.white;
-    [SerializeField] private Color _emptyColor = new Color(1, 1, 1, 0.25f);
+    [SerializeField] private Color _emptyColor = new(1, 1, 1, 0.25f);
 
     [Header("Toast")]
     [SerializeField] private float _defaultToastSeconds = 1.0f;
 
+    [Header("Engine repair")]
+    [SerializeField] private EngineRepairPanel _engineRepairPanel;
+
+    [Header("Engine danger")]
+    [SerializeField] private Button _dangerBtn;
+    [SerializeField] private Image _dagerIcon; // можно потом переименовать через FormerlySerializedAs
+    [SerializeField] private Color _lowDangerColor = Color.yellow;
+    [SerializeField] private Color _highDangerColor = Color.red;
+    [SerializeField, Range(0, 100)] private int _dangerLowThreshold = 70;
+    [SerializeField, Range(0, 100)] private int _dangerHighThreshold = 40;
+
     private Coroutine _toastRoutine;
+    private IGameEvents _gameEvents;
 
     public event System.Action<string> ToastShown;
 
     private void Awake()
     {
         ServiceLocator.Register<IUIService>(this);
+        ServiceLocator.WhenAvailable<IGameEvents>(OnGameEventsAvailable);
 
         if(_toastText)
             _toastText.gameObject.SetActive(false);
+
+        if(_dangerBtn != null)
+        {
+            _dangerBtn.onClick.AddListener(OnDangerClicked);
+            _dangerBtn.gameObject.SetActive(false);
+        }
     }
 
     private void OnDestroy()
     {
+        if(_dangerBtn != null)
+            _dangerBtn.onClick.RemoveListener(OnDangerClicked);
+
+        if(_gameEvents != null)
+        {
+            _gameEvents.PolarityChanged -= HandlePolarityChanged;
+            _gameEvents.SpeedChanged -= HandleSpeedChanged;
+            _gameEvents.StarCollected -= HandleStarCollected;
+            _gameEvents.TimeChanged -= HandleTimeChanged;
+        }
+
+        ServiceLocator.Unsubscribe<IGameEvents>(OnGameEventsAvailable);
         ServiceLocator.Unregister<IUIService>(this);
+    }
+
+
+    private void OnGameEventsAvailable(IGameEvents events)
+    {
+        // на случай повторного вызова WhenAvailable
+        if(_gameEvents != null)
+        {
+            _gameEvents.PolarityChanged -= HandlePolarityChanged;
+            _gameEvents.SpeedChanged -= HandleSpeedChanged;
+            _gameEvents.StarCollected -= HandleStarCollected;
+            _gameEvents.TimeChanged -= HandleTimeChanged;
+        }
+
+        _gameEvents = events;
+
+        if(_gameEvents == null)
+            return;
+
+        _gameEvents.PolarityChanged += HandlePolarityChanged;
+        _gameEvents.SpeedChanged += HandleSpeedChanged;
+        _gameEvents.StarCollected += HandleStarCollected;
+        _gameEvents.TimeChanged += HandleTimeChanged;
     }
 
     // ---------- IUIService ----------
 
-    public void SetStars(int collected, int total)
+    public void SetStars(int collected)
     {
         if(_starIcons != null)
         {
@@ -55,9 +109,8 @@ public sealed class UIManager : MonoBehaviour, IUIService
         }
 
         if(_starCountText != null)
-            _starCountText.text = $"{collected} / {total}";
+            _starCountText.text = collected.ToString();
     }
-
 
     public void SetLevel(int level)
     {
@@ -77,14 +130,15 @@ public sealed class UIManager : MonoBehaviour, IUIService
             return;
 
         bool has = false;
+        float best;
 
-        if(progress != null && progress.TryGetBestTime(progressKey, out float best))
+        if(progress != null && progress.TryGetBestTime(progressKey, out best))
         {
             has = float.IsFinite(best);
         }
         else
         {
-            best = 0f; // значение не важно, мы его не используем, если has == false
+            best = 0f;
         }
 
         _bestText.gameObject.SetActive(has);
@@ -117,12 +171,70 @@ public sealed class UIManager : MonoBehaviour, IUIService
 
     public void ShowFailToast(float elapsedSeconds)
     {
-        // elapsedSeconds можно использовать в тексте, если нужно
         string msg = $"Failed in {Format(elapsedSeconds)} — retry!";
         ShowToast(msg, _defaultToastSeconds);
     }
 
+    public void ShowEngineRepairOffer(int powerPercent)
+    {
+        if(_engineRepairPanel == null)
+            return;
+
+        _engineRepairPanel.Show(powerPercent);
+    }
+
+    public void UpdateEngineDangerIndicator(int durability)
+    {
+        if(_dangerBtn == null || _dagerIcon == null)
+            return;
+
+        if(durability >= _dangerLowThreshold)
+        {
+            _dangerBtn.gameObject.SetActive(false);
+            return;
+        }
+
+        _dangerBtn.gameObject.SetActive(true);
+
+        if(durability <= _dangerHighThreshold)
+            _dagerIcon.color = _highDangerColor;
+        else
+            _dagerIcon.color = _lowDangerColor;
+    }
+
+    // ---------- Event handlers ----------
+
+    private void HandlePolarityChanged(int sign) => OnPolarity(sign);
+
+    private void HandleSpeedChanged(float speed) => SetSpeed(speed);
+
+    private void HandleStarCollected(int collected, Vector3 pos) => SetStars(collected);
+
+    private void HandleTimeChanged(float timeSeconds) => SetTime(timeSeconds);
+
     // ---------- Внутреннее ----------
+
+    private void OnDangerClicked()
+    {
+        int powerPercent = 100;
+        if(ServiceLocator.TryGet<IProgressService>(out var progress))
+            powerPercent = Mathf.RoundToInt(progress.EnginePower * 100f);
+
+        if(_engineRepairPanel == null)
+            return;
+
+        if(ServiceLocator.TryGet<IModalService>(out var modal))
+        {
+            modal.Show(
+                onShow: () => _engineRepairPanel.Show(powerPercent),
+                onHide: null // панель сама прячет себя
+            );
+            return;
+        }
+
+        // fallback: если модал-сервиса нет
+        _engineRepairPanel.Show(powerPercent);
+    }
 
     private void ShowToast(string message, float seconds)
     {

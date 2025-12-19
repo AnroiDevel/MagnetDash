@@ -1,4 +1,4 @@
-using System.Collections;
+п»їusing System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,9 +14,9 @@ public sealed class LevelResultPanel : MonoBehaviour
     [SerializeField] private TMP_Text _tHint;
 
     [Header("Stars")]
-    [SerializeField] private Image[] _starImages;   // 3 Image под звезды (слева-направо)
-    [SerializeField] private Sprite _starActive;    // яркая звезда
-    [SerializeField] private Sprite _starDim;       // силуэт/тусклая
+    [SerializeField] private Image[] _starImages;   // 3 Image РїРѕРґ Р·РІРµР·РґС‹ (СЃР»РµРІР°-РЅР°РїСЂР°РІРѕ)
+    [SerializeField] private Sprite _starActive;    // СЏСЂРєР°СЏ Р·РІРµР·РґР°
+    [SerializeField] private Sprite _starDim;       // СЃРёР»СѓСЌС‚/С‚СѓСЃРєР»Р°СЏ
 
     [Header("Buttons")]
     [SerializeField] private Button _btnRetry;
@@ -24,16 +24,16 @@ public sealed class LevelResultPanel : MonoBehaviour
     [SerializeField] private Button _btnMenu;
 
     [Header("FX")]
-    [SerializeField] private float _fadeDuration = 0.25f;
+     private float _fadeDuration = 2.25f;
 
     [Header("Final panel")]
-    [SerializeField] private GameObject _finalPanel; // <-- НОВОЕ: панель финала (изначально выключена)
+    [SerializeField] private GameObject _finalPanel; 
 
     private IGameFlowEvents _flowEvents;
     private ILevelFlow _flow;
     private Coroutine _fadeRoutine;
 
-    // --- новое ---
+    // --- РЅРѕРІРѕРµ ---
     private LevelResultInfo _currentInfo;
     private bool _isFinalLevel;
 
@@ -111,25 +111,25 @@ public sealed class LevelResultPanel : MonoBehaviour
         _isFinalLevel = info.isWin && info.levelNumber == 12;
 
         _tTitle.SetText(info.levelNumber.ToString());
-        _tTime.SetText("Время: {0:0.00} c", info.elapsedTime);
+        _tTime.SetText("Р’СЂРµРјСЏ: {0:0.00} c", info.elapsedTime);
 
         if(info.bestTime.HasValue)
         {
             if(info.isPersonalBest)
-                _tBest.SetText("Лучшее: {0:0.00} c (новый рекорд!)", info.bestTime.Value);
+                _tBest.SetText("Р›СѓС‡С€РµРµ: {0:0.00} c (РЅРѕРІС‹Р№ СЂРµРєРѕСЂРґ!)", info.bestTime.Value);
             else
-                _tBest.SetText("Лучшее: {0:0.00} c", info.bestTime.Value);
+                _tBest.SetText("Р›СѓС‡С€РµРµ: {0:0.00} c", info.bestTime.Value);
         }
         else
         {
-            _tBest.SetText("Лучшее: —");
+            _tBest.SetText("Р›СѓС‡С€РµРµ: вЂ”");
         }
 
         UpdateStars(info.collectedStars);
 
         _tHint.SetText(string.IsNullOrEmpty(info.hint) ? string.Empty : info.hint);
 
-        // На экране результата «Далее» всегда видно
+        // РќР° СЌРєСЂР°РЅРµ СЂРµР·СѓР»СЊС‚Р°С‚Р° В«Р”Р°Р»РµРµВ» РІСЃРµРіРґР° РІРёРґРЅРѕ
         _btnNext.gameObject.SetActive(true);
 
         if(_fadeRoutine != null)
@@ -164,18 +164,18 @@ public sealed class LevelResultPanel : MonoBehaviour
 
     private void OnNextClicked()
     {
-        // Если это финал (победа на 12 уровне) — вместо LoadNext показываем финальную панель
+        // Р•СЃР»Рё СЌС‚Рѕ С„РёРЅР°Р» (РїРѕР±РµРґР° РЅР° 12 СѓСЂРѕРІРЅРµ) вЂ” РІРјРµСЃС‚Рѕ LoadNext РїРѕРєР°Р·С‹РІР°РµРј С„РёРЅР°Р»СЊРЅСѓСЋ РїР°РЅРµР»СЊ
         //if(_isFinalLevel && _currentInfo != null)
         //{
         //    if(_finalPanel != null)
         //        _finalPanel.SetActive(true);
 
-        //    // Скрываем панель результата
+        //    // РЎРєСЂС‹РІР°РµРј РїР°РЅРµР»СЊ СЂРµР·СѓР»СЊС‚Р°С‚Р°
         //    Hide();
         //    return;
         //}
 
-        // Обычное поведение
+        // РћР±С‹С‡РЅРѕРµ РїРѕРІРµРґРµРЅРёРµ
         if(_flow != null)
             _flow.LoadNext();
         Hide();
