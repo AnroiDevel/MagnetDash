@@ -3,24 +3,38 @@ using UnityEditor;
 
 public static class ProjectFoldersCreator
 {
-    [MenuItem("Tools/Project/Создать структуру скриптов")]
+    private static readonly string[] ScriptFolders =
+    {
+        "Assets/Scripts/AudioInGame",
+        "Assets/Scripts/Core/Audio",
+        "Assets/Scripts/Core/Boot",
+        "Assets/Scripts/Core/Input",
+        "Assets/Scripts/Core/Systems",
+        "Assets/Scripts/Economy/Meta",
+        "Assets/Scripts/Economy/Shop",
+        "Assets/Scripts/Gameplay/Effects",
+        "Assets/Scripts/Gameplay/Level",
+        "Assets/Scripts/Gameplay/Magnet",
+        "Assets/Scripts/Gameplay/Player",
+        "Assets/Scripts/Services",
+        "Assets/Scripts/Services/Ads",
+        "Assets/Scripts/Services/AudioSysten",
+        "Assets/Scripts/Services/Levels",
+        "Assets/Scripts/Tutorials",
+        "Assets/Scripts/UI/Effects",
+        "Assets/Scripts/UI/HUD",
+        "Assets/Scripts/UI/Menus",
+        "Assets/Scripts/Utilities/Camera",
+        "Assets/Scripts/Utilities/JsonGenerator"
+    };
+
+    [MenuItem("Tools/Project/Create Script Folders")]
     private static void CreateScriptsFolders()
     {
-        CreateFolderIfNotExists("Assets/Scripts/Core/Boot");
-        CreateFolderIfNotExists("Assets/Scripts/Core/Systems");
-        CreateFolderIfNotExists("Assets/Scripts/Core/Input");
-        CreateFolderIfNotExists("Assets/Scripts/Core/Audio");
-
-        CreateFolderIfNotExists("Assets/Scripts/Gameplay/Player");
-        CreateFolderIfNotExists("Assets/Scripts/Gameplay/Magnet");
-        CreateFolderIfNotExists("Assets/Scripts/Gameplay/Level");
-        CreateFolderIfNotExists("Assets/Scripts/Gameplay/Effects");
-
-        CreateFolderIfNotExists("Assets/Scripts/UI/Menus");
-        CreateFolderIfNotExists("Assets/Scripts/UI/HUD");
-        CreateFolderIfNotExists("Assets/Scripts/UI/Effects");
-
-        CreateFolderIfNotExists("Assets/Scripts/Utilities/Camera");
+        foreach(var folder in ScriptFolders)
+        {
+            CreateFolderIfNotExists(folder);
+        }
 
         AssetDatabase.Refresh();
     }
@@ -46,4 +60,3 @@ public static class ProjectFoldersCreator
         }
     }
 }
-
