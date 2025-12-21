@@ -33,14 +33,12 @@ public sealed class UIManager : MonoBehaviour, IUIService
     [SerializeField, Range(0, 100)] private int _dangerHighThreshold = 40;
 
     private Coroutine _toastRoutine;
-    private IGameEvents _gameEvents;
 
     public event System.Action<string> ToastShown;
 
     private void Awake()
     {
         ServiceLocator.Register<IUIService>(this);
-        ServiceLocator.WhenAvailable<IGameEvents>(OnGameEventsAvailable);
 
         if(_toastText)
             _toastText.gameObject.SetActive(false);
@@ -57,40 +55,9 @@ public sealed class UIManager : MonoBehaviour, IUIService
         if(_dangerBtn != null)
             _dangerBtn.onClick.RemoveListener(OnDangerClicked);
 
-        if(_gameEvents != null)
-        {
-            _gameEvents.PolarityChanged -= HandlePolarityChanged;
-            _gameEvents.SpeedChanged -= HandleSpeedChanged;
-            _gameEvents.StarCollected -= HandleStarCollected;
-            _gameEvents.TimeChanged -= HandleTimeChanged;
-        }
-
-        ServiceLocator.Unsubscribe<IGameEvents>(OnGameEventsAvailable);
         ServiceLocator.Unregister<IUIService>(this);
     }
 
-
-    private void OnGameEventsAvailable(IGameEvents events)
-    {
-        // на случай повторного вызова WhenAvailable
-        if(_gameEvents != null)
-        {
-            _gameEvents.PolarityChanged -= HandlePolarityChanged;
-            _gameEvents.SpeedChanged -= HandleSpeedChanged;
-            _gameEvents.StarCollected -= HandleStarCollected;
-            _gameEvents.TimeChanged -= HandleTimeChanged;
-        }
-
-        _gameEvents = events;
-
-        if(_gameEvents == null)
-            return;
-
-        _gameEvents.PolarityChanged += HandlePolarityChanged;
-        _gameEvents.SpeedChanged += HandleSpeedChanged;
-        _gameEvents.StarCollected += HandleStarCollected;
-        _gameEvents.TimeChanged += HandleTimeChanged;
-    }
 
     // ---------- IUIService ----------
 
@@ -202,15 +169,6 @@ public sealed class UIManager : MonoBehaviour, IUIService
             _dagerIcon.color = _lowDangerColor;
     }
 
-    // ---------- Event handlers ----------
-
-    private void HandlePolarityChanged(int sign) => OnPolarity(sign);
-
-    private void HandleSpeedChanged(float speed) => SetSpeed(speed);
-
-    private void HandleStarCollected(int collected, Vector3 pos) => SetStars(collected);
-
-    private void HandleTimeChanged(float timeSeconds) => SetTime(timeSeconds);
 
     // ---------- Внутреннее ----------
 

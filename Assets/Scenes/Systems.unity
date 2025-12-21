@@ -119,6 +119,53 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &165758
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 165760}
+  - component: {fileID: 165759}
+  m_Layer: 0
+  m_Name: Vk
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &165759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 165758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 921f021d8f8c3f146bb7a4235d6002e2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VkCloudStorage
+  _keyPrefix: magnet_save_
+  _ignoreUrlCheck: 1
+  _loadTimeoutSeconds: 5
+--- !u!4 &165760
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 165758}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &341961243
 GameObject:
   m_ObjectHideFlags: 0
@@ -207,6 +254,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 55156096034395748, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
+      propertyPath: _economy
+      value: 
+      objectReference: {fileID: 11400000, guid: feda81a81fafa244cb62137ca002cfcd, type: 2}
+    - target: {fileID: 55156096034395748, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
       propertyPath: _engineRepairThreshold
       value: 90
       objectReference: {fileID: 0}
@@ -259,6 +310,66 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
+--- !u!114 &359989912 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 180258786371937484, guid: f99f226183882d846a271ef13b1cf3a8, type: 3}
+  m_PrefabInstance: {fileID: 359989911}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4097086a50ac5c3448fb2a8ec465c58e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Services::ProgressService
+--- !u!1 &474677714
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 474677716}
+  - component: {fileID: 474677715}
+  m_Layer: 0
+  m_Name: SystemsInstaller
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &474677715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 474677714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 678962b76b2fff54893d7e132643e870, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SystemsInstaller
+  _progress: {fileID: 359989912}
+  _skinDatabase: {fileID: 11400000, guid: e534478ae58271448906b3952ae5e2ec, type: 2}
+  _defaultSkinId: default
+  _vkCloud: {fileID: 165759}
+  _localPrefix: save_
+--- !u!4 &474677716
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 474677714}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -6.4016, y: 13.79474, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1335274197
 GameObject:
   m_ObjectHideFlags: 0
@@ -387,52 +498,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e0c4be1f9494c0c42a95870ce53004e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PauseController
---- !u!1 &1493479788
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1493479790}
-  - component: {fileID: 1493479789}
-  m_Layer: 0
-  m_Name: ShopBootstrap
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1493479789
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1493479788}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56f1dcbe326ef634482eee34dc4114be, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShopBootstrap
-  _skinDatabase: {fileID: 11400000, guid: e534478ae58271448906b3952ae5e2ec, type: 2}
-  _defaultSkinId: 0
---- !u!4 &1493479790
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1493479788}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1841037870
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -562,10 +627,11 @@ MonoBehaviour:
 SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
+  - {fileID: 474677716}
   - {fileID: 1335274199}
   - {fileID: 214767515930608299}
   - {fileID: 359989911}
   - {fileID: 341961246}
-  - {fileID: 1493479790}
   - {fileID: 1841037870}
   - {fileID: 1362433101}
+  - {fileID: 165760}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [DisallowMultipleComponent]
 public sealed class VkAdService : MonoBehaviour, IAdService
@@ -10,13 +11,21 @@ public sealed class VkAdService : MonoBehaviour, IAdService
     [DllImport("__Internal")] private static extern int VK_HasBridge();
     [DllImport("__Internal")] private static extern void VK_Log(string msg);
     [DllImport("__Internal")] private static extern string VK_GetUrl();
-    [DllImport("__Internal")] private static extern void VK_PreloadRewardedAd(string goName, string onDone); // "1"/"0"
+    [DllImport("__Internal")] private static extern void VK_PreloadRewardedAd(string goName, string onDone); // "1"/"0" or JSON
 #endif
 
-    [Header("Debug")]
-    [SerializeField] private bool _ignoreUrlCheck = true; // раньше _forceAvailableInWebGL, фактически это "не проверять URL"
+    [Header("Availability")]
+    [SerializeField] private bool _ignoreUrlCheck = true;
     [SerializeField] private bool _verbose = true;
-    [SerializeField] private float _callTimeoutSeconds = 10f;
+
+    [Header("Timeouts")]
+    [SerializeField, Min(0.1f)] private float _callTimeoutSeconds = 120f;
+
+    [Header("Auto preload")]
+    [SerializeField] private string _systemsSceneName = "Systems";
+    [SerializeField] private int _menuSceneIndex = 0;
+    [SerializeField] private int _firstLevelSceneIndex = 1;
+    [SerializeField, Min(0f)] private float _preloadCooldownSeconds = 2.0f;
 
     private bool _available;
     private bool _registered;
@@ -28,8 +37,15 @@ public sealed class VkAdService : MonoBehaviour, IAdService
     private float _startedAt;
 
     private bool _rewardedReady;
-    public bool IsRewardedReady => _rewardedReady;
+    private float _nextAllowedPreloadTime;
+
+    // Pending show (если пользователь нажал до готовности)
+    private bool _pendingShow;
+    private Action _pendingSuccess;
+    private Action _pendingFail;
+
     public bool IsAvailable => _available;
+    public bool IsRewardedReady => _rewardedReady;
 
     private void Awake()
     {
@@ -47,18 +63,26 @@ public sealed class VkAdService : MonoBehaviour, IAdService
         {
             ServiceLocator.Register<IAdService>(this);
             _registered = true;
-            if(_verbose) Debug.Log("[VkAdService] Registered IAdService");
         }
         else
         {
-            if(_verbose) Debug.LogWarning("[VkAdService] Not available -> not registered");
+            _rewardedReady = false;
         }
 #else
         _available = false;
-        _rewardedReady = false; // важно: недоступно => не "готово"
-        if(_verbose)
-            Debug.Log("[VkAdService] Not WebGL build -> unavailable");
+        _rewardedReady = false;
 #endif
+    }
+
+    private void OnEnable()
+    {
+        SceneManager.activeSceneChanged += OnActiveSceneChanged;
+        TryAutoPreload("enable");
+    }
+
+    private void OnDisable()
+    {
+        SceneManager.activeSceneChanged -= OnActiveSceneChanged;
     }
 
     private void OnDestroy()
@@ -67,8 +91,6 @@ public sealed class VkAdService : MonoBehaviour, IAdService
         {
             ServiceLocator.Unregister<IAdService>(this);
             _registered = false;
-            if(_verbose)
-                Debug.Log("[VkAdService] Unregistered IAdService");
         }
     }
 
@@ -84,14 +106,33 @@ public sealed class VkAdService : MonoBehaviour, IAdService
         Complete(success: false, reason: $"timeout:{elapsed:0.0}s");
     }
 
+    private void OnActiveSceneChanged(Scene oldScene, Scene newScene)
+    {
+        if(IsGameplayScene(newScene))
+            TryAutoPreload("scene_changed_to_gameplay");
+    }
+
     public void PreloadRewarded()
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         if(!_available)
             return;
 
+        if(_rewardedReady)
+            return;
+
+        if(_waiting)
+            return;
+
+        float now = Time.unscaledTime;
+        if(now < _nextAllowedPreloadTime)
+            return;
+
+        _nextAllowedPreloadTime = now + _preloadCooldownSeconds;
+
         try
         {
+            if(_verbose) Debug.Log("[VkAdService] PreloadRewarded...");
             VK_PreloadRewardedAd(gameObject.name, nameof(OnJsRewardedReady));
         }
         catch
@@ -99,59 +140,71 @@ public sealed class VkAdService : MonoBehaviour, IAdService
             _rewardedReady = false;
         }
 #else
-        // В не-WebGL среде ничего не прелоадим.
         _rewardedReady = false;
 #endif
     }
 
-    // JS -> Unity
-    public void OnJsRewardedReady(string payload)
+    private void TryAutoPreload(string reason)
     {
-        _rewardedReady = payload == "1";
+        if(!_available)
+            return;
+
+        if(!IsGameplayScene(SceneManager.GetActiveScene()))
+            return;
+
         if(_verbose)
-            Debug.Log($"[VkAdService] PreloadRewarded result={_rewardedReady}");
+            Debug.Log($"[VkAdService] AutoPreload reason='{reason}' ready={_rewardedReady} waiting={_waiting} pending={_pendingShow}");
+
+        PreloadRewarded();
     }
 
     public void ShowRewarded(Action onSuccess, Action onFail = null)
     {
-        if(_verbose)
-            Debug.Log($"[VkAdService] ShowRewarded called. available={_available} waiting={_waiting}");
-
-#if UNITY_WEBGL && !UNITY_EDITOR
-        SafeJsLog($"[VkAdService] ShowRewarded called. available={_available} waiting={_waiting}");
-#endif
-
         if(!_available)
         {
-            if(_verbose)
-                Debug.LogWarning("[VkAdService] ShowRewarded: service unavailable");
             onFail?.Invoke();
             return;
         }
 
         if(_waiting)
         {
-            if(_verbose)
-                Debug.LogWarning("[VkAdService] ShowRewarded: already waiting (ignored)");
             onFail?.Invoke();
             return;
         }
 
+        // Если не готово — ставим pending и прелоадим.
+        if(!_rewardedReady)
+        {
+            _pendingShow = true;
+            _pendingSuccess = onSuccess;
+            _pendingFail = onFail;
+
+            if(_verbose)
+                Debug.Log("[VkAdService] ShowRewarded: not ready -> Preload + pending");
+
+            PreloadRewarded();
+            return;
+        }
+
+        InternalShowRewarded(onSuccess, onFail);
+    }
+
+    private void InternalShowRewarded(Action onSuccess, Action onFail)
+    {
         _success = onSuccess;
         _fail = onFail;
 
-        // Показываем — считаем, что "готовность" потрачена
+        // Готовность “расходуем” только в момент реального show
         _rewardedReady = false;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
         _waiting = true;
         _startedAt = Time.unscaledTime;
 
-        if(_verbose) Debug.Log("[VkAdService] Calling JS VK_ShowRewardedAd...");
-        SafeJsLog("[VkAdService] Calling JS VK_ShowRewardedAd...");
-
         try
         {
+            if(_verbose) Debug.Log("[VkAdService] Calling JS VK_ShowRewardedAd...");
+            SafeJsLog("[VkAdService] Calling JS VK_ShowRewardedAd...");
             VK_ShowRewardedAd(gameObject.name, nameof(OnJsSuccess), nameof(OnJsFail));
         }
         catch(Exception e)
@@ -160,24 +213,70 @@ public sealed class VkAdService : MonoBehaviour, IAdService
             Complete(success: false, reason: "js_call_exception");
         }
 #else
-        if(_verbose)
-            Debug.Log("[VkAdService] Non-WebGL -> simulate success");
         onSuccess?.Invoke();
 #endif
     }
 
+    private void ClearPending()
+    {
+        _pendingShow = false;
+        _pendingSuccess = null;
+        _pendingFail = null;
+    }
+
+    // -------------------------
     // JS -> Unity callbacks
+    // ВАЖНО: в Web версии часто прилетает вызов БЕЗ аргумента.
+    // Поэтому держим overload без параметров.
+    // -------------------------
+
+    // Rewarded preload done
+    public void OnJsRewardedReady() => OnJsRewardedReady("1");
+
+    public void OnJsRewardedReady(string payload)
+    {
+        _rewardedReady = ParseBool(payload);
+
+        if(_verbose)
+            Debug.Log($"[VkAdService] PreloadRewarded result={_rewardedReady} payload='{payload}' pending={_pendingShow}");
+
+        if(!_pendingShow)
+            return;
+
+        if(_rewardedReady)
+        {
+            var ok = _pendingSuccess;
+            var fail = _pendingFail;
+            ClearPending();
+            InternalShowRewarded(ok, fail);
+        }
+        else
+        {
+            var fail = _pendingFail;
+            ClearPending();
+            fail?.Invoke();
+        }
+    }
+
+    // Ad success
+    public void OnJsSuccess() => OnJsSuccess("ok");
+
     public void OnJsSuccess(string payload)
     {
         if(_verbose)
             Debug.Log($"[VkAdService] OnJsSuccess payload='{payload}'");
+
         Complete(success: true, reason: payload);
     }
+
+    // Ad fail
+    public void OnJsFail() => OnJsFail("fail");
 
     public void OnJsFail(string reason)
     {
         if(_verbose)
             Debug.LogWarning($"[VkAdService] OnJsFail reason='{reason}'");
+
         Complete(success: false, reason: reason);
     }
 
@@ -200,6 +299,45 @@ public sealed class VkAdService : MonoBehaviour, IAdService
             onSuccess?.Invoke();
         else
             onFail?.Invoke();
+
+        TryAutoPreload("after_complete");
+    }
+
+    private bool IsGameplayScene(Scene scene)
+    {
+        if(!scene.IsValid())
+            return false;
+
+        if(scene.name == _systemsSceneName)
+            return false;
+
+        if(scene.buildIndex == _menuSceneIndex)
+            return false;
+
+        return scene.buildIndex >= _firstLevelSceneIndex;
+    }
+
+    private static bool ParseBool(string payload)
+    {
+        if(string.IsNullOrEmpty(payload))
+            return false;
+
+        payload = payload.Trim();
+
+        // Частые варианты: "1"/"0", "true"/"false"
+        if(payload == "1" || payload.Equals("true", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        if(payload == "0" || payload.Equals("false", StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        // Иногда прилетает JSON вида {"ready":true} или {"result":1}
+        // Без JSON парсера — просто эвристика по подстрокам.
+        string lower = payload.ToLowerInvariant();
+        if(lower.Contains("true") || lower.Contains(":1") || lower.Contains("\"ready\":1") || lower.Contains("\"ready\":true"))
+            return true;
+
+        return false;
     }
 
 #if UNITY_WEBGL && !UNITY_EDITOR

@@ -1659,6 +1659,8 @@ GameObject:
   - component: {fileID: 6909999574732099962}
   - component: {fileID: 4727807762569079225}
   - component: {fileID: 967796512984698875}
+  - component: {fileID: 8856402427136701962}
+  - component: {fileID: 2736455773498413495}
   m_Layer: 5
   m_Name: MainUI
   m_TagString: Untagged
@@ -1737,6 +1739,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameplayHudBinder
   _ui: {fileID: 4727807762569079225}
+--- !u!114 &8856402427136701962
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8752511074600870343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4fea356358c73224581bfaa0239fd364, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProgressUiBinder
+--- !u!114 &2736455773498413495
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8752511074600870343}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cad7f37c7175d164bbd2a611148e4e0c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CurrencyUiBinder
 --- !u!1 &8794427571349238972
 GameObject:
   m_ObjectHideFlags: 0

@@ -12,6 +12,7 @@ public sealed class LevelSceneFlow
     private readonly Func<int, bool> _isValidBuildIndex;
 
     private Coroutine _switchRoutine;
+    private int _token;
 
     public LevelSceneFlow(
         MonoBehaviour host,
@@ -19,14 +20,16 @@ public sealed class LevelSceneFlow
         float sceneOpTimeoutSeconds,
         Func<int, bool> isValidBuildIndex)
     {
-        _host = host;
+        _host = host ? host : throw new ArgumentNullException(nameof(host), "[LevelSceneFlow] host is null.");
         _systemsSceneName = systemsSceneName;
-        _sceneOpTimeoutSeconds = sceneOpTimeoutSeconds;
-        _isValidBuildIndex = isValidBuildIndex;
+        _sceneOpTimeoutSeconds = sceneOpTimeoutSeconds > 0f ? sceneOpTimeoutSeconds : 30f;
+        _isValidBuildIndex = isValidBuildIndex ?? throw new ArgumentNullException(nameof(isValidBuildIndex));
     }
 
     public void Cancel()
     {
+        _token++;
+
         if(_switchRoutine != null)
         {
             _host.StopCoroutine(_switchRoutine);
@@ -40,23 +43,30 @@ public sealed class LevelSceneFlow
         Action<bool> onDone)
     {
         Cancel();
-        _switchRoutine = _host.StartCoroutine(CoSwitchToScene(targetBuildIndex, onActivated, onDone));
+        _switchRoutine = _host.StartCoroutine(CoSwitchToScene(_token, targetBuildIndex, onActivated, onDone));
         return _switchRoutine;
     }
 
-    private IEnumerator CoSwitchToScene(int targetBuildIndex, Action<Scene> onActivated, Action<bool> onDone)
+    private IEnumerator CoSwitchToScene(
+        int token,
+        int targetBuildIndex,
+        Action<Scene> onActivated,
+        Action<bool> onDone)
     {
         bool success = false;
 
         try
         {
+            if(token != _token)
+                yield break;
+
             if(!_isValidBuildIndex(targetBuildIndex))
             {
                 Debug.LogError($"[LevelSceneFlow] Target buildIndex {targetBuildIndex} is invalid.");
                 yield break;
             }
 
-            // 1) ensure Systems loaded
+            // 1) Ensure Systems loaded
             var systems = SceneManager.GetSceneByName(_systemsSceneName);
             if(!systems.IsValid() || !systems.isLoaded)
             {
@@ -70,24 +80,39 @@ public sealed class LevelSceneFlow
                 float tSys = 0f;
                 while(!sysOp.isDone)
                 {
+                    if(token != _token)
+                        yield break;
+
                     tSys += Time.unscaledDeltaTime;
                     if(tSys > _sceneOpTimeoutSeconds)
                     {
                         Debug.LogError($"[LevelSceneFlow] Timeout while loading Systems '{_systemsSceneName}'.");
                         yield break;
                     }
+
                     yield return null;
                 }
 
                 systems = SceneManager.GetSceneByName(_systemsSceneName);
+                if(!systems.IsValid() || !systems.isLoaded)
+                {
+                    Debug.LogError($"[LevelSceneFlow] Systems '{_systemsSceneName}' reported loaded, but scene is not valid/loaded.");
+                    yield break;
+                }
             }
 
-            // 2) load target additively and identify newly loaded scene
+            if(token != _token)
+                yield break;
+
+            // 2) Load target additively and identify newly loaded scene
             Scene newlyLoaded = default;
 
             void OnLoaded(Scene s, LoadSceneMode mode)
             {
-                if(s.buildIndex == targetBuildIndex && s != systems)
+                if(token != _token)
+                    return;
+
+                if(s.isLoaded && s.buildIndex == targetBuildIndex && s.handle != systems.handle)
                     newlyLoaded = s;
             }
 
@@ -104,6 +129,12 @@ public sealed class LevelSceneFlow
             float tLoad = 0f;
             while(!loadOp.isDone)
             {
+                if(token != _token)
+                {
+                    SceneManager.sceneLoaded -= OnLoaded;
+                    yield break;
+                }
+
                 tLoad += Time.unscaledDeltaTime;
                 if(tLoad > _sceneOpTimeoutSeconds)
                 {
@@ -111,18 +142,22 @@ public sealed class LevelSceneFlow
                     Debug.LogError($"[LevelSceneFlow] Timeout while loading scene {targetBuildIndex}.");
                     yield break;
                 }
+
                 yield return null;
             }
 
             SceneManager.sceneLoaded -= OnLoaded;
 
-            // fallback: detect by iterating loaded scenes
+            if(token != _token)
+                yield break;
+
+            // Fallback: detect by iterating loaded scenes
             if(!newlyLoaded.IsValid())
             {
                 for(int i = 0; i < SceneManager.sceneCount; i++)
                 {
                     var s = SceneManager.GetSceneAt(i);
-                    if(s.isLoaded && s.buildIndex == targetBuildIndex && s != systems)
+                    if(s.isLoaded && s.buildIndex == targetBuildIndex && s.handle != systems.handle)
                     {
                         newlyLoaded = s;
                         break;
@@ -130,34 +165,55 @@ public sealed class LevelSceneFlow
                 }
             }
 
-            if(!newlyLoaded.IsValid())
+            if(!newlyLoaded.IsValid() || !newlyLoaded.isLoaded)
             {
                 Debug.LogError($"[LevelSceneFlow] Could not identify newly loaded scene {targetBuildIndex}.");
                 yield break;
             }
 
-            // 3) activate
+            // 3) Activate
             SceneManager.SetActiveScene(newlyLoaded);
-            yield return null; // let Awake/OnEnable run
+            yield return null;
 
-            onActivated?.Invoke(newlyLoaded);
+            if(token != _token)
+                yield break;
 
-            // 4) unload everything except Systems + newlyLoaded
+            try
+            {
+                onActivated?.Invoke(newlyLoaded);
+            }
+            catch(Exception e)
+            {
+                Debug.LogException(e);
+                yield break;
+            }
+
+            if(token != _token)
+                yield break;
+
+            // 4) Unload everything except Systems + newlyLoaded
             var toUnload = new List<Scene>(SceneManager.sceneCount);
             for(int i = 0; i < SceneManager.sceneCount; i++)
             {
                 var s = SceneManager.GetSceneAt(i);
                 if(!s.isLoaded)
                     continue;
-                if(s == newlyLoaded)
+
+                if(s.handle == newlyLoaded.handle)
                     continue;
-                if(s == systems)
+
+                if(s.handle == systems.handle)
                     continue;
+
                 toUnload.Add(s);
             }
 
-            foreach(var s in toUnload)
+            for(int i = 0; i < toUnload.Count; i++)
             {
+                if(token != _token)
+                    yield break;
+
+                var s = toUnload[i];
                 var unOp = SceneManager.UnloadSceneAsync(s);
                 if(unOp == null)
                 {
@@ -168,12 +224,16 @@ public sealed class LevelSceneFlow
                 float tUn = 0f;
                 while(!unOp.isDone)
                 {
+                    if(token != _token)
+                        yield break;
+
                     tUn += Time.unscaledDeltaTime;
                     if(tUn > _sceneOpTimeoutSeconds)
                     {
                         Debug.LogError($"[LevelSceneFlow] Timeout while unloading scene '{s.name}'. Continue.");
                         break;
                     }
+
                     yield return null;
                 }
             }
@@ -182,6 +242,12 @@ public sealed class LevelSceneFlow
         }
         finally
         {
+            if(token == _token)
+            {
+                // очищаем только если это актуальная операция
+                _switchRoutine = null;
+            }
+
             onDone?.Invoke(success);
         }
     }

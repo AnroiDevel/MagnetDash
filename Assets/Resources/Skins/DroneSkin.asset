@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1ceeca0b73359f0499d6e50375229e2b, type: 3}
   m_Name: DroneSkin
   m_EditorClassIdentifier: Assembly-CSharp::DroneSkinDefinition
-  id: 0
+  id: default
   displayName: Classic
   price: 0
   icon: {fileID: 21300000, guid: c82d6d84e5e729546becd825b251d6e5, type: 3}

@@ -10,6 +10,8 @@ public interface IProgressService
     bool SetStarsMax(int buildIndex, int stars);
     bool TryGetBestTime(int buildIndex, out float t);
     bool SetBestTimeIfBetter(int buildIndex, float t);
+    bool WasCompleted(int progressKey);
+    bool MarkCompleted(int progressKey); // true если впервые
 
     void ResetAll();
 
