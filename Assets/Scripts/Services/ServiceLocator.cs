@@ -1,112 +1,98 @@
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 public static class ServiceLocator
 {
-    private static readonly Dictionary<Type, object> _map = new();
+    private static readonly Dictionary<Type, object> _services = new();
     private static readonly Dictionary<Type, List<Delegate>> _waiters = new();
 
-    /// <summary>
-    /// Вызывается при успешной регистрации сервиса указанного типа.
-    /// </summary>
-    public static event Action<Type, object> Registered;
-
-    /// <summary>
-    /// Вызывается при удалении сервиса указанного типа.
-    /// </summary>
-    public static event Action<Type> Unregistered;
-
-    /// <summary>
-    /// Регистрирует экземпляр сервиса типа T.
-    /// </summary>
-    public static void Register<T>(T instance) where T : class
+    public static void Register<T>(T service) where T : class
     {
-        if(instance == null)
-            throw new ArgumentNullException(nameof(instance), $"ServiceLocator.Register<{typeof(T).Name}>: instance is null. Use Unregister(instance) для удаления.");
+        if(service == null)
+        {
+            Debug.LogError($"[ServiceLocator] Register<{typeof(T).Name}>: service is null");
+            return;
+        }
 
         var type = typeof(T);
+        _services[type] = service;
 
-        _map[type] = instance;
-
-        Registered?.Invoke(type, instance);
-
-        if(_waiters.TryGetValue(type, out var list))
+        // доставляем всем ожидающим
+        if(_waiters.TryGetValue(type, out var list) && list != null)
         {
-            foreach(var d in list)
-                ((Action<T>)d)?.Invoke(instance);
-
-            _waiters.Remove(type);
+            for(int i = 0; i < list.Count; i++)
+            {
+                if(list[i] is Action<T> cb)
+                    cb(service);
+            }
         }
     }
 
-    /// <summary>
-    /// Пытается получить зарегистрированный сервис типа T.
-    /// </summary>
-    public static bool TryGet<T>(out T instance) where T : class
+    public static void Unregister<T>(T service) where T : class
     {
-        if(_map.TryGetValue(typeof(T), out var obj) && obj is T t)
+        var type = typeof(T);
+        if(_services.TryGetValue(type, out var existing) && ReferenceEquals(existing, service))
+            _services.Remove(type);
+    }
+
+    public static bool TryGet<T>(out T service) where T : class
+    {
+        if(_services.TryGetValue(typeof(T), out var obj) && obj is T s)
         {
-            instance = t;
+            service = s;
             return true;
         }
 
-        instance = null;
+        service = null;
         return false;
     }
 
     /// <summary>
-    /// Если сервис уже есть — сразу вызывает onAvailable.
-    /// Если нет — сохранит колбэк и вызовет его при первой регистрации сервиса.
+    /// КРИТИЧНО: если сервис уже есть — вызываем callback сразу.
+    /// Иначе подписываемся.
     /// </summary>
-    public static void WhenAvailable<T>(Action<T> onAvailable) where T : class
+    public static void WhenAvailable<T>(Action<T> onReady) where T : class
     {
-        if(onAvailable == null)
+        if(onReady == null)
             return;
 
-        if(TryGet(out T inst))
+        if(TryGet<T>(out var service))
         {
-            onAvailable(inst);
+            onReady(service);
             return;
         }
 
         var type = typeof(T);
-        if(!_waiters.TryGetValue(type, out var list))
-            _waiters[type] = list = new List<Delegate>();
-
-        list.Add(onAvailable);
-    }
-
-    /// <summary>
-    /// Убирает колбэк из очереди ожидания сервиса типа T.
-    /// </summary>
-    public static void Unsubscribe<T>(Action<T> onAvailable) where T : class
-    {
-        if(onAvailable == null)
-            return;
-
-        var type = typeof(T);
-        if(_waiters.TryGetValue(type, out var list))
+        if(!_waiters.TryGetValue(type, out var list) || list == null)
         {
-            list.Remove(onAvailable);
-            if(list.Count == 0)
-                _waiters.Remove(type);
+            list = new List<Delegate>(4);
+            _waiters[type] = list;
         }
+
+        // избегаем дублей
+        for(int i = 0; i < list.Count; i++)
+        {
+            if(Equals(list[i], onReady))
+                return;
+        }
+
+        list.Add(onReady);
     }
 
-    /// <summary>
-    /// Удаляет сервис типа T, только если в локаторе хранится именно этот экземпляр.
-    /// </summary>
-    public static void Unregister<T>(T instance) where T : class
+    public static void Unsubscribe<T>(Action<T> onReady) where T : class
     {
-        if(instance == null)
+        if(onReady == null)
             return;
 
         var type = typeof(T);
+        if(!_waiters.TryGetValue(type, out var list) || list == null)
+            return;
 
-        if(_map.TryGetValue(type, out var current) && ReferenceEquals(current, instance))
+        for(int i = list.Count - 1; i >= 0; i--)
         {
-            _map.Remove(type);
-            Unregistered?.Invoke(type);
+            if(Equals(list[i], onReady))
+                list.RemoveAt(i);
         }
     }
 }

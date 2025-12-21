@@ -1,41 +1,43 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class Audio
 {
     private static IAudioService _service;
-    private static bool _hooked;
+    private static bool _subscribed;
 
-    static Audio()
+    // Важно: сброс статики при старте PlayMode / домена
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetStatics()
     {
-        HookEvents();
-        TryInitialResolve();
+        _service = null;
+        _subscribed = false;
     }
 
-    private static void HookEvents()
+    // Подписываемся после загрузки сборок
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+    private static void Bootstrap()
     {
-        if(_hooked)
+        SubscribeOnce();
+        TryResolve();
+    }
+
+    private static void SubscribeOnce()
+    {
+        if(_subscribed)
             return;
 
-        _hooked = true;
+        _subscribed = true;
 
-        ServiceLocator.Registered += OnServiceRegistered;
-        ServiceLocator.Unregistered += OnServiceUnregistered;
+        // Когда сервис появится — подхватим ссылку
+        ServiceLocator.WhenAvailable<IAudioService>(OnAudioAvailable);
     }
 
-    private static void OnServiceRegistered(Type type, object instance)
+    private static void OnAudioAvailable(IAudioService service)
     {
-        if(type == typeof(IAudioService))
-            _service = instance as IAudioService;
+        _service = service;
     }
 
-    private static void OnServiceUnregistered(Type type)
-    {
-        if(type == typeof(IAudioService))
-            _service = null;
-    }
-
-    private static void TryInitialResolve()
+    private static void TryResolve()
     {
         if(_service != null)
             return;
@@ -48,8 +50,10 @@ public static class Audio
     {
         get
         {
+            // Страховка: если сервис пересоздали/пере-регистрировали — подхватим заново
             if(_service == null)
-                TryInitialResolve();
+                TryResolve();
+
             return _service;
         }
     }

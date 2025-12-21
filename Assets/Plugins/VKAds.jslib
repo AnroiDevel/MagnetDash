@@ -55,7 +55,7 @@ mergeInto(LibraryManager.library, {
             finished = true;
             console.warn('[VK_ShowRewardedAd] timeout');
             SendMessage(goName, methodFail, 'promise_timeout');
-        }, 10000);
+        }, 120000);
 
         vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' })
             .then(function (res) {

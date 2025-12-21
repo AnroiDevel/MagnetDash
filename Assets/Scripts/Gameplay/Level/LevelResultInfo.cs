@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 
 [Serializable]
 public sealed class LevelResultInfo
@@ -11,4 +11,6 @@ public sealed class LevelResultInfo
     public bool isPersonalBest;
     public bool isWin;
     public string hint;
+
+    public LevelRewardInfo reward;
 }

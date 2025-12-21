@@ -1,101 +1,47 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.InteropServices;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-public sealed class ProgressService : MonoBehaviour, IProgressService, ICurrencyService
+public sealed class ProgressService : MonoBehaviour,
+    IProgressService, ICurrencyService, ILevelCompletionService, IShopState
 {
-    [Header("Storage (local file)")]
+    [Header("Save")]
     [SerializeField] private string _slotId = "default";
-    [SerializeField] private string _filePrefix = "save_";
     [SerializeField] private float _saveDebounce = 0.2f;
 
-    [Header("Cloud (VK)")]
-    [SerializeField] private string _vkStorageKey = "magnet_save_default";
+    [Header("Shop")]
+    [SerializeField] private string _defaultSkinId = "default";
 
     public event Action Loaded;
+
+    // progress events
     public event Action<int, int> StarsChanged;
     public event Action<int, float> BestTimeChanged;
     public event Action<int> EngineDurabilityChanged;
 
+    // economy events
     public event Action<int> AmountChanged;
 
-    private SaveData _state = new() { slotId = "default" };
-    private readonly Dictionary<int, int> _stars = new();         // buildIndex/id -> stars
-    private readonly Dictionary<int, float> _bestTimes = new();   // buildIndex/id -> time
-    private bool _saveScheduled;
-    private bool _loaded;     // данные загружены (для WebGL/облака)
-
-    private string FilePath => Path.Combine(Application.persistentDataPath, $"{_filePrefix}{_slotId}.json");
-    private string TempPath => FilePath + ".tmp";
-
-#if UNITY_WEBGL
-
-    [DllImport("__Internal")] private static extern void VK_SaveString(string key, string value);
-    [DllImport("__Internal")] private static extern void VK_LoadString(string key, string goName, string methodName);
-#endif
+    // shop events
+    public event Action<string> CurrentSkinChanged;
 
     public bool IsLoaded => _loaded;
 
+    private ISaveStorage _storage;
+    private bool _booted;
+    private bool _loaded;
+
+    private SaveData _state = new() { slotId = "default" };
+
+    private readonly Dictionary<int, int> _stars = new();
+    private readonly Dictionary<int, float> _bestTimes = new();
+    private readonly HashSet<int> _completed = new();
+    private readonly HashSet<string> _ownedSkins = new();
+
+    private bool _saveScheduled;
     private Coroutine _saveRoutine;
-
-    private void Awake()
-    {
-        if(ServiceLocator.TryGet<IProgressService>(out var existing) && !ReferenceEquals(existing, this))
-        {
-            Debug.LogWarning("[ProgressService] Duplicate instance detected. Destroying new one.");
-            Destroy(gameObject);
-            return;
-        }
-
-        _state.slotId = _slotId;
-
-        ServiceLocator.Register<IProgressService>(this);
-        ServiceLocator.Register<ICurrencyService>(this);
-
-#if UNITY_WEBGL && !UNITY_EDITOR
-    if(IsVkEnvironment())
-    {
-        // грузим только из облака VK
-        StartCoroutine(CoLoadFromVkCloud());
-    }
-    else
-    {
-        // обычное локальное сохранение
-        LoadOrCreateLocal();
-    }
-#else
-        // Editor / Standalone / прочий runtime
-        LoadOrCreateLocal();
-#endif
-    }
-
-#if UNITY_WEBGL && !UNITY_EDITOR
-private bool IsVkEnvironment()
-{
-    string url = Application.absoluteURL;
-    if(string.IsNullOrEmpty(url))
-        return false;
-
-    url = url.ToLowerInvariant();
-    return url.Contains("vk.com")
-        || url.Contains("m.vk.com")
-        || url.Contains("vk.ru")
-        || url.Contains("vkplay.ru");
-}
-#endif
-
-
-    private void OnDestroy()
-    {
-        ServiceLocator.Unregister<IProgressService>(this);
-        ServiceLocator.Unregister<ICurrencyService>(this);
-    }
-
-    // ================= PUBLIC API =================
 
     public int EngineDurability => Mathf.Clamp(_state.engineDurability, 0, 100);
 
@@ -103,64 +49,122 @@ private bool IsVkEnvironment()
     {
         get
         {
-            // 100 → 1.0; 0 → 0.5
             float dur = EngineDurability;
-            return (0.5f + (dur / 100f) * 0.5f);
+            return 0.5f + (dur / 100f) * 0.5f;
         }
     }
 
-
-    public void DamageEngine(int amount)
-    {
-        if(amount <= 0 || !_loaded)
-            return;
-
-        Debug.Log($"[ProgressService] DamageEngine amount={amount} before={_state.engineDurability}\n{Environment.StackTrace}");
-
-        int prev = _state.engineDurability;
-        _state.engineDurability = Mathf.Clamp(_state.engineDurability - amount, 0, 100);
-
-        if(_state.engineDurability == prev)
-            return;
-
-        ScheduleSave();
-        EngineDurabilityChanged?.Invoke(_state.engineDurability);
-
-        if(ServiceLocator.TryGet<IUIService>(out var ui))
-            ui.UpdateEngineDangerIndicator(_state.engineDurability);
-    }
-
-    public void RepairEngineFull()
-    {
-        Debug.Log($"[ProgressService] RepairEngineFull instance={GetHashCode()}");
-
-
-        int prev = _state.engineDurability;
-        _state.engineDurability = 100;
-
-        if(prev == 100)
-            return;
-
-        ScheduleSave(forceImmediate: true);
-        EngineDurabilityChanged?.Invoke(_state.engineDurability);
-
-        if(ServiceLocator.TryGet<IUIService>(out var ui))
-            ui.UpdateEngineDangerIndicator(_state.engineDurability);
-    }
-
-    // ===== CURRENCY =====
-
     public int Amount => _state.currency;
 
-    public bool CanSpend(int amount)
+    public string CurrentSkinId => _state.currentSkinId ?? string.Empty;
+
+    public void Boot(ISaveStorage storage)
     {
-        if(amount <= 0)
-            return true;
-        return _state.currency >= amount;
+        if(_booted)
+            return;
+
+        _booted = true;
+        _storage = storage;
+
+        _state.slotId = _slotId;
+
+        StartLoad();
     }
+
+    private void Start()
+    {
+        if(!_booted)
+            Debug.LogError("[ProgressService] Boot() was not called. Progress will stay unloaded.", this);
+    }
+
+    private void StartLoad()
+    {
+        _loaded = false;
+
+        if(_storage == null || !_storage.IsAvailable)
+        {
+            ApplyState(new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 });
+            return;
+        }
+
+        _storage.Load(
+            _slotId,
+            onOk: json =>
+            {
+                SaveData data = null;
+
+                if(!string.IsNullOrEmpty(json))
+                {
+                    try
+                    { data = JsonUtility.FromJson<SaveData>(json); }
+                    catch(Exception e) { Debug.LogError($"[ProgressService] JSON parse error: {e}"); }
+                }
+
+                data ??= new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
+                ApplyState(data);
+            },
+            onFail: reason =>
+            {
+                Debug.LogWarning($"[ProgressService] Load failed: {reason}. Using empty state.", this);
+                ApplyState(new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 });
+            }
+        );
+    }
+
+    private void ApplyState(SaveData data)
+    {
+        _state = data ?? new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
+        _state.slotId = _slotId;
+
+        EnsureInitialized();
+        RebuildCaches();
+
+        _loaded = true;
+
+        Loaded?.Invoke();
+
+        AmountChanged?.Invoke(_state.currency);
+        EngineDurabilityChanged?.Invoke(EngineDurability);
+        CurrentSkinChanged?.Invoke(CurrentSkinId);
+    }
+
+    private void EnsureInitialized()
+    {
+        if(_state.engineDurability <= 0 || _state.engineDurability > 100)
+            _state.engineDurability = 100;
+
+        _state.levels ??= new List<LevelResultDto>();
+        _state.completedLevels ??= new List<int>();
+
+        _state.ownedSkins ??= new List<string>();
+        _state.currentSkinId ??= string.Empty;
+
+        EnsureDefaultSkinNoAutoSave();
+    }
+
+    private void EnsureDefaultSkinNoAutoSave()
+    {
+        var defaultId = string.IsNullOrEmpty(_defaultSkinId) ? "default" : _defaultSkinId.Trim();
+
+        if(string.IsNullOrEmpty(_state.currentSkinId))
+            _state.currentSkinId = defaultId;
+
+        // НЕ сохраняем здесь автоматически (чтобы не перетирать облако при пустой загрузке)
+        if(!_ownedSkins.Contains(_state.currentSkinId))
+        {
+            _ownedSkins.Add(_state.currentSkinId);
+            _state.ownedSkins.Add(_state.currentSkinId);
+        }
+    }
+
+    // ---------- currency ----------
+    public bool CanSpend(int amount) => amount <= 0 || _state.currency >= amount;
 
     public bool TrySpend(int amount)
     {
+        if(!_loaded)
+            return false;
+
         if(amount < 0)
             return false;
 
@@ -175,6 +179,9 @@ private bool IsVkEnvironment()
 
     public void Add(int amount)
     {
+        if(!_loaded)
+            return;
+
         if(amount <= 0)
             return;
 
@@ -183,37 +190,45 @@ private bool IsVkEnvironment()
         AmountChanged?.Invoke(_state.currency);
     }
 
-
-
-    public bool TryGetLastCompletedLevel(out int lastCLevel)
+    // ---------- engine ----------
+    public void DamageEngine(int amount)
     {
-        if(_state == null || _state.lastCompletedLogicalLevel < 0)
-        {
-            lastCLevel = -1;
-            return false;
-        }
-
-        lastCLevel = _state.lastCompletedLogicalLevel;
-        return true;
-    }
-
-    public void SetLastCompletedLevelIfHigher(int logicalIndex)
-    {
-        if(logicalIndex < 0)
+        if(amount <= 0 || !_loaded)
             return;
 
-        if(_state.lastCompletedLogicalLevel >= logicalIndex)
+        int prev = _state.engineDurability;
+        _state.engineDurability = Mathf.Clamp(_state.engineDurability - amount, 0, 100);
+
+        if(_state.engineDurability == prev)
             return;
 
-        _state.lastCompletedLogicalLevel = logicalIndex;
         ScheduleSave();
+        EngineDurabilityChanged?.Invoke(_state.engineDurability);
     }
 
-    public int GetStars(int buildIndex) =>
-        _stars.TryGetValue(buildIndex, out var s) ? s : 0;
+    public void RepairEngineFull()
+    {
+        if(!_loaded)
+            return;
+
+        int prev = _state.engineDurability;
+        _state.engineDurability = 100;
+
+        if(prev == 100)
+            return;
+
+        ScheduleSave(forceImmediate: true);
+        EngineDurabilityChanged?.Invoke(EngineDurability);
+    }
+
+    // ---------- progress ----------
+    public int GetStars(int buildIndex) => _stars.TryGetValue(buildIndex, out var s) ? s : 0;
 
     public bool SetStarsMax(int buildIndex, int stars)
     {
+        if(!_loaded)
+            return false;
+
         stars = Mathf.Clamp(stars, 0, 3);
         int prev = GetStars(buildIndex);
         if(stars <= prev)
@@ -230,14 +245,19 @@ private bool IsVkEnvironment()
     {
         if(_bestTimes.TryGetValue(buildIndex, out t))
             return true;
+
         t = float.MaxValue;
         return false;
     }
 
     public bool SetBestTimeIfBetter(int buildIndex, float t)
     {
+        if(!_loaded)
+            return false;
+
         if(t <= 0f || !float.IsFinite(t))
             return false;
+
         if(TryGetBestTime(buildIndex, out var prev) && t >= prev)
             return false;
 
@@ -248,149 +268,170 @@ private bool IsVkEnvironment()
         return true;
     }
 
+    public bool TryGetLastCompletedLevel(out int logicalIndex)
+    {
+        if(_state.lastCompletedLogicalLevel < 0)
+        {
+            logicalIndex = -1;
+            return false;
+        }
+
+        logicalIndex = _state.lastCompletedLogicalLevel;
+        return true;
+    }
+
+    public void SetLastCompletedLevelIfHigher(int logicalIndex)
+    {
+        if(!_loaded)
+            return;
+
+        if(logicalIndex < 0)
+            return;
+
+        if(_state.lastCompletedLogicalLevel >= logicalIndex)
+            return;
+
+        _state.lastCompletedLogicalLevel = logicalIndex;
+        ScheduleSave();
+    }
+
+    // ---------- completion ----------
+    public bool WasCompleted(int progressKey) => _completed.Contains(progressKey);
+
+    public bool MarkCompleted(int progressKey)
+    {
+        if(!_loaded)
+            return false;
+
+        if(progressKey < 0)
+            return false;
+
+        if(!_completed.Add(progressKey))
+            return false;
+
+        _state.completedLevels.Add(progressKey);
+        ScheduleSave();
+        return true;
+    }
+
     public void ResetAll()
     {
+        if(!_loaded)
+            return;
+
         _state = new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
-        EnsureProgressInitialized();
+        EnsureInitialized();
 
         _stars.Clear();
         _bestTimes.Clear();
+        _completed.Clear();
 
         ScheduleSave(forceImmediate: true);
 
         StarsChanged?.Invoke(-1, 0);
         AmountChanged?.Invoke(_state.currency);
+        EngineDurabilityChanged?.Invoke(EngineDurability);
+        CurrentSkinChanged?.Invoke(CurrentSkinId);
     }
 
-    // ================= INTERNAL: LOAD =================
-
-    /// <summary>
-    /// Локальная загрузка/создание (Editor, Standalone, WebGL без облака).
-    /// </summary>
-    private void LoadOrCreateLocal()
+    // ---------- shop (IShopState) ----------
+    public bool IsOwned(string skinId)
     {
-        if(File.Exists(FilePath))
-        {
-            TryReadLocal(out _state);
-        }
-        else
-        {
-            _state = new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
-            TryMigrateFromPlayerPrefs(_state);
-            WriteFileImmediateLocal();
-        }
-
-        EnsureProgressInitialized();   // <-- вместо EnsureEngineInitialized
-        RebuildCaches();
-        MarkLoaded();
-    }
-
-
-    private void EnsureEngineInitialized()
-    {
-        if(_state.engineDurability <= 0 || _state.engineDurability > 100)
-            _state.engineDurability = 100;
-    }
-
-
-    private void EnsureProgressInitialized()
-    {
-        // 1) двигатель
-        if(_state.engineDurability <= 0 || _state.engineDurability > 100)
-            _state.engineDurability = 100;
-
-        // 2) прогресс уровней
-        // Если сейв реально пустой (нет записей уровней), но lastCompleted == 0,
-        // это почти наверняка "дефолт int", а не реальный прогресс.
-        if((_state.levels == null || _state.levels.Count == 0) && _state.lastCompletedLogicalLevel == 0)
-            _state.lastCompletedLogicalLevel = -1;
-    }
-
-    private void MarkLoaded()
-    {
-        _loaded = true;
-        Loaded?.Invoke();
-
-        AmountChanged?.Invoke(_state.currency);
-
-        if(ServiceLocator.TryGet<IUIService>(out var ui))
-            ui.UpdateEngineDangerIndicator(EngineDurability);
-    }
-
-
-#if UNITY_WEBGL 
-    /// <summary>
-    /// Загрузка из VK Storage (WebGL).
-    /// </summary>
-    private IEnumerator CoLoadFromVkCloud()
-    {
-        _loaded = false;
-
-        // дергаем JS → он вернёт строку через SendMessage
-        VK_LoadString(_vkStorageKey, gameObject.name, nameof(OnVkStorageLoaded));
-
-        // ждём, пока коллбек выставит _loaded = true
-        float timeout = 5f;
-        float t = 0f;
-        while(!_loaded && t < timeout)
-        {
-            t += Time.unscaledDeltaTime;
-            yield return null;
-        }
-
         if(!_loaded)
-        {
-            Debug.LogWarning("[ProgressService] VK cloud load timeout, fallback to empty state.");
-            _state = new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
-            EnsureProgressInitialized();
-            RebuildCaches();
-            MarkLoaded();
-        }
+            return false;
+
+        skinId = skinId?.Trim();
+        return !string.IsNullOrEmpty(skinId) && _ownedSkins.Contains(skinId);
     }
 
-    /// <summary>
-    /// Коллбек из JS. Получаем JSON или пустую строку.
-    /// </summary>
-    private void OnVkStorageLoaded(string json)
+    public IReadOnlyCollection<string> GetOwnedSkins() => _ownedSkins;
+
+    public bool AddOwned(string skinId)
     {
-        if(string.IsNullOrEmpty(json))
-        {
-            _state = new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
-            TryMigrateFromPlayerPrefs(_state);
-        }
-        else
-        {
-            try
-            {
-                var data = JsonUtility.FromJson<SaveData>(json);
-                _state = data ?? new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
-            }
-            catch(Exception e)
-            {
-                Debug.LogError($"[ProgressService] VK load parse error: {e}");
-                _state = new SaveData { slotId = _slotId, lastCompletedLogicalLevel = -1 };
-            }
-        }
+        if(!_loaded)
+            return false;
 
-        EnsureProgressInitialized();   // <-- вместо EnsureEngineInitialized
-        RebuildCaches();
-        MarkLoaded();
+        skinId = skinId?.Trim();
+        if(string.IsNullOrEmpty(skinId))
+            return false;
+
+        if(!_ownedSkins.Add(skinId))
+            return false;
+
+        _state.ownedSkins.Add(skinId);
+        ScheduleSave(forceImmediate: true);
+        return true;
     }
-#endif
 
+    public bool TrySetCurrent(string skinId)
+    {
+        if(!_loaded)
+            return false;
+
+        skinId = skinId?.Trim();
+        if(string.IsNullOrEmpty(skinId))
+            return false;
+
+        if(!_ownedSkins.Contains(skinId))
+            return false;
+
+        if(_state.currentSkinId == skinId)
+            return true;
+
+        _state.currentSkinId = skinId;
+        ScheduleSave(forceImmediate: true);
+        CurrentSkinChanged?.Invoke(_state.currentSkinId);
+        return true;
+    }
+
+    public void Initialize(string defaultSkinId, ISkinDatabase db)
+    {
+        // оставил совместимость с твоим интерфейсом магазина.
+        if(!_loaded)
+            return;
+
+        if(!string.IsNullOrEmpty(defaultSkinId))
+            _defaultSkinId = defaultSkinId.Trim();
+
+        EnsureDefaultSkinNoAutoSave();
+        CurrentSkinChanged?.Invoke(CurrentSkinId);
+    }
+
+    // ---------- caches ----------
     private void RebuildCaches()
     {
         _stars.Clear();
         _bestTimes.Clear();
-        if(_state?.levels == null)
-            return;
+        _completed.Clear();
+        _ownedSkins.Clear();
 
-        foreach(var lr in _state.levels)
+        if(_state.levels != null)
         {
-            _stars[lr.levelId] = Mathf.Clamp(lr.stars, 0, 3);
-            if(lr.hasBestTime && float.IsFinite(lr.bestTime))
-                _bestTimes[lr.levelId] = lr.bestTime;
+            foreach(var lr in _state.levels)
+            {
+                _stars[lr.levelId] = Mathf.Clamp(lr.stars, 0, 3);
+                if(lr.hasBestTime && float.IsFinite(lr.bestTime))
+                    _bestTimes[lr.levelId] = lr.bestTime;
+            }
         }
+
+        if(_state.completedLevels != null)
+        {
+            for(int i = 0; i < _state.completedLevels.Count; i++)
+                _completed.Add(_state.completedLevels[i]);
+        }
+
+        if(_state.ownedSkins != null)
+        {
+            for(int i = 0; i < _state.ownedSkins.Count; i++)
+            {
+                var id = _state.ownedSkins[i]?.Trim();
+                if(!string.IsNullOrEmpty(id))
+                    _ownedSkins.Add(id);
+            }
+        }
+
+        _state.currentSkinId = _state.currentSkinId?.Trim() ?? string.Empty;
     }
 
     private void UpsertLevel(int buildIndex, Func<LevelResultDto, LevelResultDto> mutate)
@@ -399,20 +440,16 @@ private bool IsVkEnvironment()
         {
             if(_state.levels[i].levelId == buildIndex)
             {
-                var lr = _state.levels[i];
-                lr = mutate(lr);
-                _state.levels[i] = lr;
+                _state.levels[i] = mutate(_state.levels[i]);
                 return;
             }
         }
 
         var created = new LevelResultDto { levelId = buildIndex };
-        created = mutate(created);
-        _state.levels.Add(created);
+        _state.levels.Add(mutate(created));
     }
 
-    // ================= INTERNAL: SAVE =================
-
+    // ---------- save pipeline ----------
     private void ScheduleSave(bool forceImmediate = false)
     {
         if(!_loaded)
@@ -454,94 +491,10 @@ private bool IsVkEnvironment()
 
     private void WriteImmediate()
     {
-        var json = JsonUtility.ToJson(_state, prettyPrint: false);
+        if(_storage == null || !_storage.IsAvailable)
+            return;
 
-#if UNITY_WEBGL && !UNITY_EDITOR       
-    if (IsVkEnvironment())
-    {
-        VK_SaveString(_vkStorageKey, json);
-    }
-    else
-    {
-        WriteFileImmediateLocal(json);
-    }
-#else
-        WriteFileImmediateLocal(json);
-#endif
-    }
-
-    private void WriteFileImmediateLocal()
-    {
-        var json = JsonUtility.ToJson(_state, prettyPrint: false);
-        WriteFileImmediateLocal(json);
-    }
-
-    private void WriteFileImmediateLocal(string json)
-    {
-        try
-        {
-            File.WriteAllText(TempPath, json);
-            if(File.Exists(FilePath))
-                File.Delete(FilePath);
-            File.Move(TempPath, FilePath);
-        }
-        catch(Exception e)
-        {
-            Debug.LogError($"[ProgressService] local save error: {e}");
-        }
-    }
-
-    private bool TryReadLocal(out SaveData data)
-    {
-        try
-        {
-            string json = File.ReadAllText(FilePath);
-            data = JsonUtility.FromJson<SaveData>(json);
-            if(data == null)
-            {
-                data = new SaveData { slotId = _slotId };
-                return false;
-            }
-            if(string.IsNullOrEmpty(data.slotId))
-                data.slotId = _slotId;
-            return true;
-        }
-        catch(Exception e)
-        {
-            Debug.LogError($"[ProgressService] local read error: {e}");
-            data = new SaveData { slotId = _slotId };
-            return false;
-        }
-    }
-
-    private void TryMigrateFromPlayerPrefs(SaveData target)
-    {
-        for(int idx = 0; idx <= 300; idx++)
-        {
-            string sk = $"stars_{idx}";
-            string bk = $"best_{idx}";
-            bool touched = false;
-
-            var lr = new LevelResultDto { levelId = idx };
-
-            if(PlayerPrefs.HasKey(sk))
-            {
-                lr.stars = Mathf.Clamp(PlayerPrefs.GetInt(sk, 0), 0, 3);
-                touched = true;
-            }
-            if(PlayerPrefs.HasKey(bk))
-            {
-                float t = PlayerPrefs.GetFloat(bk, float.MaxValue);
-                if(float.IsFinite(t) && t < float.MaxValue)
-                {
-                    lr.bestTime = t;
-                    lr.hasBestTime = true;
-                    touched = true;
-                }
-            }
-
-            if(touched)
-                target.levels.Add(lr);
-        }
+        string json = JsonUtility.ToJson(_state, prettyPrint: false);
+        _storage.Save(_slotId, json);
     }
 }

@@ -1,9 +1,25 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 [DisallowMultipleComponent]
 public sealed class LevelManager : MonoBehaviour, ILevelFlow
 {
+    public event Action<LevelUiContext> LevelActivated;
+
+    public readonly struct LevelUiContext
+    {
+        public readonly int LevelNumber;
+        public readonly int ProgressKey;
+
+        public LevelUiContext(int levelNumber, int progressKey)
+        {
+            LevelNumber = levelNumber;
+            ProgressKey = progressKey;
+        }
+    }
+
+
     #region Serialized Fields
 
     [Header("Scenes / flow")]
@@ -12,6 +28,9 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
     [SerializeField] private int _firstLevelSceneIndex = 1;
     [SerializeField] private int _runtimeLevelSceneIndex = -1;
     [SerializeField, Min(1f)] private float _sceneOpTimeout = 15f;
+
+    [Header("Economy")]
+    [SerializeField] private EconomyConfig _economy;
 
     [Header("Stars")]
     [SerializeField, Min(0)] private int _starsPerLevel = 3;
@@ -68,24 +87,13 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         ServiceLocator.Register<LevelManager>(this);
         ServiceLocator.Register<ILevelFlow>(this);
 
-        ServiceLocator.WhenAvailable<IProgressService>(p =>
-        {
-            _progress = p;
-            RebuildPresentersIfReady();
-        });
-
-        ServiceLocator.WhenAvailable<IGameFlowEvents>(e =>
-        {
-            _flowEvents = e;
-            RebuildPresentersIfReady();
-        });
-
-        ServiceLocator.WhenAvailable<IGameEvents>(e => _gameEvents = e);
+        ServiceLocator.WhenAvailable<IProgressService>(OnProgressReady);
+        ServiceLocator.WhenAvailable<IGameFlowEvents>(OnFlowEventsReady);
+        ServiceLocator.WhenAvailable<IGameEvents>(OnGameEventsReady);
 
         _sceneFlow = new LevelSceneFlow(this, _systemsSceneName, _sceneOpTimeout, IsValidBuildIndex);
         _sessionController = new LevelSessionController(_starsPerLevel);
         _index = new LevelIndexResolver(_firstLevelSceneIndex, _runtimeLevelSceneIndex, SceneManager.sceneCountInBuildSettings);
-
     }
 
     private void Start()
@@ -122,8 +130,29 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
     {
         _sceneFlow?.Cancel();
 
+        ServiceLocator.Unsubscribe<IProgressService>(OnProgressReady);
+        ServiceLocator.Unsubscribe<IGameFlowEvents>(OnFlowEventsReady);
+        ServiceLocator.Unsubscribe<IGameEvents>(OnGameEventsReady);
+
         ServiceLocator.Unregister<ILevelFlow>(this);
         ServiceLocator.Unregister<LevelManager>(this);
+    }
+
+    private void OnProgressReady(IProgressService p)
+    {
+        _progress = p;
+        RebuildPresentersIfReady();
+    }
+
+    private void OnFlowEventsReady(IGameFlowEvents e)
+    {
+        _flowEvents = e;
+        RebuildPresentersIfReady();
+    }
+
+    private void OnGameEventsReady(IGameEvents e)
+    {
+        _gameEvents = e;
     }
 
     private void RebuildPresentersIfReady()
@@ -134,7 +163,7 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         if(_progress == null || _flowEvents == null)
             return;
 
-        _results = new LevelResultsPresenter(_progress, _flowEvents, _starsPerLevel, _engineRepairThreshold);
+        _results = new LevelResultsPresenter(_progress, _flowEvents, _starsPerLevel, _engineRepairThreshold, _economy);
     }
 
     #endregion
@@ -430,20 +459,9 @@ public sealed class LevelManager : MonoBehaviour, ILevelFlow
         _sessionController.StartLevel(buildIndex);
 
         int levelNo = _index.GetLevelNumberForUI(buildIndex, _isRuntimeLevel, _currentRuntimeJsonIndex);
+        int progressKey = _index.GetProgressKey(buildIndex, _isRuntimeLevel, _currentRuntimeJsonIndex);
 
-        if(ServiceLocator.TryGet<IUIService>(out var ui))
-        {
-            ui.SetLevel(levelNo);
-
-            int progressKey = _index.GetProgressKey(buildIndex, _isRuntimeLevel, _currentRuntimeJsonIndex);
-            ui.RefreshBest(progressKey, _progress);
-
-            ui.SetStars(_sessionController.Session.CollectedStars);
-            ui.SetTime(0f);
-
-            if(_progress != null)
-                ui.UpdateEngineDangerIndicator(_progress.EngineDurability);
-        }
+        LevelActivated?.Invoke(new LevelUiContext(levelNo, progressKey));
 
         _gameEvents?.FireStarCollected(_sessionController.Session.CollectedStars, Vector3.zero);
     }

@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Text;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -14,9 +15,21 @@ public sealed class LevelResultPanel : MonoBehaviour
     [SerializeField] private TMP_Text _tHint;
 
     [Header("Stars")]
-    [SerializeField] private Image[] _starImages;   // 3 Image под звезды (слева-направо)
-    [SerializeField] private Sprite _starActive;    // яркая звезда
-    [SerializeField] private Sprite _starDim;       // силуэт/тусклая
+    [SerializeField] private Image[] _starImages;
+    [SerializeField] private Sprite _starActive;
+    [SerializeField] private Sprite _starDim;
+
+    [Header("Reward")]
+    [SerializeField] private GameObject _rewardRoot;
+    [SerializeField] private TMP_Text _tRewardTotal;
+    [SerializeField] private TMP_Text _tRewardLines;
+
+    [Header("Ads")]
+    [SerializeField] private Button _btnDoubleReward;
+    [SerializeField] private TMP_Text _tDoubleRewardLabel;
+
+    // В вебе прелоад может быть “длинным”, 2 секунды часто мало.
+    [SerializeField, Min(0.1f)] private float _rewardedWaitSeconds = 15.0f;
 
     [Header("Buttons")]
     [SerializeField] private Button _btnRetry;
@@ -24,18 +37,16 @@ public sealed class LevelResultPanel : MonoBehaviour
     [SerializeField] private Button _btnMenu;
 
     [Header("FX")]
-     private float _fadeDuration = 2.25f;
-
-    [Header("Final panel")]
-    [SerializeField] private GameObject _finalPanel; 
+    [SerializeField, Min(0f)] private float _fadeDuration = 0.25f;
 
     private IGameFlowEvents _flowEvents;
     private ILevelFlow _flow;
-    private Coroutine _fadeRoutine;
 
-    // --- новое ---
+    private Coroutine _fadeRoutine;
+    private Coroutine _waitRewardedRoutine;
+
     private LevelResultInfo _currentInfo;
-    private bool _isFinalLevel;
+    private bool _adInFlight;
 
     private void Awake()
     {
@@ -47,90 +58,137 @@ public sealed class LevelResultPanel : MonoBehaviour
 
     private void OnEnable()
     {
-        ServiceLocator.WhenAvailable<IGameFlowEvents>(e =>
-        {
-            if(!isActiveAndEnabled)
-                return;
+        ServiceLocator.WhenAvailable<IGameFlowEvents>(BindFlowEvents);
+        ServiceLocator.WhenAvailable<ILevelFlow>(BindLevelFlow);
 
-            _flowEvents = e;
-            _flowEvents.LevelCompleted += OnLevelCompleted;
-            _flowEvents.LevelFailed += OnLevelFailed;
-        });
-
-        ServiceLocator.WhenAvailable<ILevelFlow>(f =>
-        {
-            _flow = f;
-        });
-
-        _btnRetry.onClick.AddListener(OnRetryClicked);
-        _btnNext.onClick.AddListener(OnNextClicked);
-        _btnMenu.onClick.AddListener(OnMenuClicked);
+        if(_btnRetry != null)
+            _btnRetry.onClick.AddListener(OnRetryClicked);
+        if(_btnNext != null)
+            _btnNext.onClick.AddListener(OnNextClicked);
+        if(_btnMenu != null)
+            _btnMenu.onClick.AddListener(OnMenuClicked);
+        if(_btnDoubleReward != null)
+            _btnDoubleReward.onClick.AddListener(OnDoubleRewardClicked);
     }
 
     private void OnDisable()
     {
-        if(_flowEvents != null)
-        {
-            _flowEvents.LevelCompleted -= OnLevelCompleted;
-            _flowEvents.LevelFailed -= OnLevelFailed;
-            _flowEvents = null;
-        }
+        ServiceLocator.Unsubscribe<IGameFlowEvents>(BindFlowEvents);
+        ServiceLocator.Unsubscribe<ILevelFlow>(BindLevelFlow);
 
-        _btnRetry.onClick.RemoveListener(OnRetryClicked);
-        _btnNext.onClick.RemoveListener(OnNextClicked);
-        _btnMenu.onClick.RemoveListener(OnMenuClicked);
+        UnbindFlowEvents();
+        _flow = null;
 
+        if(_btnRetry != null)
+            _btnRetry.onClick.RemoveListener(OnRetryClicked);
+        if(_btnNext != null)
+            _btnNext.onClick.RemoveListener(OnNextClicked);
+        if(_btnMenu != null)
+            _btnMenu.onClick.RemoveListener(OnMenuClicked);
+        if(_btnDoubleReward != null)
+            _btnDoubleReward.onClick.RemoveListener(OnDoubleRewardClicked);
+
+        StopRoutines();
+
+        _currentInfo = null;
+        _adInFlight = false;
+        HideImmediate();
+    }
+
+    private void StopRoutines()
+    {
         if(_fadeRoutine != null)
         {
             StopCoroutine(_fadeRoutine);
             _fadeRoutine = null;
         }
 
-        _currentInfo = null;
-        _isFinalLevel = false;
-
-        HideImmediate();
+        if(_waitRewardedRoutine != null)
+        {
+            StopCoroutine(_waitRewardedRoutine);
+            _waitRewardedRoutine = null;
+        }
     }
 
-    private void OnLevelCompleted(LevelResultInfo info)
+    private void BindFlowEvents(IGameFlowEvents e)
     {
-        Show(info);
+        if(!isActiveAndEnabled)
+            return;
+
+        if(ReferenceEquals(_flowEvents, e))
+            return;
+
+        UnbindFlowEvents();
+        _flowEvents = e;
+
+        if(_flowEvents == null)
+            return;
+
+        _flowEvents.LevelCompleted += OnLevelCompleted;
+        _flowEvents.LevelFailed += OnLevelFailed;
     }
 
-    private void OnLevelFailed(LevelResultInfo info)
+    private void UnbindFlowEvents()
     {
-        Show(info);
+        if(_flowEvents == null)
+            return;
+
+        _flowEvents.LevelCompleted -= OnLevelCompleted;
+        _flowEvents.LevelFailed -= OnLevelFailed;
+        _flowEvents = null;
     }
+
+    private void BindLevelFlow(ILevelFlow f)
+    {
+        if(!isActiveAndEnabled)
+            return;
+
+        _flow = f;
+    }
+
+    private void OnLevelCompleted(LevelResultInfo info) => Show(info);
+    private void OnLevelFailed(LevelResultInfo info) => Show(info);
 
     private void Show(LevelResultInfo info)
     {
         if(info == null)
             return;
 
-        _currentInfo = info;
-        _isFinalLevel = info.isWin && info.levelNumber == 12;
-
-        _tTitle.SetText(info.levelNumber.ToString());
-        _tTime.SetText("Время: {0:0.00} c", info.elapsedTime);
-
-        if(info.bestTime.HasValue)
+        if(_waitRewardedRoutine != null)
         {
-            if(info.isPersonalBest)
-                _tBest.SetText("Лучшее: {0:0.00} c (новый рекорд!)", info.bestTime.Value);
-            else
-                _tBest.SetText("Лучшее: {0:0.00} c", info.bestTime.Value);
+            StopCoroutine(_waitRewardedRoutine);
+            _waitRewardedRoutine = null;
         }
-        else
+
+        _currentInfo = info;
+        _adInFlight = false;
+
+        if(_tTitle != null)
+            _tTitle.SetText(info.levelNumber.ToString());
+        if(_tTime != null)
+            _tTime.SetText("Время: {0:0.00} c", info.elapsedTime);
+
+        if(_tBest != null)
         {
-            _tBest.SetText("Лучшее: —");
+            if(info.bestTime.HasValue)
+            {
+                _tBest.SetText(
+                    info.isPersonalBest ? "Лучшее: {0:0.00} c (новый рекорд!)" : "Лучшее: {0:0.00} c",
+                    info.bestTime.Value);
+            }
+            else
+                _tBest.SetText("Лучшее: —");
         }
 
         UpdateStars(info.collectedStars);
 
-        _tHint.SetText(string.IsNullOrEmpty(info.hint) ? string.Empty : info.hint);
+        if(_tHint != null)
+            _tHint.SetText(string.IsNullOrEmpty(info.hint) ? string.Empty : info.hint);
 
-        // На экране результата «Далее» всегда видно
-        _btnNext.gameObject.SetActive(true);
+        if(_btnNext != null)
+            _btnNext.gameObject.SetActive(info.isWin);
+
+        UpdateRewardUi(info);
 
         if(_fadeRoutine != null)
             StopCoroutine(_fadeRoutine);
@@ -138,8 +196,110 @@ public sealed class LevelResultPanel : MonoBehaviour
         _fadeRoutine = StartCoroutine(FadeIn());
     }
 
+    private void UpdateRewardUi(LevelResultInfo info)
+    {
+        var r = info.reward;
+        bool showReward = info.isWin && r != null && r.baseReward > 0;
+
+        if(_rewardRoot != null)
+            _rewardRoot.SetActive(showReward);
+
+        if(!showReward)
+        {
+            SetDoubleButtonVisible(false);
+            return;
+        }
+
+        if(_tRewardTotal != null)
+            _tRewardTotal.SetText("НАГРАДА   +{0}", r.Total);
+
+        if(_tRewardLines != null)
+            _tRewardLines.SetText(BuildRewardLines(r, info.collectedStars));
+
+        bool available = false;
+        bool ready = false;
+
+        if(ServiceLocator.TryGet<IAdService>(out var ads) && ads != null)
+        {
+            available = ads.IsAvailable;
+            ready = ads.IsAvailable && ads.IsRewardedReady;
+
+            // Если всё ок, но rewarded ещё не готов — прелоадим и ждём дольше (unscaled)
+            if(available && r.CanDoubleNow && !_adInFlight && !ready)
+            {
+                ads.PreloadRewarded();
+
+                if(_waitRewardedRoutine != null)
+                    StopCoroutine(_waitRewardedRoutine);
+
+                _waitRewardedRoutine = StartCoroutine(CoWaitRewardedReadyThenRefresh());
+            }
+        }
+
+        bool showDoubleButton = available && ready && r.CanDoubleNow && !_adInFlight;
+
+        SetDoubleButtonVisible(showDoubleButton);
+
+        if(_tDoubleRewardLabel != null)
+            _tDoubleRewardLabel.SetText("🎥 Удвоить (+{0})", r.baseReward);
+    }
+
+    private void SetDoubleButtonVisible(bool visible)
+    {
+        if(_btnDoubleReward == null)
+            return;
+
+        _btnDoubleReward.gameObject.SetActive(visible);
+        _btnDoubleReward.interactable = visible;
+    }
+
+    private IEnumerator CoWaitRewardedReadyThenRefresh()
+    {
+        float t = 0f;
+
+        while(t < _rewardedWaitSeconds)
+        {
+            if(!isActiveAndEnabled)
+                yield break;
+
+            if(ServiceLocator.TryGet<IAdService>(out var ads) && ads != null && ads.IsAvailable && ads.IsRewardedReady)
+                break;
+
+            t += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        _waitRewardedRoutine = null;
+
+        if(isActiveAndEnabled && _currentInfo != null)
+            UpdateRewardUi(_currentInfo);
+    }
+
+    private static string BuildRewardLines(LevelRewardInfo r, int stars)
+    {
+        var sb = new StringBuilder(64);
+
+        if(r.firstClear > 0)
+            sb.Append('+').Append(r.firstClear).Append("  Прохождение\n");
+        if(r.starsDelta > 0)
+            sb.Append('+').Append(r.starsDelta).Append("  Звёзды (+").Append(stars).Append(")\n");
+        if(r.timeRecord > 0)
+            sb.Append('+').Append(r.timeRecord).Append("  Рекорд\n");
+        if(r.doubleBonus > 0)
+            sb.Append('+').Append(r.doubleBonus).Append("  Удвоение\n");
+
+        if(sb.Length == 0)
+            return string.Empty;
+
+        sb.Length -= 1;
+        return sb.ToString();
+    }
+
     private void UpdateStars(int collected)
     {
+        if(_starImages == null)
+            return;
+
         int max = _starImages.Length;
         int clamped = Mathf.Clamp(collected, 0, max);
 
@@ -149,54 +309,84 @@ public sealed class LevelResultPanel : MonoBehaviour
             if(img == null)
                 continue;
 
-            bool isOn = i < clamped;
-            img.sprite = isOn ? _starActive : _starDim;
+            img.sprite = (i < clamped) ? _starActive : _starDim;
             img.enabled = true;
         }
     }
 
     private void OnRetryClicked()
     {
-        if(_flow != null)
-            _flow.Reload();
+        _flow?.Reload();
         Hide();
     }
 
     private void OnNextClicked()
     {
-        // Если это финал (победа на 12 уровне) — вместо LoadNext показываем финальную панель
-        //if(_isFinalLevel && _currentInfo != null)
-        //{
-        //    if(_finalPanel != null)
-        //        _finalPanel.SetActive(true);
-
-        //    // Скрываем панель результата
-        //    Hide();
-        //    return;
-        //}
-
-        // Обычное поведение
-        if(_flow != null)
-            _flow.LoadNext();
+        _flow?.LoadNext();
         Hide();
     }
 
     private void OnMenuClicked()
     {
-        if(_flow != null)
-            _flow.LoadMenu();
+        _flow?.LoadMenu();
         Hide();
+    }
+
+    private void OnDoubleRewardClicked()
+    {
+        if(_adInFlight)
+            return;
+
+        var info = _currentInfo;
+        var r = info?.reward;
+
+        if(info == null || r == null || !info.isWin || !r.CanDoubleNow)
+            return;
+
+        // Для запуска требуем доступность сервиса. Готовность rewarded — желательно,
+        // но реальную "pending очередь" лучше держать внутри VkAdService.
+        if(!ServiceLocator.TryGet<IAdService>(out var ads) || ads == null || !ads.IsAvailable)
+            return;
+
+        _adInFlight = true;
+
+        // ВАЖНО: сразу обновляем UI, чтобы кнопка исчезла (а не просто стала disabled).
+        UpdateRewardUi(info);
+
+        ads.ShowRewarded(
+            onSuccess: () =>
+            {
+                _adInFlight = false;
+
+                if(ServiceLocator.TryGet<ICurrencyService>(out var currency))
+                    currency.Add(r.baseReward);
+
+                r.doubled = true;
+                r.doubleBonus += r.baseReward;
+
+                UpdateRewardUi(info);
+            },
+            onFail: () =>
+            {
+                _adInFlight = false;
+                UpdateRewardUi(info);
+            }
+        );
     }
 
     public void Hide()
     {
         if(_fadeRoutine != null)
             StopCoroutine(_fadeRoutine);
+
         _fadeRoutine = StartCoroutine(FadeOut());
     }
 
     private void HideImmediate()
     {
+        if(_cg == null)
+            return;
+
         _cg.alpha = 0f;
         _cg.interactable = false;
         _cg.blocksRaycasts = false;
@@ -204,6 +394,9 @@ public sealed class LevelResultPanel : MonoBehaviour
 
     private IEnumerator FadeIn()
     {
+        if(_cg == null)
+            yield break;
+
         _cg.blocksRaycasts = true;
         _cg.interactable = true;
 
@@ -221,6 +414,9 @@ public sealed class LevelResultPanel : MonoBehaviour
 
     private IEnumerator FadeOut()
     {
+        if(_cg == null)
+            yield break;
+
         float t = 0f;
         while(t < _fadeDuration)
         {

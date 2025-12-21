@@ -45,9 +45,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae0aa7f25b157804eb1af8dff6a8c55a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp-firstpass::VkAdService
-  _forceAvailableInWebGL: 1
+  _ignoreUrlCheck: 1
   _verbose: 1
-  _callTimeoutSeconds: 10
+  _callTimeoutSeconds: 120
+  _systemsSceneName: Systems
+  _menuSceneIndex: 0
+  _firstLevelSceneIndex: 1
+  _preloadCooldownSeconds: 2
 --- !u!114 &4894508979095235537
 MonoBehaviour:
   m_ObjectHideFlags: 0

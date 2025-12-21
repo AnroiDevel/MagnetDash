@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 
+[DisallowMultipleComponent]
 public sealed class ShopCurrencyView : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _amountLabel;
@@ -9,26 +10,37 @@ public sealed class ShopCurrencyView : MonoBehaviour
 
     private void OnEnable()
     {
-        ServiceLocator.WhenAvailable<ICurrencyService>(OnCurrencyReady);
+        ServiceLocator.WhenAvailable<ICurrencyService>(BindCurrency);
     }
 
     private void OnDisable()
     {
-        if(_currency != null)
-            _currency.AmountChanged -= OnAmountChanged;
+        ServiceLocator.Unsubscribe<ICurrencyService>(BindCurrency);
+        UnbindCurrency();
     }
 
-    private void OnCurrencyReady(ICurrencyService currency)
+    private void BindCurrency(ICurrencyService currency)
     {
+        if(ReferenceEquals(_currency, currency))
+            return;
+
+        UnbindCurrency();
         _currency = currency;
         _currency.AmountChanged += OnAmountChanged;
+
         Refresh();
     }
 
-    private void OnAmountChanged(int _)
+    private void UnbindCurrency()
     {
-        Refresh();
+        if(_currency == null)
+            return;
+
+        _currency.AmountChanged -= OnAmountChanged;
+        _currency = null;
     }
+
+    private void OnAmountChanged(int _) => Refresh();
 
     private void Refresh()
     {

@@ -9,22 +9,22 @@ public sealed class PortalArrow : MonoBehaviour
     #region Serialized Fields
 
     [Header("World / Camera")]
-    [SerializeField] private Camera _worldCamera;          // камера, которая рендерит мир (Player/Portal)
+    [SerializeField] private Camera _worldCamera;
 
     [Header("UI")]
-    [SerializeField] private float _edgePadding = 80f;     // отступ от краёв экрана в ui-пикселях
+    [SerializeField] private float _edgePadding = 80f;
 
     #endregion
 
     #region State
 
     private RectTransform _rect;
-    private RectTransform _canvasRect;                     // корневой RectTransform канваса
+    private RectTransform _canvasRect;
     private Canvas _rootCanvas;
-    private Camera _uiCamera;                              // камера канваса (или null для Overlay)
+    private Camera _uiCamera;
 
-    private Transform _target;                             // Transform портала
-    private Graphic _graphic;                              // Image / любая Graphic
+    private Transform _target;
+    private Graphic _graphic;
 
     #endregion
 
@@ -39,48 +39,44 @@ public sealed class PortalArrow : MonoBehaviour
         if(_rootCanvas != null)
         {
             _canvasRect = _rootCanvas.GetComponent<RectTransform>();
-
-            _uiCamera = _rootCanvas.renderMode switch
-            {
-                RenderMode.ScreenSpaceOverlay => null,// по правилам Unity
-                RenderMode.ScreenSpaceCamera or RenderMode.WorldSpace => _rootCanvas.worldCamera,
-                _ => null,
-            };
+            _uiCamera = _rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : _rootCanvas.worldCamera;
         }
 
+        if(_worldCamera == null)
+            _worldCamera = Camera.main;
 
-        // получаем портал через сервис
-        ServiceLocator.WhenAvailable<IPortal>(p =>
-        {
-            SetTarget(p.Transform);
-        });
+        // 1) Сразу пробуем привязаться (важно, если портал уже зарегистрирован)
+        TryBindPortal();
+
+        // 2) И дополнительно подписываемся на "появится позже"
+        ServiceLocator.WhenAvailable<IPortal>(p => SetTarget(p != null ? p.Transform : null));
     }
 
     private void LateUpdate()
     {
-        if(_graphic == null)
+        if(_graphic == null || _canvasRect == null)
             return;
+
         if(_worldCamera == null)
             _worldCamera = Camera.main;
 
-        if(_target == null || _worldCamera == null || _canvasRect == null)
+        // Портал могли пересоздать на новом уровне — подхватываем заново
+        if(_target == null)
+            TryBindPortal();
+
+        if(_target == null || _worldCamera == null)
         {
             _graphic.enabled = false;
             return;
         }
 
-        // --- 1. Позиция портала в screen-space ---
-
         Vector3 screenPos = _worldCamera.WorldToScreenPoint(_target.position);
 
-        // Если портал позади камеры — зеркалим по X/Y, чтобы стрелка указывала в "правильную" сторону
         if(screenPos.z < 0f)
         {
             screenPos.x = Screen.width - screenPos.x;
             screenPos.y = Screen.height - screenPos.y;
         }
-
-        // --- 2. Проверяем, в кадре ли портал (через viewport) ---
 
         Vector3 viewportPos = _worldCamera.ScreenToViewportPoint(screenPos);
 
@@ -89,52 +85,54 @@ public sealed class PortalArrow : MonoBehaviour
             viewportPos.x > 0f && viewportPos.x < 1f &&
             viewportPos.y > 0f && viewportPos.y < 1f;
 
-        // Если портал в кадре — стрелка прячется
         if(portalOnScreen)
         {
             _graphic.enabled = false;
             return;
         }
 
-        // Портал вне экрана — стрелка видима
         _graphic.enabled = true;
 
-        // --- 3. Переводим screen → local (координаты канваса) ---
-
-        if(!RectTransformUtility.ScreenPointToLocalPointInRectangle(
-               _canvasRect,
-               new Vector2(screenPos.x, screenPos.y),
-               _uiCamera,
-               out Vector2 localPoint))
-        {
+        if(!RectTransformUtility.ScreenPointToLocalPointInRectangle(_canvasRect, screenPos, _uiCamera, out Vector2 localPoint))
             return;
-        }
 
-        // Центр канваса = (0, 0), направление на портал:
-        Vector2 dir = localPoint.normalized;
+        Vector2 dir = localPoint.sqrMagnitude > 0.0001f ? localPoint.normalized : Vector2.up;
 
         float halfW = _canvasRect.rect.width * 0.5f - _edgePadding;
         float halfH = _canvasRect.rect.height * 0.5f - _edgePadding;
 
-        // --- 4. Прижимаем к прямоугольнику (края экрана) ---
+        halfW = Mathf.Max(halfW, 0f);
+        halfH = Mathf.Max(halfH, 0f);
 
-        Vector2 pos = dir;
         float k = Mathf.Max(
-            Mathf.Abs(pos.x) / Mathf.Max(halfW, 0.001f),
-            Mathf.Abs(pos.y) / Mathf.Max(halfH, 0.001f)
+            Mathf.Abs(dir.x) / Mathf.Max(halfW, 0.001f),
+            Mathf.Abs(dir.y) / Mathf.Max(halfH, 0.001f)
         );
+
         if(k < 1f)
             k = 1f;
 
-        pos.x = pos.x / k * halfW;
-        pos.y = pos.y / k * halfH;
+        Vector2 pos;
+        pos.x = dir.x / k * halfW;
+        pos.y = dir.y / k * halfH;
 
         _rect.anchoredPosition = pos;
 
-        // --- 5. Поворот стрелки по направлению к порталу ---
-
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-        _rect.rotation = Quaternion.Euler(0f, 0f, angle - 90f); // если спрайт "смотрит вверх"
+        _rect.rotation = Quaternion.Euler(0f, 0f, angle - 90f);
+    }
+
+    #endregion
+
+    #region Private
+
+    private void TryBindPortal()
+    {
+        if(_target != null)
+            return;
+
+        if(ServiceLocator.TryGet<IPortal>(out var portal) && portal != null)
+            _target = portal.Transform;
     }
 
     #endregion
